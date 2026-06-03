@@ -1,0 +1,233 @@
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f8fafc;
+  font-family: var(--p-font-family);
+
+  .topbar {
+    height: 70px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    z-index: 10;
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border-radius: 8px;
+      }
+
+      span {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #0f172a;
+      }
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+
+      .profile-btn {
+        background-color: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-weight: 600;
+        color: #1f2937;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
+        &:hover {
+          background-color: #f3f4f6;
+        }
+
+        .ml-2 {
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+
+  // --- ARREGLO ABSOLUTO DEL POPOVER (SPACING Y HOVER EFECTS) ---
+  ::ng-deep .profile-overlay.p-popover {
+    background-color: #1e293b !important; /* Azul pizarra oscuro/antracita muy pro */
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    width: 290px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+    padding: 0 !important;
+
+    .p-popover-content {
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    // Encabezado alineado a la izquierda con separación interna
+    .profile-header {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      padding: 18px 20px !important;
+      gap: 4px !important;
+
+      .user-name-block {
+        font-size: 1rem;
+        color: #ffffff;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+      }
+
+      .user-email-block {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        word-break: break-all;
+      }
+
+      .user-id-block {
+        margin-top: 4px;
+        display: flex !important;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: #64748b;
+      }
+    }
+
+    // Separadores limpios con espacio superior e inferior explícito
+    .divider {
+      height: 1px !important;
+      background-color: rgba(255, 255, 255, 0.08) !important;
+      margin: 6px 0 !important;
+      display: block !important;
+      width: 100% !important;
+    }
+
+    // Menú controlado por Flexbox para asegurar márgenes y saltos de línea
+    .profile-menu {
+      padding: 4px 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 2px !important; /* Espaciado uniforme entre botones */
+
+      .menu-item {
+        padding: 10px 16px !important;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        margin: 0 12px !important; /* Margen lateral para el efecto píldora */
+        border-radius: 8px !important;
+        color: #cbd5e1;
+        text-align: left !important;
+        display: block !important;
+
+        // Efecto hover premium translúcido (Igual al de tu referencia)
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.08) !important;
+          color: #ffffff !important;
+          padding-left: 20px !important; /* Pequeño desplazamiento dinámico elegante */
+        }
+      }
+
+      // DISEÑO ESPECIAL PARA CERRAR SESIÓN (Rojo con efectos)
+      .logout-item {
+        color: #f87171 !important; /* Color rojo pastel pasivo */
+        font-weight: 600;
+
+        &:hover {
+          background-color: rgba(239, 68, 68, 0.15) !important; /* Fondo rojo translúcido */
+          color: #fca5a5 !important;
+          padding-left: 20px !important;
+          box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.2) !important; /* Borde interno sutil */
+        }
+      }
+    }
+  }
+
+  .main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+
+    .sidebar {
+      width: 250px;
+      background-color: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      padding: 20px 0;
+
+      .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          padding: 15px 30px;
+          color: #64748b;
+          cursor: pointer;
+          transition: all 0.2s;
+          border-left: 3px solid transparent;
+
+          i {
+            font-size: 1.1rem;
+          }
+
+          span {
+            font-weight: 500;
+            font-size: 0.95rem;
+          }
+
+          &:hover {
+            background-color: #f1f5f9;
+            color: #007bff;
+            border-left-color: #007bff;
+          }
+        }
+      }
+    }
+
+    .content-area {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+
+      ::ng-deep .welcome-card.p-card {
+        .p-card {
+          background: #1e293b !important;
+          color: #cbd5e1 !important;
+          border-radius: 12px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .p-card-title {
+          color: #ffffff !important;
+          font-size: 1.25rem;
+        }
+
+        strong {
+          color: #38bdf8;
+        }
+      }
+    }
+  }
+}

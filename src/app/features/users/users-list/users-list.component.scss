@@ -1,0 +1,96 @@
+.card {
+    background: var(--p-content-background, #ffffff);
+    color: var(--p-text-color, #1e293b);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    margin-bottom: 2rem;
+}
+
+.flex {
+    display: flex;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.mb-4 { margin-bottom: 1.5rem; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-3 { margin-top: 1rem; }
+.mr-2 { margin-right: 0.5rem; }
+
+h2 {
+    margin: 0;
+    color: inherit;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.role-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    
+    &.admin {
+        background-color: #fef2f2;
+        color: #ef4444;
+    }
+    
+    &.student {
+        background-color: #eff6ff;
+        color: #3b82f6;
+    }
+    
+    &.professor {
+        background-color: #f0fdf4;
+        color: #22c55e;
+    }
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    
+    &.active {
+        background-color: #f0fdf4;
+        color: #22c55e;
+    }
+    
+    &.inactive {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+}
+
+.field {
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #334155;
+    }
+}
+
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    
+    .col-6 {
+        flex: 1;
+        min-width: calc(50% - 0.5rem);
+    }
+}

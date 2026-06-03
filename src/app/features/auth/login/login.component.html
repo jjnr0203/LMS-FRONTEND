@@ -1,0 +1,47 @@
+<p-toast></p-toast>
+<div class="login-layout">
+  <!-- Left Panel: Form -->
+  <div class="login-left-panel">
+    <div class="glass-card">
+      <div class="logo-container">
+        <div class="logo"></div>
+        <span>LMS</span>
+      </div>
+
+      <h2>Log in</h2>
+      
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="p-field">
+          <label for="id">Username (Cédula)</label>
+          <input pInputText id="id" formControlName="id" type="text" placeholder="cedula" />
+          <small class="p-error" *ngIf="loginForm.get('id')?.invalid && loginForm.get('id')?.touched">
+            Cédula inválida (10 dígitos requeridos).
+          </small>
+        </div>
+
+        <div class="p-field">
+          <label for="password">Password</label>
+          <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="false" placeholder="Password"></p-password>
+          <small class="p-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+            La contraseña es requerida.
+          </small>
+        </div>
+
+        <div class="form-actions">
+          <p-button type="submit" label="Log in" [loading]="isLoading" [disabled]="loginForm.invalid" styleClass="p-button-primary"></p-button>
+          <a href="#" class="forgot-password">Forgot Password?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right Panel: Image/Branding -->
+  <div class="login-right-panel">
+    <div class="overlay-content">
+      <h1>Learning<br>Management<br>System</h1>
+    </div>
+    <div class="footer-text">
+      © New Learning Management System LMS 2026. All Right Reserved.
+    </div>
+  </div>
+</div>

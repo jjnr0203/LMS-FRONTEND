@@ -1,0 +1,183 @@
+.login-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: var(--p-font-family);
+
+  .login-left-panel {
+    flex: 0 0 450px;
+    background-color: #0b1120;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 40px;
+    width: 350px;
+    color: white;
+    
+    // Position it slightly overflowing the dark panel like in the design
+    position: absolute;
+    right: -100px;
+    z-index: 3;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+      gap: 10px;
+
+      .logo {
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border-radius: 50%;
+      }
+
+      span {
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      .p-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        label {
+          font-size: 0.85rem;
+          color: rgba(255, 255, 255, 0.7);
+        }
+
+        ::ng-deep input {
+          width: 100%;
+          border-radius: 8px;
+          border: none;
+          padding: 12px;
+          background: rgba(255, 255, 255, 0.9);
+          color: #333;
+          &:focus {
+            box-shadow: 0 0 0 2px #007bff;
+          }
+        }
+        
+        ::ng-deep p-password {
+          width: 100%;
+          .p-password-input {
+             width: 100%;
+          }
+        }
+        
+        .p-error {
+            color: #ef4444;
+        }
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+
+        ::ng-deep .p-button {
+          border-radius: 8px;
+          padding: 10px 20px;
+        }
+
+        .forgot-password {
+          color: rgba(255, 255, 255, 0.6);
+          font-size: 0.85rem;
+          text-decoration: none;
+          &:hover {
+            color: white;
+          }
+        }
+      }
+    }
+  }
+
+  .login-right-panel {
+    flex: 1;
+    background: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 100px;
+    z-index: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .overlay-content {
+      position: relative;
+      z-index: 2;
+      text-align: right;
+      padding-left: 200px;
+
+      h1 {
+        color: #0b1120;
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin: 0;
+      }
+    }
+
+    .footer-text {
+      position: absolute;
+      bottom: 20px;
+      right: 40px;
+      font-size: 0.8rem;
+      color: #0b1120;
+      z-index: 2;
+      font-weight: 500;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .login-layout {
+    flex-direction: column;
+
+    .login-left-panel {
+      flex: 1;
+      width: 100%;
+    }
+
+    .glass-card {
+      right: auto;
+      position: relative;
+    }
+
+    .login-right-panel {
+      display: none;
+    }
+  }
+}
