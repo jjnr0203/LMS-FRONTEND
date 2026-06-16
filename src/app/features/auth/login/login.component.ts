@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { FormControl } from '@angular/forms';
 
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -13,7 +14,6 @@ import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
   imports: [
     CommonModule, 
     ReactiveFormsModule, 
@@ -25,36 +25,39 @@ import { MessageService } from 'primeng/api';
   ],
   providers: [MessageService],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrl: './login.component.scss'
 })
 export class LoginComponent {
-  loginForm: FormGroup;
-  isLoading = false;
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private messageService = inject(MessageService);
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
-    private messageService: MessageService
-  ) {
+  loginForm: FormGroup;
+  isLoading = signal(false);
+
+  constructor() {
     this.loginForm = this.fb.group({
       id: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
+  get id(): FormControl { return this.loginForm.get('id') as FormControl; }
+  get password(): FormControl { return this.loginForm.get('password') as FormControl; }
+
   onSubmit(): void {
     if (this.loginForm.valid) {
-      this.isLoading = true;
+      this.isLoading.set(true);
       const { id, password } = this.loginForm.value;
       
       this.authService.login(id, password).subscribe({
         next: () => {
-          this.isLoading = false;
+          this.isLoading.set(false);
           setTimeout(() => this.router.navigate(['/dashboard']), 500);
         },
         error: (err) => {
-          this.isLoading = false;
+          this.isLoading.set(false);
           let errorMsg = 'Error al iniciar sesión';
           if (err.status === 401 || err.status === 404 || err.status === 400) {
              errorMsg = 'Credenciales inválidas';

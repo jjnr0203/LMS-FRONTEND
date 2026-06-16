@@ -14,21 +14,25 @@
         <div class="p-field">
           <label for="id">Username (Cédula)</label>
           <input pInputText id="id" formControlName="id" type="text" placeholder="cedula" />
-          <small class="p-error" *ngIf="loginForm.get('id')?.invalid && loginForm.get('id')?.touched">
-            Cédula inválida (10 dígitos requeridos).
-          </small>
+          @if (id.invalid && id.touched) {
+            <small class="p-error">
+              Cédula inválida (10 dígitos requeridos).
+            </small>
+          }
         </div>
 
         <div class="p-field">
           <label for="password">Password</label>
           <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="false" placeholder="Password"></p-password>
-          <small class="p-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-            La contraseña es requerida.
-          </small>
+          @if (password.invalid && password.touched) {
+            <small class="p-error">
+              La contraseña es requerida.
+            </small>
+          }
         </div>
 
         <div class="form-actions">
-          <p-button type="submit" label="Log in" [loading]="isLoading" [disabled]="loginForm.invalid" styleClass="p-button-primary"></p-button>
+          <p-button type="submit" label="Log in" [loading]="isLoading()" [disabled]="loginForm.invalid" styleClass="p-button-primary"></p-button>
           <a href="#" class="forgot-password">Forgot Password?</a>
         </div>
       </form>

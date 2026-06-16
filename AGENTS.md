@@ -1,55 +1,80 @@
+# LMS-FRONTEND
 
-You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+Angular 21 standalone app with PrimeNG Aura theme + PrimeIcons.
+SCSS for component styles; `src/styles.scss` imports `primeicons/primeicons.css`.
 
-## TypeScript Best Practices
+## Commands
 
-- Use strict type checking
-- Prefer type inference when the type is obvious
-- Avoid the `any` type; use `unknown` when type is uncertain
+| Command | Action |
+|---------|--------|
+| `npm start` | Dev server (`ng serve`) |
+| `npm run build` | Prod build (budgets: initial 500kB/1MB) |
+| `npm test` | Unit tests (Vitest via `@angular/build:unit-test`) |
+| `npm run watch` | Build with watch + dev config |
+| `npx prettier --write .` | Format everything |
 
-## Angular Best Practices
+**No linting** (no ESLint). Formatting via Prettier (single quotes, printWidth 100, Angular HTML parser).
 
-- Always use standalone components over NgModules
-- Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
-- Use signals for state management
-- Implement lazy loading for feature routes
-- Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
-- Use `NgOptimizedImage` for all static images.
-  - `NgOptimizedImage` does not work for inline base64 images.
+## Architecture
 
-## Accessibility Requirements
+- **Entrypoint:** `src/main.ts` bootstraps standalone `App` via `bootstrapApplication`
+- **Config:** `src/app/app.config.ts` — router, HTTP client (auth interceptor), PrimeNG Aura theme, async animations
+- **Routes** (`src/app/app.routes.ts`): lazy-loaded via `loadComponent`:
+  - `/login` — public, loads `LoginComponent`
+  - `/dashboard` — protected by `AuthGuard` (class-based `CanActivate`), child `/dashboard/users`
+  - `/` redirects to `/login`
+  - *Dashboard nav has a `/dashboard/courses` menu item but no route or feature exists yet*
+- **Core:** `src/app/core/` — `guards/`, `interceptors/`, `services/`
+- **Features:** `src/app/features/` — `auth/login`, `dashboard`, `users/users-list`
+- **API base:** `http://localhost:3000/api` (`src/environments/environment*.ts`, dev file-replacement in `angular.json`)
 
-- It MUST pass all AXE checks.
-- It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
+## Auth pattern
 
-### Components
-
-- Keep components small and focused on a single responsibility
-- Use `input()` and `output()` functions instead of decorators
-- Use `computed()` for derived state
-- Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator
-- Prefer inline templates for small components
-- Prefer Reactive forms instead of Template-driven ones
-- Do NOT use `ngClass`, use `class` bindings instead
-- Do NOT use `ngStyle`, use `style` bindings instead
-- When using external templates/styles, use paths relative to the component TS file.
-
-## State Management
-
-- Use signals for local component state
-- Use `computed()` for derived state
-- Keep state transformations pure and predictable
-- Do NOT use `mutate` on signals, use `update` or `set` instead
-
-## Templates
-
-- Keep templates simple and avoid complex logic
-- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
-- Use the async pipe to handle observables
-- Do not assume globals like (`new Date()`) are available.
+- JWT in `localStorage` keys `accessToken` / `refreshToken`
+- `authInterceptor` (functional interceptor, `HttpInterceptorFn`) adds `Authorization: Bearer <token>`
+- `AuthGuard` checks `isLoggedIn()`, redirects to `/login` if missing
+- `AuthService.login(id, password)` POSTs `{ emailOrCedula, password }` to `${apiUrl}/auth/login`, stores tokens
+- Also: `register()`, `logout()`, `getRoleFromToken()` (decodes JWT payload for `role`), `getProfile()` (GET `/users/me`)
 
 ## Services
 
-- Design services around a single responsibility
-- Use the `providedIn: 'root'` option for singleton services
-- Use the `inject()` function instead of constructor injection
+- `AuthService` — auth operations, token storage, role extraction from JWT
+- `UserService` — paginated user CRUD (`getUsers`, `updateUser`, `deleteUser`). GET params: `page`, `limit`, `role`. Response shape: `{ data: User[], pagination: { total, current_page, last_page } }`.
+
+## Stub files to be aware of
+
+- `auth/login/` has two components: `LoginComponent` (full, used by router) and `Login` (stub, imported by spec `login.spec.ts`)
+- `core/services/auth.ts` + `auth.spec.ts` are scaffold stubs (unused)
+
+## Testing (Vitest)
+
+- `ng test` runs Vitest via `@angular/build:unit-test` builder
+- Specs use standard Angular `TestBed` (see `app.spec.ts`, `login.spec.ts`)
+- `tsconfig.spec.json` has `types: ["vitest/globals"]`
+- No snapshot testing
+
+## Conventions (target state for new code)
+
+- Standalone components: **omit** `standalone: true` (default in Angular 20+)
+- `input()`/`output()` functions over `@Input()`/`@Output()` decorators
+- `signal()` for local state, `computed()` for derived state; use `set`/`update`, never `mutate`
+- Reactive forms via `FormBuilder`
+- Native control flow (`@if`, `@for`, `@switch`) over `*ngIf`/`*ngFor`/`*ngSwitch`
+- `host` object in `@Component` instead of `@HostBinding`/`@HostListener`
+- `ChangeDetectionStrategy.OnPush`
+- `inject()` function over constructor injection
+- PrimeNG components: import the module, provide `MessageService`/`ConfirmationService` in component `providers` where needed
+- Prettier: single quotes, trailing comma, Angular HTML parser
+- `providedIn: 'root'` for services
+
+> Note: Existing components still use class properties, constructor DI, `standalone: true`, `*ngIf`/`*ngFor`, and no `OnPush`. Follow the conventions above for **new** code.
+
+## Cross-platform AI instruction files
+
+- `.claude/CLAUDE.md` and `.cursor/rules/cursor.mdc` contain near-identical generic Angular best-practice rules (same conventions as above). Keep them in sync if updating conventions.
+
+## Tooling
+
+- Node: npm 11.12.1 (pinned in `packageManager`)
+- `.editorconfig`: 2-space indent, UTF-8
+- `.vscode/extensions.json` recommends `angular.ng-template`

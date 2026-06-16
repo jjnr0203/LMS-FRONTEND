@@ -14,10 +14,9 @@ import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
   imports: [CommonModule, MenubarModule, ButtonModule, CardModule, PopoverModule, RouterModule],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   @ViewChild('op') op: any;
