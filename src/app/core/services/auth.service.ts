@@ -1,57 +1,109 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { LoginResponse, User, AuthState } from '../models';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
 
+  private state = signal<AuthState>({
+    user: null,
+    accessToken: localStorage.getItem('accessToken'),
+    refreshToken: localStorage.getItem('refreshToken'),
+    role: this.decodeRole(localStorage.getItem('accessToken')),
+    isLoggedIn: !!localStorage.getItem('accessToken'),
+  });
+
+  readonly user = computed(() => this.state().user);
+  readonly accessToken = computed(() => this.state().accessToken);
+  readonly refreshTokenVal = computed(() => this.state().refreshToken);
+  readonly role = computed(() => this.state().role);
+  readonly isLoggedIn = computed(() => this.state().isLoggedIn);
+
   constructor(private http: HttpClient) {}
 
-  login(id: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { emailOrCedula: id, password }).pipe(
-      tap(response => {
-        if (response.accessToken) {
-          localStorage.setItem('accessToken', response.accessToken);
-          localStorage.setItem('refreshToken', response.refreshToken);
-        }
-      })
-    );
+  login(emailOrCedula: string, password: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/login`, { emailOrCedula, passwordRaw: password })
+      .pipe(
+        tap((res) => {
+          this.setSession(res);
+        }),
+      );
   }
 
   register(data: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, data);
+    return this.http.post(`${this.apiUrl}/register`, data);
+  }
+
+  refresh(): Observable<{ accessToken: string; refreshToken: string }> {
+    const token = this.state().refreshToken;
+    return this.http
+      .post<{ accessToken: string; refreshToken: string }>(`${this.apiUrl}/refresh`, {
+        refreshToken: token,
+      })
+      .pipe(
+        tap((res) => {
+          localStorage.setItem('accessToken', res.accessToken);
+          localStorage.setItem('refreshToken', res.refreshToken);
+          this.state.update((s) => ({
+            ...s,
+            accessToken: res.accessToken,
+            refreshToken: res.refreshToken,
+            role: this.decodeRole(res.accessToken),
+          }));
+        }),
+      );
   }
 
   logout(): Observable<any> {
-    const refreshToken = localStorage.getItem('refreshToken');
-    return this.http.post<any>(`${this.apiUrl}/logout`, { refreshToken }).pipe(
-      tap(() => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-      })
+    const token = this.state().refreshToken;
+    return this.http
+      .post(`${this.apiUrl}/logout`, { refreshToken: token })
+      .pipe(tap(() => this.clearSession()));
+  }
+
+  getProfile(): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/users/me`).pipe(
+      tap((user) => {
+        this.state.update((s) => ({ ...s, user }));
+      }),
     );
   }
 
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('accessToken');
+  setSession(res: { accessToken: string; refreshToken: string; user?: User }) {
+    localStorage.setItem('accessToken', res.accessToken);
+    localStorage.setItem('refreshToken', res.refreshToken);
+    this.state.set({
+      user: res.user ?? null,
+      accessToken: res.accessToken,
+      refreshToken: res.refreshToken,
+      role: this.decodeRole(res.accessToken),
+      isLoggedIn: true,
+    });
   }
 
-  getRoleFromToken(): string | null {
-    const token = localStorage.getItem('accessToken');
+  clearSession() {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    this.state.set({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      role: null,
+      isLoggedIn: false,
+    });
+  }
+
+  private decodeRole(token: string | null): string | null {
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role;
-    } catch (e) {
+      return payload.role ?? null;
+    } catch {
       return null;
     }
-  }
-
-  getProfile(): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/users/me`);
   }
 }

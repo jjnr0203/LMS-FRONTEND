@@ -5,13 +5,13 @@ SCSS for component styles; `src/styles.scss` imports `primeicons/primeicons.css`
 
 ## Commands
 
-| Command | Action |
-|---------|--------|
-| `npm start` | Dev server (`ng serve`) |
-| `npm run build` | Prod build (budgets: initial 500kB/1MB) |
-| `npm test` | Unit tests (Vitest via `@angular/build:unit-test`) |
-| `npm run watch` | Build with watch + dev config |
-| `npx prettier --write .` | Format everything |
+| Command                  | Action                                             |
+| ------------------------ | -------------------------------------------------- |
+| `npm start`              | Dev server (`ng serve`)                            |
+| `npm run build`          | Prod build (budgets: initial 500kB/1MB)            |
+| `npm test`               | Unit tests (Vitest via `@angular/build:unit-test`) |
+| `npm run watch`          | Build with watch + dev config                      |
+| `npx prettier --write .` | Format everything                                  |
 
 **No linting** (no ESLint). Formatting via Prettier (single quotes, printWidth 100, Angular HTML parser).
 
@@ -23,7 +23,7 @@ SCSS for component styles; `src/styles.scss` imports `primeicons/primeicons.css`
   - `/login` — public, loads `LoginComponent`
   - `/dashboard` — protected by `AuthGuard` (class-based `CanActivate`), child `/dashboard/users`
   - `/` redirects to `/login`
-  - *Dashboard nav has a `/dashboard/courses` menu item but no route or feature exists yet*
+  - _Dashboard nav has a `/dashboard/courses` menu item but no route or feature exists yet_
 - **Core:** `src/app/core/` — `guards/`, `interceptors/`, `services/`
 - **Features:** `src/app/features/` — `auth/login`, `dashboard`, `users/users-list`
 - **API base:** `http://localhost:3000/api` (`src/environments/environment*.ts`, dev file-replacement in `angular.json`)
