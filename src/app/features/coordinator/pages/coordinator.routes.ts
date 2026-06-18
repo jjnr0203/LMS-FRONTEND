@@ -6,7 +6,7 @@ export default [
   {
     path: '',
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['coordinador'] },
+    data: { roles: ['coordinator'] },
     children: [
       { path: '', redirectTo: 'estudiantes', pathMatch: 'full' },
       {

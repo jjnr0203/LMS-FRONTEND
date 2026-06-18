@@ -61,20 +61,20 @@ import { CommonModule } from '@angular/common';
 
           <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <div class="mb-4">
-              <label for="emailOrCedula" class="block text-sm font-semibold text-700 mb-2">Cédula o Correo</label>
+              <label for="id" class="block text-sm font-semibold text-700 mb-2">ID</label>
               <p-inputGroup>
                 <p-inputGroupAddon>
                   <i class="pi pi-user text-primary"></i>
                 </p-inputGroupAddon>
                 <input
-                  id="emailOrCedula"
+                  id="id"
                   pInputText
-                  formControlName="emailOrCedula"
-                  placeholder="Ingrese su cédula o correo"
-                  [class.ng-invalid]="emailOrCedula.invalid && emailOrCedula.touched"
+                  formControlName="id"
+                  placeholder="Ingrese su ID"
+                  [class.ng-invalid]="id.invalid && id.touched"
                 />
               </p-inputGroup>
-              @if (emailOrCedula.invalid && emailOrCedula.touched) {
+              @if (id.invalid && id.touched) {
                 <small class="p-error block mt-1">Este campo es requerido.</small>
               }
             </div>
@@ -140,12 +140,12 @@ export class LoginComponent {
   suspendedMessage = signal('');
 
   form = this.fb.nonNullable.group({
-    emailOrCedula: ['', Validators.required],
+    id: ['', Validators.required],
     password: ['', Validators.required],
   });
 
-  get emailOrCedula() {
-    return this.form.controls.emailOrCedula;
+  get id() {
+    return this.form.controls.id;
   }
   get password() {
     return this.form.controls.password;
@@ -166,16 +166,16 @@ export class LoginComponent {
     }
 
     this.isLoading.set(true);
-    const { emailOrCedula, password } = this.form.value;
+    const { id, password } = this.form.value;
 
-    this.authService.login(emailOrCedula!, password!).subscribe({
+    this.authService.login(id!, password!).subscribe({
       next: () => {
         this.isLoading.set(false);
         const role = this.authService.role();
         if (role === 'admin') this.router.navigate(['/admin/users']);
-        else if (role === 'coordinador') this.router.navigate(['/coordinador/estudiantes']);
-        else if (role === 'tesoreria') this.router.navigate(['/tesoreria/matriculas']);
-        else if (role === 'docente') this.router.navigate(['/docente/inscribir']);
+        else if (role === 'coordinator') this.router.navigate(['/coordinator/students']);
+        else if (role === 'treasury') this.router.navigate(['/treasury/matriculas']);
+        else if (role === 'teacher') this.router.navigate(['/teacher/inscribir']);
         else this.router.navigate(['/perfil']);
       },
       error: (err) => {

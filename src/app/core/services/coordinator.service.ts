@@ -6,7 +6,7 @@ import { User, Subject, Enrollment } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class CoordinatorService {
-  private apiUrl = `${environment.apiUrl}/coordinador`;
+  private apiUrl = `${environment.apiUrl}/coordinator`;
 
   constructor(private http: HttpClient) {}
 
@@ -21,7 +21,7 @@ export class CoordinatorService {
     user: User;
     tuition: { status: string; paidInstallments: number };
   }> {
-    return this.http.post<any>(`${this.apiUrl}/estudiantes`, data);
+    return this.http.post<any>(`${this.apiUrl}/students`, data);
   }
 
   registerTeacher(data: {
@@ -31,7 +31,7 @@ export class CoordinatorService {
     email: string;
     password: string;
   }): Observable<{ message: string; user: User }> {
-    return this.http.post<any>(`${this.apiUrl}/docentes`, data);
+    return this.http.post<any>(`${this.apiUrl}/teachers`, data);
   }
 
   createSubject(data: {

@@ -6,7 +6,7 @@ export default [
   {
     path: '',
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['tesoreria'] },
+    data: { roles: ['treasury'] },
     children: [
       { path: '', redirectTo: 'matriculas', pathMatch: 'full' },
       {

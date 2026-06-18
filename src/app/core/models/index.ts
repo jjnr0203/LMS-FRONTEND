@@ -81,4 +81,4 @@ export interface AuthState {
   isLoggedIn: boolean;
 }
 
-export type AppRole = 'admin' | 'coordinador' | 'tesoreria' | 'docente' | 'estudiante';
+export type AppRole = 'admin' | 'coordinator' | 'treasury' | 'teacher' | 'student';

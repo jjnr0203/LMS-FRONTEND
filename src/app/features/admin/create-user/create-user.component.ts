@@ -133,8 +133,8 @@ export class CreateUserComponent {
   loading = signal(false);
 
   roles = [
-    { label: 'Coordinador', value: 'coordinador' },
-    { label: 'Tesorería', value: 'tesoreria' },
+    { label: 'Coordinador', value: 'coordinator' },
+    { label: 'Tesorería', value: 'treasury' },
   ];
 
   form = this.fb.nonNullable.group({

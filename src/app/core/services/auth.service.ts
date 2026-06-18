@@ -24,9 +24,9 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(emailOrCedula: string, password: string): Observable<LoginResponse> {
+  login(id: string, password: string): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${this.apiUrl}/login`, { emailOrCedula, passwordRaw: password })
+      .post<LoginResponse>(`${this.apiUrl}/login`, { id, passwordRaw: password })
       .pipe(
         tap((res) => {
           this.setSession(res);

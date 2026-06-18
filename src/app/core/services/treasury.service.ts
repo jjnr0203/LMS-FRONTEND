@@ -6,7 +6,7 @@ import { Tuition, User } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class TreasuryService {
-  private apiUrl = `${environment.apiUrl}/tesoreria`;
+  private apiUrl = `${environment.apiUrl}/treasury`;
 
   constructor(private http: HttpClient) {}
 

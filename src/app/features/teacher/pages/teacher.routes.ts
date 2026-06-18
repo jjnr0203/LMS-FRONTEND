@@ -6,7 +6,7 @@ export default [
   {
     path: '',
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['docente'] },
+    data: { roles: ['teacher'] },
     children: [
       { path: '', redirectTo: 'inscribir', pathMatch: 'full' },
       {

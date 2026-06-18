@@ -6,7 +6,7 @@ import { Assignment, Submission } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class TeacherService {
-  private apiUrl = `${environment.apiUrl}/docente`;
+  private apiUrl = `${environment.apiUrl}/teacher`;
 
   constructor(private http: HttpClient) {}
 

@@ -14,21 +14,21 @@ export const routes: Routes = [
     loadChildren: () => import('./features/admin/pages/admin.routes'),
   },
   {
-    path: 'coordinador',
+    path: 'coordinator',
     loadComponent: () =>
       import('./layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
     canActivate: [AuthGuard],
     loadChildren: () => import('./features/coordinator/pages/coordinator.routes'),
   },
   {
-    path: 'tesoreria',
+    path: 'treasury',
     loadComponent: () =>
       import('./layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
     canActivate: [AuthGuard],
     loadChildren: () => import('./features/treasury/pages/treasury.routes'),
   },
   {
-    path: 'docente',
+    path: 'teacher',
     loadComponent: () =>
       import('./layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
     canActivate: [AuthGuard],
