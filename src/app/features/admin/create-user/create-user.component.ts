@@ -94,6 +94,18 @@ import { CommonModule } from '@angular/common';
               }
             </div>
           </div>
+          <div class="col-12 md:col-6">
+            <div class="field">
+              <label for="birthDate">Fecha de Nacimiento (Opcional)</label>
+              <input id="birthDate" type="date" pInputText formControlName="birthDate" />
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="field">
+              <label for="phone">Teléfono (Opcional)</label>
+              <input id="phone" type="tel" pInputText formControlName="phone" />
+            </div>
+          </div>
         </div>
 
         <div class="mt-3">
@@ -135,6 +147,7 @@ export class CreateUserComponent {
   roles = [
     { label: 'Coordinador', value: 'coordinator' },
     { label: 'Tesorería', value: 'treasury' },
+    { label: 'Docente', value: 'teacher' },
   ];
 
   form = this.fb.nonNullable.group({
@@ -143,6 +156,8 @@ export class CreateUserComponent {
     lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    birthDate: [''],
+    phone: [''],
     roleName: ['', Validators.required],
   });
 
@@ -164,6 +179,12 @@ export class CreateUserComponent {
   get roleName() {
     return this.form.controls.roleName;
   }
+  get birthDate() {
+    return this.form.controls.birthDate;
+  }
+  get phone() {
+    return this.form.controls.phone;
+  }
 
   onSubmit() {
     if (this.form.invalid) {
@@ -172,7 +193,17 @@ export class CreateUserComponent {
     }
 
     this.loading.set(true);
-    this.adminService.createUser(this.form.value as any).subscribe({
+    const payload: any = { ...this.form.value };
+    if (!payload.birthDate) {
+      delete payload.birthDate;
+    } else {
+      payload.birthDate = new Date(payload.birthDate).toISOString();
+    }
+    if (!payload.phone) {
+      delete payload.phone;
+    }
+
+    this.adminService.createUser(payload).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',

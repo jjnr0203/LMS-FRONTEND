@@ -17,15 +17,24 @@ import { CommonModule } from '@angular/common';
       <div class="toolbar-right">
         @if (profile(); as p) {
           <div class="user-info">
-            <p-avatar
-              [label]="getInitials(p.firstName, p.lastName)"
-              shape="circle"
-              styleClass="mr-2"
-              size="normal"
-            />
+            @if (p.avatarUrl) {
+              <p-avatar
+                [image]="p.avatarUrl"
+                shape="circle"
+                styleClass="mr-2"
+                size="normal"
+              />
+            } @else {
+              <p-avatar
+                [label]="getInitials(p.firstName, p.lastName)"
+                shape="circle"
+                styleClass="mr-2 avatar-fallback"
+                size="normal"
+              />
+            }
             <div class="user-text">
               <span class="user-name">{{ p.firstName }} {{ p.lastName }}</span>
-              <span class="user-role">{{ role() | titlecase }}</span>
+              <span class="user-role">{{ formatRoleName(p.roleName || role()) }}</span>
             </div>
           </div>
         }
@@ -79,6 +88,11 @@ import { CommonModule } from '@angular/common';
         font-size: 0.75rem;
         color: #64748b;
       }
+      .avatar-fallback {
+        background: #3b82f6;
+        color: #fff;
+        font-weight: 600;
+      }
     </style>
   `,
 })
@@ -86,15 +100,26 @@ export class ToolbarComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  profile = signal<User | null>(null);
+  profile = this.authService.user;
   role = signal('');
 
   ngOnInit() {
     this.role.set(this.authService.role() ?? '');
-    this.authService.getProfile().subscribe({
-      next: (u) => this.profile.set(u),
-      error: () => {},
-    });
+    if (!this.profile()) {
+      this.authService.getProfile().subscribe();
+    }
+  }
+
+  formatRoleName(r?: string): string {
+    if (!r) return 'Desconocido';
+    const roles: Record<string, string> = {
+      admin: 'Administrador',
+      treasury: 'Tesorería',
+      coordinator: 'Coordinador',
+      teacher: 'Docente',
+      student: 'Estudiante'
+    };
+    return roles[r.toLowerCase()] || r;
   }
 
   getInitials(fn: string, ln: string): string {

@@ -31,15 +31,29 @@ import { CommonModule } from '@angular/common';
       <div class="profile-grid">
         <p-card header="Mi Perfil">
           <div class="profile-header">
-            <p-avatar
-              [label]="initials()"
-              shape="circle"
-              size="xlarge"
-              styleClass="profile-avatar"
-            />
+            <div class="avatar-container">
+              @if (u.avatarUrl) {
+                <p-avatar
+                  [image]="u.avatarUrl"
+                  shape="circle"
+                  size="xlarge"
+                />
+              } @else {
+                <p-avatar
+                  [label]="initials()"
+                  shape="circle"
+                  size="xlarge"
+                  styleClass="profile-avatar-fallback"
+                />
+              }
+              <div class="avatar-overlay" (click)="fileInput.click()">
+                <i class="pi pi-camera"></i>
+              </div>
+              <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none" />
+            </div>
             <div>
               <h2>{{ u.firstName }} {{ u.lastName }}</h2>
-              <p class="role-badge">{{ u.roleId | titlecase }}</p>
+              <p class="role-badge">{{ formatRoleName(u.roleName) }}</p>
               <p class="text-sm text-color-secondary">{{ u.email }}</p>
             </div>
           </div>
@@ -81,10 +95,35 @@ import { CommonModule } from '@angular/common';
       .profile-header h2 {
         margin: 0;
       }
-      .profile-avatar {
+      .profile-avatar-fallback {
         background: #3b82f6;
         color: #fff;
         font-weight: 700;
+      }
+      .avatar-container {
+        position: relative;
+        cursor: pointer;
+        border-radius: 50%;
+        overflow: hidden;
+        width: 64px;
+        height: 64px;
+      }
+      .avatar-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      .avatar-container:hover .avatar-overlay {
+        opacity: 1;
       }
       .role-badge {
         display: inline-block;
@@ -123,6 +162,7 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private userService = inject(UserService);
   private router = inject(Router);
+  private messageService = inject(MessageService);
 
   user = signal<User | null>(null);
   initials = signal('');
@@ -136,6 +176,34 @@ export class ProfileComponent implements OnInit {
         );
       },
     });
+  }
+
+  formatRoleName(role?: string): string {
+    if (!role) return 'Desconocido';
+    const roles: Record<string, string> = {
+      admin: 'Administrador',
+      treasury: 'Tesorería',
+      coordinator: 'Coordinador',
+      teacher: 'Docente',
+      student: 'Estudiante'
+    };
+    return roles[role.toLowerCase()] || role;
+  }
+
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.userService.uploadAvatar(file).subscribe({
+        next: (res) => {
+          this.user.set(res.user);
+          this.authService.getProfile().subscribe(); // Update global auth state
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Avatar actualizado' });
+        },
+        error: () => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el avatar' });
+        }
+      });
+    }
   }
 
   goChangePassword() {

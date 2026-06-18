@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TeacherService } from '../../../core/services/teacher.service';
+import { CoordinatorService } from '../../../core/services/coordinator.service';
 import { MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -9,10 +9,9 @@ import { CardModule } from 'primeng/card';
 import { CommonModule } from '@angular/common';
 import { SelectModule } from 'primeng/select';
 import { UserService } from '../../../core/services/user.service';
-import { CoordinatorService } from '../../../core/services/coordinator.service';
 
 @Component({
-  selector: 'app-enroll-student-subject',
+  selector: 'app-assign-teacher',
   imports: [
     ReactiveFormsModule,
     InputTextModule,
@@ -25,25 +24,25 @@ import { CoordinatorService } from '../../../core/services/coordinator.service';
   providers: [MessageService],
   template: `
     <p-toast />
-    <p-card header="Inscribir Alumno en Materia">
+    <p-card header="Asignar Docente a Materia">
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="grid">
           <div class="col-12 md:col-6">
             <div class="field">
-              <label for="studentId">Seleccione el Estudiante</label>
+              <label for="teacherId">Seleccione un Docente</label>
               <p-select
-                id="studentId"
-                [options]="students()"
-                formControlName="studentId"
+                id="teacherId"
+                [options]="teachers()"
+                formControlName="teacherId"
                 optionLabel="fullName"
                 optionValue="id"
-                placeholder="Seleccione un estudiante"
+                placeholder="Seleccione un docente"
                 [filter]="true"
                 filterBy="fullName"
                 [showClear]="true"
               ></p-select>
-              @if (studentId.invalid && studentId.touched) {
-                <small class="p-error">Debe seleccionar un estudiante.</small>
+              @if (teacherId.invalid && teacherId.touched) {
+                <small class="p-error">Debe seleccionar un docente.</small>
               }
             </div>
           </div>
@@ -68,7 +67,7 @@ import { CoordinatorService } from '../../../core/services/coordinator.service';
           </div>
         </div>
 
-        <p-button type="submit" label="Inscribir" [loading]="loading()" [disabled]="form.invalid" />
+        <p-button type="submit" label="Asignar Docente" [loading]="loading()" [disabled]="form.invalid" />
       </form>
     </p-card>
 
@@ -87,19 +86,18 @@ import { CoordinatorService } from '../../../core/services/coordinator.service';
     </style>
   `,
 })
-export class EnrollStudentSubjectComponent {
+export class AssignTeacherComponent {
   private fb = inject(FormBuilder);
-  private teacherService = inject(TeacherService);
-  private userService = inject(UserService);
   private coordinatorService = inject(CoordinatorService);
+  private userService = inject(UserService);
   private messageService = inject(MessageService);
 
   loading = signal(false);
-  students = signal<any[]>([]);
+  teachers = signal<any[]>([]);
   subjects = signal<any[]>([]);
 
   form = this.fb.nonNullable.group({
-    studentId: ['', Validators.required],
+    teacherId: ['', Validators.required],
     subjectId: ['', Validators.required],
   });
 
@@ -108,18 +106,20 @@ export class EnrollStudentSubjectComponent {
   }
 
   loadData() {
-    this.userService.getUsers(1, 1000, 'student').subscribe((res) => {
+    // Load Teachers
+    this.userService.getUsers(1, 1000, 'teacher').subscribe((res) => {
       const mapped = res.data.map((u) => ({ ...u, fullName: `${u.firstName} ${u.lastName} (${u.id})` }));
-      this.students.set(mapped);
+      this.teachers.set(mapped);
     });
 
+    // Load Subjects
     this.coordinatorService.getSubjects().subscribe((res) => {
       this.subjects.set(res.subjects);
     });
   }
 
-  get studentId() {
-    return this.form.controls.studentId;
+  get teacherId() {
+    return this.form.controls.teacherId;
   }
   get subjectId() {
     return this.form.controls.subjectId;
@@ -132,12 +132,12 @@ export class EnrollStudentSubjectComponent {
     }
 
     this.loading.set(true);
-    this.teacherService.enrollStudent(this.form.value as any).subscribe({
+    this.coordinatorService.assignTeacher(this.form.value as any).subscribe({
       next: (res) => {
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
-          detail: res.message ?? 'Alumno inscrito',
+          detail: res.message ?? 'Docente asignado',
         });
         this.form.reset();
         this.loading.set(false);
@@ -147,7 +147,7 @@ export class EnrollStudentSubjectComponent {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: err.error?.message ?? 'Error al inscribir',
+          detail: err.error?.message ?? 'Error al asignar docente',
         });
       },
     });

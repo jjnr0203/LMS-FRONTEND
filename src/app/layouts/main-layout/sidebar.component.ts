@@ -79,23 +79,36 @@ export class SidebarComponent {
   private role = this.authService.role();
 
   allMenu: NavItem[] = [
-    { label: 'Usuarios', icon: 'pi pi-users', route: '/admin/users', roles: ['admin'] },
+    { label: 'Crear Usuario', icon: 'pi pi-user-plus', route: '/admin/users', roles: ['admin'] },
+    { label: 'Lista de Usuarios', icon: 'pi pi-users', route: '/admin/users-list', roles: ['admin'] },
     {
       label: 'Registrar Estudiante',
       icon: 'pi pi-user-plus',
-      route: '/coordinator/students',
-      roles: ['coordinator'],
+      route: '/treasury/estudiantes',
+      roles: ['treasury'],
     },
     {
-      label: 'Registrar Docente',
-      icon: 'pi pi-user-plus',
-      route: '/coordinator/teachers',
+      label: 'Lista de Estudiantes',
+      icon: 'pi pi-users',
+      route: '/treasury/estudiantes-list',
+      roles: ['treasury'],
+    },
+    {
+      label: 'Lista de Materias',
+      icon: 'pi pi-list',
+      route: '/coordinator/materias-list',
       roles: ['coordinator'],
     },
     {
       label: 'Crear Materia',
       icon: 'pi pi-book',
       route: '/coordinator/materias',
+      roles: ['coordinator'],
+    },
+    {
+      label: 'Asignar Docente',
+      icon: 'pi pi-link',
+      route: '/coordinator/asignar-docente',
       roles: ['coordinator'],
     },
     {

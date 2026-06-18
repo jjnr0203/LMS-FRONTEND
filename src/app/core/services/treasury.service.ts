@@ -14,6 +14,22 @@ export class TreasuryService {
     return this.http.get<{ tuitions: Tuition[] }>(`${this.apiUrl}/matriculas`);
   }
 
+  registerStudent(data: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    birthDate?: string;
+    phone?: string;
+  }): Observable<{
+    message: string;
+    user: User;
+    tuition: { status: string; paidInstallments: number };
+  }> {
+    return this.http.post<any>(`${this.apiUrl}/estudiantes`, data);
+  }
+
   registerPayment(studentId: string): Observable<{
     message: string;
     tuition: Tuition;

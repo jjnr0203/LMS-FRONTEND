@@ -10,6 +10,12 @@ export default [
     children: [
       { path: '', redirectTo: 'users', pathMatch: 'full' },
       {
+        path: 'users-list',
+        loadComponent: () =>
+          import('../../users/users-list/users-list.component').then((m) => m.UsersListComponent),
+        data: { roleFilter: '' },
+      },
+      {
         path: 'users',
         loadComponent: () =>
           import('../create-user/create-user.component').then((m) => m.CreateUserComponent),

@@ -8,26 +8,24 @@ export default [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['coordinator'] },
     children: [
-      { path: '', redirectTo: 'estudiantes', pathMatch: 'full' },
+      { path: '', redirectTo: 'materias', pathMatch: 'full' },
       {
-        path: 'estudiantes',
+        path: 'materias-list',
         loadComponent: () =>
-          import('../register-student/register-student.component').then(
-            (m) => m.RegisterStudentComponent,
-          ),
-      },
-      {
-        path: 'docentes',
-        loadComponent: () =>
-          import('../register-teacher/register-teacher.component').then(
-            (m) => m.RegisterTeacherComponent,
-          ),
+          import('../subjects-list/subjects-list.component').then((m) => m.SubjectsListComponent),
       },
       {
         path: 'materias',
         loadComponent: () =>
           import('../create-subject/create-subject.component').then(
             (m) => m.CreateSubjectComponent,
+          ),
+      },
+      {
+        path: 'asignar-docente',
+        loadComponent: () =>
+          import('../assign-teacher/assign-teacher.component').then(
+            (m) => m.AssignTeacherComponent,
           ),
       },
       {

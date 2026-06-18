@@ -173,7 +173,7 @@ export class LoginComponent {
         this.isLoading.set(false);
         const role = this.authService.role();
         if (role === 'admin') this.router.navigate(['/admin/users']);
-        else if (role === 'coordinator') this.router.navigate(['/coordinator/students']);
+        else if (role === 'coordinator') this.router.navigate(['/coordinator/materias']);
         else if (role === 'treasury') this.router.navigate(['/treasury/matriculas']);
         else if (role === 'teacher') this.router.navigate(['/teacher/inscribir']);
         else this.router.navigate(['/perfil']);

@@ -10,28 +10,8 @@ export class CoordinatorService {
 
   constructor(private http: HttpClient) {}
 
-  registerStudent(data: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-  }): Observable<{
-    message: string;
-    user: User;
-    tuition: { status: string; paidInstallments: number };
-  }> {
-    return this.http.post<any>(`${this.apiUrl}/students`, data);
-  }
-
-  registerTeacher(data: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-  }): Observable<{ message: string; user: User }> {
-    return this.http.post<any>(`${this.apiUrl}/teachers`, data);
+  getSubjects(): Observable<{ subjects: Subject[] }> {
+    return this.http.get<{ subjects: Subject[] }>(`${this.apiUrl}/materias`);
   }
 
   createSubject(data: {
@@ -41,6 +21,10 @@ export class CoordinatorService {
     description?: string;
   }): Observable<{ message: string; subject: Subject }> {
     return this.http.post<any>(`${this.apiUrl}/materias`, data);
+  }
+
+  assignTeacher(data: { teacherId: string; subjectId: string }): Observable<{ message: string }> {
+    return this.http.post<any>(`${this.apiUrl}/asignar-docente`, data);
   }
 
   enrollStudent(studentId: string): Observable<{ message: string; enrollment: Enrollment }> {

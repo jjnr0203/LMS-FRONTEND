@@ -30,6 +30,7 @@ export class AuthService {
       .pipe(
         tap((res) => {
           this.setSession(res);
+          this.getProfile().subscribe();
         }),
       );
   }

@@ -8,6 +8,8 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
 import { CommonModule } from '@angular/common';
+import { SelectModule } from 'primeng/select';
+import { UserService } from '../../../core/services/user.service';
 
 @Component({
   selector: 'app-disable-account',
@@ -19,6 +21,7 @@ import { CommonModule } from '@angular/common';
     ConfirmDialogModule,
     CardModule,
     CommonModule,
+    SelectModule,
   ],
   providers: [MessageService, ConfirmationService],
   template: `
@@ -35,10 +38,20 @@ import { CommonModule } from '@angular/common';
 
       <form [formGroup]="form" (ngSubmit)="confirm()">
         <div class="field">
-          <label for="studentId">Cédula del Estudiante</label>
-          <input id="studentId" pInputText formControlName="studentId" placeholder="0000000000" />
+          <label for="studentId">Seleccione el Estudiante</label>
+          <p-select
+            id="studentId"
+            [options]="students()"
+            formControlName="studentId"
+            optionLabel="fullName"
+            optionValue="id"
+            placeholder="Seleccione un estudiante"
+            [filter]="true"
+            filterBy="fullName"
+            [showClear]="true"
+          ></p-select>
           @if (studentId.invalid && studentId.touched) {
-            <small class="p-error">Debe tener exactamente 10 dígitos.</small>
+            <small class="p-error">Debe seleccionar un estudiante.</small>
           }
         </div>
 
@@ -83,14 +96,27 @@ import { CommonModule } from '@angular/common';
 export class DisableAccountComponent {
   private fb = inject(FormBuilder);
   private treasuryService = inject(TreasuryService);
+  private userService = inject(UserService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
 
   loading = signal(false);
+  students = signal<any[]>([]);
 
   form = this.fb.nonNullable.group({
-    studentId: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+    studentId: ['', Validators.required],
   });
+
+  constructor() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.userService.getUsers(1, 1000, 'student').subscribe((res) => {
+      const mapped = res.data.map((u) => ({ ...u, fullName: `${u.firstName} ${u.lastName} (${u.id})` }));
+      this.students.set(mapped);
+    });
+  }
 
   get studentId() {
     return this.form.controls.studentId;

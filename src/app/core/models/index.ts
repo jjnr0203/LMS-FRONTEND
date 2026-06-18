@@ -3,7 +3,8 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  roleId: string;
+  roleId?: string;
+  roleName?: string;
   isActive: boolean;
   birthDate?: string;
   phone?: string;

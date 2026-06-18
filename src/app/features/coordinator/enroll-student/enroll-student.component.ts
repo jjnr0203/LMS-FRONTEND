@@ -7,6 +7,8 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 import { CommonModule } from '@angular/common';
+import { SelectModule } from 'primeng/select';
+import { UserService } from '../../../core/services/user.service';
 
 @Component({
   selector: 'app-enroll-student',
@@ -17,6 +19,7 @@ import { CommonModule } from '@angular/common';
     ToastModule,
     CardModule,
     CommonModule,
+    SelectModule,
   ],
   providers: [MessageService],
   template: `
@@ -24,10 +27,20 @@ import { CommonModule } from '@angular/common';
     <p-card header="Matricular Estudiante">
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="field">
-          <label for="studentId">Cédula del Estudiante</label>
-          <input id="studentId" pInputText formControlName="studentId" placeholder="0000000000" />
+          <label for="studentId">Seleccione el Estudiante</label>
+          <p-select
+            id="studentId"
+            [options]="students()"
+            formControlName="studentId"
+            optionLabel="fullName"
+            optionValue="id"
+            placeholder="Seleccione un estudiante"
+            [filter]="true"
+            filterBy="fullName"
+            [showClear]="true"
+          ></p-select>
           @if (studentId.invalid && studentId.touched) {
-            <small class="p-error">Debe tener exactamente 10 dígitos.</small>
+            <small class="p-error">Debe seleccionar un estudiante.</small>
           }
         </div>
 
@@ -59,13 +72,26 @@ import { CommonModule } from '@angular/common';
 export class EnrollStudentComponent {
   private fb = inject(FormBuilder);
   private coordinatorService = inject(CoordinatorService);
+  private userService = inject(UserService);
   private messageService = inject(MessageService);
 
   loading = signal(false);
+  students = signal<any[]>([]);
 
   form = this.fb.nonNullable.group({
-    studentId: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+    studentId: ['', Validators.required],
   });
+
+  constructor() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.userService.getUsers(1, 1000, 'student').subscribe((res) => {
+      const mapped = res.data.map((u) => ({ ...u, fullName: `${u.firstName} ${u.lastName} (${u.id})` }));
+      this.students.set(mapped);
+    });
+  }
 
   get studentId() {
     return this.form.controls.studentId;

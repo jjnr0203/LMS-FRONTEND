@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CoordinatorService } from '../../../core/services/coordinator.service';
+import { TreasuryService } from '../../../core/services/treasury.service';
 import { MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -76,6 +76,18 @@ import { CommonModule } from '@angular/common';
               }
             </div>
           </div>
+          <div class="col-12 md:col-6">
+            <div class="field">
+              <label for="birthDate">Fecha de Nacimiento (Opcional)</label>
+              <input id="birthDate" type="date" pInputText formControlName="birthDate" />
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="field">
+              <label for="phone">Teléfono (Opcional)</label>
+              <input id="phone" type="tel" pInputText formControlName="phone" />
+            </div>
+          </div>
         </div>
 
         <p-button
@@ -104,7 +116,7 @@ import { CommonModule } from '@angular/common';
 })
 export class RegisterStudentComponent {
   private fb = inject(FormBuilder);
-  private coordinatorService = inject(CoordinatorService);
+  private treasuryService = inject(TreasuryService);
   private messageService = inject(MessageService);
 
   loading = signal(false);
@@ -115,6 +127,8 @@ export class RegisterStudentComponent {
     lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    birthDate: [''],
+    phone: [''],
   });
 
   get id() {
@@ -132,6 +146,12 @@ export class RegisterStudentComponent {
   get password() {
     return this.form.controls.password;
   }
+  get birthDate() {
+    return this.form.controls.birthDate;
+  }
+  get phone() {
+    return this.form.controls.phone;
+  }
 
   onSubmit() {
     if (this.form.invalid) {
@@ -140,7 +160,17 @@ export class RegisterStudentComponent {
     }
 
     this.loading.set(true);
-    this.coordinatorService.registerStudent(this.form.value as any).subscribe({
+    const payload: any = { ...this.form.value };
+    if (!payload.birthDate) {
+      delete payload.birthDate;
+    } else {
+      payload.birthDate = new Date(payload.birthDate).toISOString();
+    }
+    if (!payload.phone) {
+      delete payload.phone;
+    }
+
+    this.treasuryService.registerStudent(payload).subscribe({
       next: (res) => {
         this.messageService.add({
           severity: 'success',

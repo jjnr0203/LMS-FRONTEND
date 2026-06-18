@@ -15,6 +15,19 @@ export default [
           import('../tuition-list/tuition-list.component').then((m) => m.TuitionListComponent),
       },
       {
+        path: 'estudiantes-list',
+        loadComponent: () =>
+          import('../../users/users-list/users-list.component').then((m) => m.UsersListComponent),
+        data: { roleFilter: 'student' },
+      },
+      {
+        path: 'estudiantes',
+        loadComponent: () =>
+          import('../register-student/register-student.component').then(
+            (m) => m.RegisterStudentComponent,
+          ),
+      },
+      {
         path: 'abonos',
         loadComponent: () =>
           import('../register-payment/register-payment.component').then(
