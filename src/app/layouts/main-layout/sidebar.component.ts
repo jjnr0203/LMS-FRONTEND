@@ -476,7 +476,12 @@ export class SidebarComponent {
 
   logout(event: Event) {
     event.stopPropagation();
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => {
+        this.authService.clearSession();
+        this.router.navigate(['/login']);
+      }
+    });
   }
 }
