@@ -13,6 +13,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DividerModule } from 'primeng/divider';
+import { CarouselModule } from 'primeng/carousel';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -29,34 +30,25 @@ import { CommonModule } from '@angular/common';
     InputGroupModule,
     InputGroupAddonModule,
     DividerModule,
+    CarouselModule,
     CommonModule,
   ],
   providers: [MessageService],
   template: `
     <p-toast />
-    <div class="grid grid-nogutter min-h-screen">
-      <div class="col-6 flex flex-column align-items-center justify-content-center p-8" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)">
-        <div class="flex flex-column align-items-center text-center">
-          <p-avatar icon="pi pi-graduation-cap" size="xlarge" shape="circle" styleClass="bg-primary text-white shadow-5 mb-3" />
-          <h1 class="text-white text-5xl font-bold mb-2">LMS IPB</h1>
-          <p class="text-white-alpha-70 text-lg mb-5">Plataforma Educativa</p>
-          <p class="text-white-alpha-50 text-sm line-height-3 max-w-24rem">
-            Sistema de gestión de aprendizaje para la comunidad educativa. Acceda a sus cursos, calificaciones y más.
-          </p>
-          <div class="flex gap-3 mt-5">
-            <span class="pi pi-book text-white-alpha-40 text-4xl"></span>
-            <span class="pi pi-chart-line text-white-alpha-40 text-4xl"></span>
-            <span class="pi pi-users text-white-alpha-40 text-4xl"></span>
-            <span class="pi pi-certificate text-white-alpha-40 text-4xl"></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6 flex flex-column align-items-center justify-content-center bg-surface-0 p-8">
+    <div class="grid grid-nogutter min-h-screen bg-surface-0 p-3 md:p-4">
+      <!-- Left Column: Form -->
+      <div class="col-12 md:col-5 lg:col-4 flex flex-column align-items-center justify-content-center bg-surface-0 px-5">
         <div class="w-full" style="max-width: 400px">
+          
+          <div class="flex align-items-center mb-6">
+            <i class="pi pi-box text-4xl mr-3" style="color: #064e3b"></i>
+            <span class="text-3xl font-bold" style="color: #064e3b">LMS IPB</span>
+          </div>
+
           <div class="mb-5">
-            <h2 class="text-2xl font-bold m-0 text-900">Bienvenido</h2>
-            <p class="text-color-secondary mt-2 mb-0">Ingrese sus credenciales para acceder al sistema</p>
+            <h2 class="text-3xl font-bold m-0 text-900 mb-2">Iniciar Sesión</h2>
+            <p class="text-color-secondary m-0">¡Bienvenido de nuevo! Por favor, ingrese sus credenciales.</p>
           </div>
 
           <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -64,7 +56,7 @@ import { CommonModule } from '@angular/common';
               <label for="id" class="block text-sm font-semibold text-700 mb-2">ID</label>
               <p-inputGroup>
                 <p-inputGroupAddon>
-                  <i class="pi pi-user text-primary"></i>
+                  <i class="pi pi-user" style="color: #064e3b;"></i>
                 </p-inputGroupAddon>
                 <input
                   id="id"
@@ -83,7 +75,7 @@ import { CommonModule } from '@angular/common';
               <label for="password" class="block text-sm font-semibold text-700 mb-2">Contraseña</label>
               <p-inputGroup>
                 <p-inputGroupAddon>
-                  <i class="pi pi-lock text-primary"></i>
+                  <i class="pi pi-lock" style="color: #064e3b;"></i>
                 </p-inputGroupAddon>
                 <p-password
                   id="password"
@@ -101,7 +93,7 @@ import { CommonModule } from '@angular/common';
             </div>
 
             <div class="flex justify-content-end mb-4">
-              <a class="text-sm text-primary cursor-pointer hover:underline">¿Olvidó su contraseña?</a>
+              <a class="text-sm cursor-pointer hover:underline" style="color: #064e3b;">¿Olvidó su contraseña?</a>
             </div>
 
             <p-button
@@ -119,15 +111,42 @@ import { CommonModule } from '@angular/common';
             <p-message severity="warn" [text]="suspendedMessage()" styleClass="w-full mt-3" />
           }
 
-          <p-divider align="center" type="solid">
-            <span class="text-sm text-color-secondary px-2">LMS IPB</span>
+          <p-divider align="center" type="solid" styleClass="mt-5 mb-4">
+            <span class="text-sm text-color-secondary px-2">Soporte Técnico</span>
           </p-divider>
 
           <p class="text-center text-xs text-color-secondary m-0">&copy; 2026 LMS IPB. Todos los derechos reservados.</p>
         </div>
       </div>
+
+      <!-- Right Column: Green Panel with Carousel -->
+      <div class="hidden md:flex md:col-7 lg:col-8 flex-column align-items-center justify-content-center p-6 lg:p-8 border-round-3xl shadow-4" style="background: #064e3b;">
+        <div class="text-center mb-6 w-full" style="max-width: 600px;">
+          <h2 class="text-white text-5xl font-bold mb-3">La plataforma más sencilla para gestionar tu institución</h2>
+          <p class="text-white-alpha-80 text-xl line-height-3">Administra estudiantes, docentes y calificaciones desde un solo lugar con nuestra interfaz moderna e intuitiva.</p>
+        </div>
+        
+
+        
+        <div class="flex gap-5 mt-8 opacity-60">
+           <i class="pi pi-shield text-white text-3xl"></i>
+           <i class="pi pi-server text-white text-3xl"></i>
+           <i class="pi pi-database text-white text-3xl"></i>
+           <i class="pi pi-globe text-white text-3xl"></i>
+        </div>
+      </div>
+
     </div>
   `,
+  styles: [`
+    /* Custom Carousel styling for dark background */
+    ::ng-deep .p-carousel-indicators .p-carousel-indicator button {
+      background-color: rgba(255,255,255,0.3) !important;
+    }
+    ::ng-deep .p-carousel-indicators .p-carousel-indicator.p-highlight button {
+      background-color: #ffffff !important;
+    }
+  `]
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
@@ -138,6 +157,11 @@ export class LoginComponent {
 
   isLoading = signal(false);
   suspendedMessage = signal('');
+
+  slides = [
+    { image: 'images/slide1.png' },
+    { image: 'images/slide2.png' }
+  ];
 
   form = this.fb.nonNullable.group({
     id: ['', Validators.required],
@@ -172,10 +196,10 @@ export class LoginComponent {
       next: () => {
         this.isLoading.set(false);
         const role = this.authService.role();
-        if (role === 'admin') this.router.navigate(['/admin/users']);
-        else if (role === 'coordinator') this.router.navigate(['/coordinator/materias']);
-        else if (role === 'treasury') this.router.navigate(['/treasury/matriculas']);
-        else if (role === 'teacher') this.router.navigate(['/teacher/inscribir']);
+        if (role === 'admin') this.router.navigate(['/admin']);
+        else if (role === 'coordinator') this.router.navigate(['/coordinator']);
+        else if (role === 'treasury') this.router.navigate(['/treasury']);
+        else if (role === 'teacher') this.router.navigate(['/teacher']);
         else this.router.navigate(['/perfil']);
       },
       error: (err) => {

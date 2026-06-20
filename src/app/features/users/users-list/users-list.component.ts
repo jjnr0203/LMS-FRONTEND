@@ -10,8 +10,9 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'app-users-list',
@@ -24,73 +25,103 @@ import { InputTextModule } from 'primeng/inputtext';
     ConfirmDialogModule,
     DialogModule,
     ReactiveFormsModule,
+    FormsModule,
     InputTextModule,
+    SelectModule,
   ],
   providers: [MessageService, ConfirmationService],
   template: `
     <p-toast />
     <p-confirmDialog />
 
-    <div class="card">
-      <div class="flex justify-content-between align-items-center mb-4">
-        <h2>{{ isStudentList ? 'Lista de Estudiantes' : 'Lista de Usuarios' }}</h2>
+    <div class="page-container">
+      <!-- Dark Header -->
+      <div class="page-header">
+        <div class="header-content">
+          <h1 class="title">{{ isStudentList ? 'Lista de Estudiantes' : 'Lista de Usuarios' }}</h1>
+          <p class="description">
+            {{ isStudentList ? 'Administra a todos los estudiantes registrados en la institución.' : 'Gestiona los accesos y roles de los usuarios de la plataforma.' }}
+          </p>
+        </div>
       </div>
 
-      <p-table
-        [value]="users()"
-        [paginator]="true"
-        [rows]="10"
-        [totalRecords]="totalRecords()"
-        [lazy]="true"
-        (onLazyLoad)="onPageChange($event)"
-        [loading]="loading()"
-        [tableStyle]="{ 'min-width': '50rem' }"
-      >
-        <ng-template pTemplate="header">
-          <tr>
-            <th>ID / Cédula</th>
-            <th>Nombres</th>
-            <th>Apellidos</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Acciones</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-user>
-          <tr>
-            <td>{{ user.id }}</td>
-            <td>{{ user.firstName }}</td>
-            <td>{{ user.lastName }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-              <p-tag [value]="user.roleName" [severity]="getRoleSeverity(user.roleName)"></p-tag>
-            </td>
-            <td>
-              <div class="flex gap-2">
-                <p-button
-                  icon="pi pi-pencil"
-                  [rounded]="true"
-                  [outlined]="true"
-                  severity="info"
-                  (click)="openEditDialog(user)"
-                />
-                <p-button
-                  icon="pi pi-trash"
-                  [rounded]="true"
-                  [outlined]="true"
-                  severity="danger"
-                  (click)="confirmDelete(user)"
-                />
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="6">No se encontraron registros.</td>
-          </tr>
-        </ng-template>
-      </p-table>
+      <!-- Main Content Card -->
+      <div class="content-wrapper">
+        <div class="data-card">
+          <div class="flex justify-content-between align-items-center mb-4">
+            <h3 class="m-0 text-xl font-medium text-800">Directorio</h3>
+            @if (!isStudentList) {
+              <p-select
+                [options]="roleOptions"
+                [(ngModel)]="selectedRole"
+                (onChange)="onRoleFilterChange()"
+                placeholder="Filtrar por Rol"
+                [showClear]="true"
+                styleClass="w-15rem"
+                optionLabel="label"
+                optionValue="value"
+              ></p-select>
+            }
+          </div>
+
+          <p-table
+            [value]="users()"
+            [paginator]="true"
+            [rows]="10"
+            [totalRecords]="totalRecords()"
+            [lazy]="true"
+            (onLazyLoad)="onPageChange($event)"
+            [loading]="loading()"
+            [tableStyle]="{ 'min-width': '50rem' }"
+            styleClass="p-datatable-sm"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>ID / Cédula</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-user>
+              <tr>
+                <td class="font-medium text-900">{{ user.id }}</td>
+                <td>{{ user.firstName }}</td>
+                <td>{{ user.lastName }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <p-tag [value]="translateRole(user.roleName)" [severity]="getRoleSeverity(user.roleName)"></p-tag>
+                </td>
+                <td>
+                  <div class="flex gap-2">
+                    <p-button
+                      icon="pi pi-pencil"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="info"
+                      (click)="openEditDialog(user)"
+                    />
+                    <p-button
+                      icon="pi pi-trash"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="danger"
+                      (click)="confirmDelete(user)"
+                    />
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="6" class="text-center p-4 text-500">No se encontraron registros.</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
     </div>
 
     <!-- Edit Dialog -->
@@ -103,15 +134,15 @@ import { InputTextModule } from 'primeng/inputtext';
       <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()">
         <div class="flex flex-column gap-3 mt-3">
           <div class="flex flex-column gap-1">
-            <label for="firstName">Nombres</label>
+            <label for="firstName" class="font-semibold text-sm">Nombres</label>
             <input pInputText id="firstName" formControlName="firstName" />
           </div>
           <div class="flex flex-column gap-1">
-            <label for="lastName">Apellidos</label>
+            <label for="lastName" class="font-semibold text-sm">Apellidos</label>
             <input pInputText id="lastName" formControlName="lastName" />
           </div>
           <div class="flex flex-column gap-1">
-            <label for="email">Email</label>
+            <label for="email" class="font-semibold text-sm">Email</label>
             <input pInputText id="email" formControlName="email" type="email" />
           </div>
           <div class="flex justify-content-end mt-3 gap-2">
@@ -135,12 +166,58 @@ import { InputTextModule } from 'primeng/inputtext';
   `,
   styles: [
     `
-      .card {
-        background: #ffffff;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      .page-container {
+        display: flex;
+        flex-direction: column;
+        margin-top: -1.5rem;
+        margin-left: -1.5rem;
+        margin-right: -1.5rem;
       }
+
+      .page-header {
+        background: #064e3b;
+        color: #ffffff;
+        border-bottom: none;
+        padding: 2.5rem 2rem 5rem 2rem;
+        min-height: 250px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .title {
+        font-size: 2.2rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+      }
+      .description {
+        color: #d1fae5;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      .content-wrapper {
+        padding: 0 2rem;
+        margin-top: -3.5rem;
+      }
+      
+      .data-card {
+        background: #ffffff;
+        border-radius: 6px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        max-width: 1200px;
+        margin: 0 auto;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .data-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
       .flex { display: flex; }
       .flex-column { flex-direction: column; }
       .justify-content-between { justify-content: space-between; }
@@ -151,6 +228,16 @@ import { InputTextModule } from 'primeng/inputtext';
       .gap-3 { gap: 1rem; }
       .mt-3 { margin-top: 1rem; }
       .mb-4 { margin-bottom: 1.5rem; }
+      .font-semibold { font-weight: 600; }
+      .text-sm { font-size: 0.875rem; }
+      .font-medium { font-weight: 500; }
+      .text-900 { color: #111827; }
+      .text-500 { color: #6b7280; }
+      .text-center { text-align: center; }
+      .p-4 { padding: 1rem; }
+      .text-xl { font-size: 1.25rem; }
+      .m-0 { margin: 0; }
+      .w-15rem { width: 15rem; }
     `,
   ],
 })
@@ -167,6 +254,15 @@ export class UsersListComponent implements OnInit {
 
   roleFilter: string = '';
   isStudentList = false;
+
+  selectedRole: string | null = null;
+  roleOptions = [
+    { label: 'Administrador', value: 'admin' },
+    { label: 'Coordinador', value: 'coordinator' },
+    { label: 'Docente', value: 'teacher' },
+    { label: 'Estudiante', value: 'student' },
+    { label: 'Tesorería', value: 'treasury' }
+  ];
 
   editDialogVisible = false;
   selectedUserId: string | null = null;
@@ -185,7 +281,8 @@ export class UsersListComponent implements OnInit {
 
   loadUsers(page: number, limit: number) {
     this.loading.set(true);
-    this.userService.getUsers(page, limit, this.roleFilter).subscribe({
+    const roleToFilter = this.isStudentList ? 'student' : (this.selectedRole || '');
+    this.userService.getUsers(page, limit, roleToFilter).subscribe({
       next: (res) => {
         this.users.set(res.data);
         this.totalRecords.set(res.pagination.total);
@@ -204,6 +301,10 @@ export class UsersListComponent implements OnInit {
     this.loadUsers(page, limit);
   }
 
+  onRoleFilterChange() {
+    this.loadUsers(1, 10);
+  }
+
   getRoleSeverity(roleName?: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
     if (!roleName) return 'secondary';
     switch (roleName.toLowerCase()) {
@@ -219,6 +320,18 @@ export class UsersListComponent implements OnInit {
         return 'secondary';
       default:
         return 'secondary';
+    }
+  }
+
+  translateRole(roleName?: string): string {
+    if (!roleName) return '';
+    switch (roleName.toLowerCase()) {
+      case 'admin': return 'Administrador';
+      case 'coordinator': return 'Coordinador';
+      case 'teacher': return 'Docente';
+      case 'student': return 'Estudiante';
+      case 'treasury': return 'Tesorería';
+      default: return roleName;
     }
   }
 
@@ -276,3 +389,8 @@ export class UsersListComponent implements OnInit {
     });
   }
 }
+
+
+
+
+

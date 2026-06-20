@@ -8,7 +8,11 @@ export default [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['teacher'] },
     children: [
-      { path: '', redirectTo: 'inscribir', pathMatch: 'full' },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./teacher-dashboard.component').then((m) => m.TeacherDashboardComponent),
+      },
       {
         path: 'inscribir',
         loadComponent: () =>

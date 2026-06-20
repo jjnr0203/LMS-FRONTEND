@@ -18,3 +18,43 @@ body {
     'Segoe UI Symbol'
   );
 }
+
+/* Global Button overrides for LMS Dark Green Theme */
+.p-button {
+  background: #064e3b !important;
+  border-color: #064e3b !important;
+  color: #ffffff !important;
+  padding: 0.5rem 1rem !important; /* Reduces height and padding */
+  border-radius: 6px !important;
+  font-size: 0.9rem !important;
+}
+
+.p-button:hover {
+  background: #0f5132 !important;
+  border-color: #0f5132 !important;
+}
+
+/* Secondary / Danger / Success exceptions if needed */
+.p-button.p-button-danger {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+.p-button.p-button-danger:hover {
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+
+.p-button.p-button-secondary {
+  background: #64748b !important;
+  border-color: #64748b !important;
+}
+.p-button.p-button-secondary:hover {
+  background: #475569 !important;
+  border-color: #475569 !important;
+}
+
+
+/* Enforce consistent border-radius for p-card */
+.p-card {
+  border-radius: 6px !important;
+}

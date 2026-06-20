@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ToolbarComponent } from './toolbar.component';
 import { SidebarComponent } from './sidebar.component';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [RouterOutlet, ToolbarComponent, SidebarComponent],
+  imports: [RouterOutlet, SidebarComponent],
   template: `
     <div class="layout">
-      <app-toolbar />
       <div class="layout-body">
         <app-sidebar />
         <main class="layout-content">

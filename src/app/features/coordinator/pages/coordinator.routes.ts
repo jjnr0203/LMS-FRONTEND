@@ -8,7 +8,11 @@ export default [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['coordinator'] },
     children: [
-      { path: '', redirectTo: 'materias', pathMatch: 'full' },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./coordinator-dashboard.component').then((m) => m.CoordinatorDashboardComponent),
+      },
       {
         path: 'materias-list',
         loadComponent: () =>

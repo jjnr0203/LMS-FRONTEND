@@ -8,7 +8,11 @@ export default [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['admin'] },
     children: [
-      { path: '', redirectTo: 'users', pathMatch: 'full' },
+      {
+        path: '',
+        loadComponent: () =>
+          import('../admin-dashboard.component').then((m) => m.AdminDashboardComponent),
+      },
       {
         path: 'users-list',
         loadComponent: () =>

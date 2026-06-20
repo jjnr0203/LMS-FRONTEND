@@ -8,7 +8,11 @@ export default [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['treasury'] },
     children: [
-      { path: '', redirectTo: 'matriculas', pathMatch: 'full' },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./treasury-dashboard.component').then((m) => m.TreasuryDashboardComponent),
+      },
       {
         path: 'matriculas',
         loadComponent: () =>
