@@ -24,6 +24,11 @@ export default [
         loadComponent: () =>
           import('../create-user/create-user.component').then((m) => m.CreateUserComponent),
       },
+      {
+        path: 'academic',
+        loadComponent: () =>
+          import('./academic-management/academic-management').then((m) => m.AcademicManagement),
+      },
     ],
   },
 ] as Routes;

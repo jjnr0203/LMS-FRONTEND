@@ -7,6 +7,7 @@ export interface User {
   roleName?: string;
   isActive: boolean;
   birthDate?: string;
+
   phone?: string;
   avatarUrl?: string;
   createdAt: string;
@@ -22,10 +23,10 @@ export interface Tuition {
 
 export interface Subject {
   id: string;
-  name: string;
   code: string;
+  name: string;
   credits: number;
-  coordinatorId: string;
+  teacherId?: string;
   description?: string;
 }
 
@@ -83,3 +84,28 @@ export interface AuthState {
 }
 
 export type AppRole = 'admin' | 'coordinator' | 'treasury' | 'teacher' | 'student';
+
+export interface AcademicTerm {
+  id: string;
+  name: string;
+  startDate: Date | string;
+  endDate: Date | string;
+  isActive: boolean;
+}
+
+export interface Modality {
+  id: string;
+  name: string;
+  isActive: boolean;
+  description?: string;
+}
+
+export interface Career {
+  id: string;
+  code: string;
+  name: string;
+  durationSemesters: number;
+  modalityId?: string;
+  coordinatorId?: string;
+  isActive: boolean;
+}

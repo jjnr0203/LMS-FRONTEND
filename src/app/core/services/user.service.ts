@@ -10,9 +10,10 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  getUsers(page = 1, limit = 10, role?: string): Observable<PaginatedResponse<User>> {
+  getUsers(page = 1, limit = 10, role?: string, search?: string): Observable<PaginatedResponse<User>> {
     let params = new HttpParams().set('page', page).set('limit', limit);
     if (role) params = params.set('role', role);
+    if (search) params = params.set('search', search);
     return this.http.get<PaginatedResponse<User>>(this.apiUrl, { params });
   }
 

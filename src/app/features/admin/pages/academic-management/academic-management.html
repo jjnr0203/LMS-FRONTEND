@@ -1,0 +1,40 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="page-container">
+  <!-- Dark Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Gestión Académica</h1>
+      <p class="description">Administra los ciclos académicos, modalidades, carreras y materias.</p>
+    </div>
+  </div>
+
+  <!-- Main Content Card -->
+  <div class="content-wrapper">
+    <div class="data-card">
+    <p-tabs value="terms">
+      <p-tablist>
+        <p-tab value="terms">Ciclos Académicos</p-tab>
+        <p-tab value="modalities">Modalidades</p-tab>
+        <p-tab value="careers">Carreras</p-tab>
+        <p-tab value="subjects">Materias</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="terms">
+          <app-academic-terms></app-academic-terms>
+        </p-tabpanel>
+        <p-tabpanel value="modalities">
+          <app-modalities></app-modalities>
+        </p-tabpanel>
+        <p-tabpanel value="careers">
+          <app-careers></app-careers>
+        </p-tabpanel>
+        <p-tabpanel value="subjects">
+          <app-subjects></app-subjects>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+</div>

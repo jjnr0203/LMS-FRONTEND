@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { MessageService } from 'primeng/api';
@@ -25,8 +25,9 @@ import { CommonModule } from '@angular/common';
   providers: [MessageService],
   template: `
     <p-toast />
-    <div class="page-container">
+    <div [class.page-container]="!isModal()">
       <!-- Dark Header -->
+      @if (!isModal()) {
       <div class="page-header">
         <div class="header-content">
           <h1 class="title">Crear Nuevo Usuario</h1>
@@ -35,10 +36,11 @@ import { CommonModule } from '@angular/common';
           </p>
         </div>
       </div>
+      }
 
       <!-- Main Content Card -->
-      <div class="content-wrapper">
-        <div class="data-card">
+      <div [class.content-wrapper]="!isModal()">
+        <div [class.data-card]="!isModal()">
           <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <div class="grid">
               <div class="col-12 md:col-6">
@@ -210,6 +212,9 @@ export class CreateUserComponent {
   private adminService = inject(AdminService);
   private messageService = inject(MessageService);
 
+  isModal = input<boolean>(false);
+  userCreated = output<void>();
+
   loading = signal(false);
 
   roles = [
@@ -280,6 +285,7 @@ export class CreateUserComponent {
         });
         this.form.reset();
         this.loading.set(false);
+        this.userCreated.emit();
       },
       error: (err) => {
         this.loading.set(false);

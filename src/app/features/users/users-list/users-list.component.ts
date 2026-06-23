@@ -1,4 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
@@ -13,6 +15,9 @@ import { DialogModule } from 'primeng/dialog';
 import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { CreateUserComponent } from '../../admin/create-user/create-user.component';
 
 @Component({
   selector: 'app-users-list',
@@ -28,6 +33,9 @@ import { SelectModule } from 'primeng/select';
     FormsModule,
     InputTextModule,
     SelectModule,
+    IconFieldModule,
+    InputIconModule,
+    CreateUserComponent,
   ],
   providers: [MessageService, ConfirmationService],
   template: `
@@ -48,20 +56,32 @@ import { SelectModule } from 'primeng/select';
       <!-- Main Content Card -->
       <div class="content-wrapper">
         <div class="data-card">
-          <div class="flex justify-content-between align-items-center mb-4">
-            <h3 class="m-0 text-xl font-medium text-800">Directorio</h3>
-            @if (!isStudentList) {
-              <p-select
-                [options]="roleOptions"
-                [(ngModel)]="selectedRole"
-                (onChange)="onRoleFilterChange()"
-                placeholder="Filtrar por Rol"
-                [showClear]="true"
-                styleClass="w-15rem"
-                optionLabel="label"
-                optionValue="value"
-              ></p-select>
-            }
+          <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="flex align-items-center gap-3">
+              <h3 class="m-0 text-xl font-medium text-800">Directorio</h3>
+              @if (!isStudentList) {
+                <p-button label="Crear Usuario" icon="pi pi-plus" (click)="openCreateDialog()" severity="success" size="small"></p-button>
+              }
+            </div>
+            
+            <div class="flex align-items-center gap-2">
+              <p-iconField iconPosition="left" styleClass="w-20rem">
+                <p-inputIcon styleClass="pi pi-search" />
+                <input pInputText type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Buscar por cédula o nombre..." class="w-full" />
+              </p-iconField>
+              @if (!isStudentList) {
+                <p-select
+                  [options]="roleOptions"
+                  [(ngModel)]="selectedRole"
+                  (onChange)="onRoleFilterChange()"
+                  placeholder="Filtrar por Rol"
+                  [showClear]="true"
+                  styleClass="w-15rem"
+                  optionLabel="label"
+                  optionValue="value"
+                ></p-select>
+              }
+            </div>
           </div>
 
           <p-table
@@ -163,6 +183,17 @@ import { SelectModule } from 'primeng/select';
         </div>
       </form>
     </p-dialog>
+
+    <!-- Create Dialog -->
+    <p-dialog
+      header="Crear Nuevo Usuario"
+      [(visible)]="createDialogVisible"
+      [modal]="true"
+      [style]="{ width: '800px', 'max-width': '95vw' }"
+      [closable]="true"
+    >
+      <app-create-user [isModal]="true" (userCreated)="onUserCreated()"></app-create-user>
+    </p-dialog>
   `,
   styles: [
     `
@@ -241,7 +272,7 @@ import { SelectModule } from 'primeng/select';
     `,
   ],
 })
-export class UsersListComponent implements OnInit {
+export class UsersListComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private route = inject(ActivatedRoute);
   private messageService = inject(MessageService);
@@ -264,6 +295,11 @@ export class UsersListComponent implements OnInit {
     { label: 'Tesorería', value: 'treasury' }
   ];
 
+  searchQuery = '';
+  searchSubject = new Subject<string>();
+  searchSubscription!: Subscription;
+
+  createDialogVisible = false;
   editDialogVisible = false;
   selectedUserId: string | null = null;
 
@@ -277,12 +313,25 @@ export class UsersListComponent implements OnInit {
     this.roleFilter = this.route.snapshot.data['roleFilter'] || '';
     this.isStudentList = this.roleFilter === 'student';
     this.loadUsers(1, 10);
+
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.loadUsers(1, 10);
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
   }
 
   loadUsers(page: number, limit: number) {
     this.loading.set(true);
     const roleToFilter = this.isStudentList ? 'student' : (this.selectedRole || '');
-    this.userService.getUsers(page, limit, roleToFilter).subscribe({
+    this.userService.getUsers(page, limit, roleToFilter, this.searchQuery).subscribe({
       next: (res) => {
         this.users.set(res.data);
         this.totalRecords.set(res.pagination.total);
@@ -302,6 +351,19 @@ export class UsersListComponent implements OnInit {
   }
 
   onRoleFilterChange() {
+    this.loadUsers(1, 10);
+  }
+
+  onSearchChange(value: string) {
+    this.searchSubject.next(value);
+  }
+
+  openCreateDialog() {
+    this.createDialogVisible = true;
+  }
+
+  onUserCreated() {
+    this.createDialogVisible = false;
     this.loadUsers(1, 10);
   }
 

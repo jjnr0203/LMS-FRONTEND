@@ -371,12 +371,14 @@ export class SidebarComponent {
     {
       label: 'Usuarios',
       icon: 'pi pi-users',
+      route: '/admin/users-list',
       roles: ['admin'],
-      expanded: false,
-      children: [
-        { label: 'Ver Usuarios', icon: '', route: '/admin/users-list', roles: ['admin'] },
-        { label: 'Crear Usuario', icon: '', route: '/admin/users', roles: ['admin'] },
-      ]
+    },
+    {
+      label: 'Gestión Académica',
+      icon: 'pi pi-sitemap',
+      route: '/admin/academic',
+      roles: ['admin'],
     },
     {
       label: 'Estudiantes',
