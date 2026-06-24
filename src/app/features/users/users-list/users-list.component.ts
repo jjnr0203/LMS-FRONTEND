@@ -154,6 +154,10 @@ import { CreateUserComponent } from '../../admin/create-user/create-user.compone
       <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()">
         <div class="flex flex-column gap-3 mt-3">
           <div class="flex flex-column gap-1">
+            <label for="id" class="font-semibold text-sm">Cédula</label>
+            <input pInputText id="id" formControlName="id" />
+          </div>
+          <div class="flex flex-column gap-1">
             <label for="firstName" class="font-semibold text-sm">Nombres</label>
             <input pInputText id="firstName" formControlName="firstName" />
           </div>
@@ -164,6 +168,14 @@ import { CreateUserComponent } from '../../admin/create-user/create-user.compone
           <div class="flex flex-column gap-1">
             <label for="email" class="font-semibold text-sm">Email</label>
             <input pInputText id="email" formControlName="email" type="email" />
+          </div>
+          <div class="flex flex-column gap-1">
+            <label for="phone" class="font-semibold text-sm">Teléfono</label>
+            <input pInputText id="phone" formControlName="phone" />
+          </div>
+          <div class="flex flex-column gap-1">
+            <label for="birthDate" class="font-semibold text-sm">Fecha de Nacimiento</label>
+            <input pInputText id="birthDate" type="date" formControlName="birthDate" />
           </div>
           <div class="flex justify-content-end mt-3 gap-2">
             <p-button
@@ -303,16 +315,25 @@ export class UsersListComponent implements OnInit, OnDestroy {
   editDialogVisible = false;
   selectedUserId: string | null = null;
 
-  editForm = this.fb.nonNullable.group({
+  editForm = this.fb.group({
+    id: [{ value: '', disabled: true }],
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
+    phone: [''],
+    birthDate: [''],
   });
 
   ngOnInit() {
     this.roleFilter = this.route.snapshot.data['roleFilter'] || '';
     this.isStudentList = this.roleFilter === 'student';
-    this.loadUsers(1, 10);
+
+    this.route.queryParams.subscribe(params => {
+      if (params['role']) {
+        this.selectedRole = params['role'];
+      }
+      this.loadUsers(1, 10);
+    });
 
     this.searchSubscription = this.searchSubject.pipe(
       debounceTime(300),
@@ -400,9 +421,12 @@ export class UsersListComponent implements OnInit, OnDestroy {
   openEditDialog(user: User) {
     this.selectedUserId = user.id;
     this.editForm.patchValue({
+      id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      phone: user.phone || '',
+      birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split('T')[0] : '',
     });
     this.editDialogVisible = true;
   }
@@ -410,7 +434,13 @@ export class UsersListComponent implements OnInit, OnDestroy {
   onSaveEdit() {
     if (this.editForm.invalid || !this.selectedUserId) return;
     this.loading.set(true);
-    this.userService.updateUser(this.selectedUserId, this.editForm.value).subscribe({
+    const payload: Partial<User> = { ...this.editForm.value } as Partial<User>;
+    if (!payload.birthDate) {
+      delete payload.birthDate;
+    }
+    delete payload.id;
+    
+    this.userService.updateUser(this.selectedUserId, payload).subscribe({
       next: (res) => {
         this.users.update((users) =>
           users.map((u) => (u.id === this.selectedUserId ? { ...u, ...res.user } : u))

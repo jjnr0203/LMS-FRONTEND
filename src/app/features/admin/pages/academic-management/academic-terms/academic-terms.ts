@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -34,6 +34,7 @@ export class AcademicTerms implements OnInit {
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService); // Inherits from parent
   private confirmationService = inject(ConfirmationService); // Inherits from parent
+  private cdr = inject(ChangeDetectorRef);
 
   terms: AcademicTerm[] = [];
   displayDialog = false;
@@ -57,8 +58,14 @@ export class AcademicTerms implements OnInit {
 
   loadTerms() {
     this.academicService.getTerms().subscribe({
-      next: (data) => (this.terms = data),
-      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los ciclos' }),
+      next: (data) => {
+        this.terms = data;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los ciclos' });
+        this.cdr.detectChanges();
+      }
     });
   }
 

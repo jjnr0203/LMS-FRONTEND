@@ -1,0 +1,295 @@
+<div class="page-container">
+  <!-- Dark Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Bienvenido de nuevo, <span>{{ user()?.firstName }}</span></h1>
+      <p class="description">
+        Aquí puedes ver el resumen general y académico de la plataforma.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content Card -->
+  <div class="content-wrapper">
+    <div class="data-card">
+      
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <!-- Total Users -->
+        <div class="stat-card clickable" (click)="goToUsers()">
+          <div class="stat-icon total-icon">
+            <i class="pi pi-users"></i>
+          </div>
+          <div class="stat-info">
+            <h3>
+              @if (stats()) {
+                <span translate="no">{{ getTotalUsers() }}</span>
+              } @else {
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #cbd5e1;"></i>
+              }
+            </h3>
+            <p>Total Usuarios</p>
+          </div>
+          <div class="action-arrow">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+        </div>
+
+        <!-- Students -->
+        <div class="stat-card clickable" (click)="goToUsers('student')">
+          <div class="stat-icon student-icon">
+            <i class="pi pi-graduation-cap"></i>
+          </div>
+          <div class="stat-info">
+            <h3>
+              @if (stats()) {
+                <span translate="no">{{ stats()!.users.student }}</span>
+              } @else {
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #cbd5e1;"></i>
+              }
+            </h3>
+            <p>Estudiantes</p>
+          </div>
+          <div class="action-arrow">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+        </div>
+
+        <!-- Teachers -->
+        <div class="stat-card clickable" (click)="goToUsers('teacher')">
+          <div class="stat-icon teacher-icon">
+            <i class="pi pi-briefcase"></i>
+          </div>
+          <div class="stat-info">
+            <h3>
+              @if (stats()) {
+                <span translate="no">{{ stats()!.users.teacher }}</span>
+              } @else {
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #cbd5e1;"></i>
+              }
+            </h3>
+            <p>Docentes</p>
+          </div>
+          <div class="action-arrow">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+        </div>
+
+        <!-- Coordinators -->
+        <div class="stat-card clickable" (click)="goToUsers('coordinator')">
+          <div class="stat-icon coordinator-icon">
+            <i class="pi pi-id-card"></i>
+          </div>
+          <div class="stat-info">
+            <h3>
+              @if (stats()) {
+                <span translate="no">{{ stats()!.users.coordinator }}</span>
+              } @else {
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #cbd5e1;"></i>
+              }
+            </h3>
+            <p>Coordinadores</p>
+          </div>
+          <div class="action-arrow">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+        </div>
+
+        <!-- Treasury -->
+        <div class="stat-card clickable" (click)="goToUsers('treasury')">
+          <div class="stat-icon treasury-icon">
+            <i class="pi pi-wallet"></i>
+          </div>
+          <div class="stat-info">
+            <h3>
+              @if (stats()) {
+                <span translate="no">{{ stats()!.users.treasury }}</span>
+              } @else {
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #cbd5e1;"></i>
+              }
+            </h3>
+            <p>Tesorería</p>
+          </div>
+          <div class="action-arrow">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+        </div>
+
+        <!-- Careers -->
+        <div class="stat-card clickable" (click)="goToAcademic('careers')">
+          <div class="stat-icon career-icon">
+            <i class="pi pi-book"></i>
+          </div>
+          <div class="stat-info">
+            <h3>
+              @if (stats()) {
+                <span translate="no">{{ stats()!.academic.totalCareers }}</span>
+              } @else {
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #cbd5e1;"></i>
+              }
+            </h3>
+            <p>Carreras</p>
+          </div>
+          <div class="action-arrow">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+        </div>
+
+        <!-- Subjects -->
+        <div class="stat-card clickable" (click)="goToAcademic('subjects')">
+          <div class="stat-icon subject-icon">
+            <i class="pi pi-file"></i>
+          </div>
+          <div class="stat-info">
+            <h3>
+              @if (stats()) {
+                <span translate="no">{{ stats()!.academic.totalSubjects }}</span>
+              } @else {
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #cbd5e1;"></i>
+              }
+            </h3>
+            <p>Materias</p>
+          </div>
+          <div class="action-arrow">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Academic Breakdown Section -->
+      <div class="academic-section" id="academic-section">
+        <div class="section-header flex justify-content-between align-items-center">
+          <div>
+            <h2>Desglose Académico</h2>
+            <p>Detalle de carreras, coordinadores y malla curricular</p>
+          </div>
+          <p-button icon="pi pi-palette" label="Configurar Colores" severity="contrast" (onClick)="displayColorConfig.set(true)"></p-button>
+        </div>
+
+        <!-- Filters Bar -->
+        <div class="filters-bar grid gap-3 mb-4 p-3 bg-white border-round-xl shadow-1 w-full m-0 align-items-center">
+          <div class="col-12 md:col p-0">
+            <p-iconField iconPosition="left" styleClass="w-full">
+              <p-inputIcon styleClass="pi pi-search" />
+              <input type="text" pInputText placeholder="Buscar carrera..." [ngModel]="filterCareer()" (ngModelChange)="filterCareer.set($event)" class="w-full" />
+            </p-iconField>
+          </div>
+          <div class="col-12 md:col p-0">
+            <p-select [options]="availableModalities()" [ngModel]="filterModality()" (ngModelChange)="filterModality.set($event)" placeholder="Filtrar por modalidad" [showClear]="true" styleClass="w-full"></p-select>
+          </div>
+          <div class="col-12 md:col p-0">
+            <p-iconField iconPosition="left" styleClass="w-full">
+              <p-inputIcon styleClass="pi pi-book" />
+              <input type="text" pInputText placeholder="Buscar materia..." [ngModel]="filterSubject()" (ngModelChange)="filterSubject.set($event)" class="w-full" />
+            </p-iconField>
+          </div>
+          <div class="col-12 md:col p-0 flex align-items-center h-full">
+            <p-inputNumber [ngModel]="filterSemester()" (ngModelChange)="filterSemester.set($event)" placeholder="Semestre" [showClear]="true" styleClass="w-full" inputId="semFilter"></p-inputNumber>
+          </div>
+        </div>
+
+        @if (stats()) {
+          <p-accordion [multiple]="true" styleClass="academic-accordion">
+            @for (group of filteredAcademicGroups(); track group.id) {
+              <p-accordion-panel [value]="group.id">
+                <p-accordion-header>
+                  <div class="accordion-header-content">
+                    <div class="career-title">
+                      <i class="pi pi-graduation-cap"></i>
+                      <span>{{ group.careerName }} <small class="text-500 font-normal">({{ group.modalityName }})</small></span>
+                    </div>
+                    <div class="career-badges">
+                      <p-badge [value]="group.durationSemesters + ' Semestres'" styleClass="badge-sys-dark"></p-badge>
+                      <p-badge [value]="'Modalidad: ' + group.modalityName" severity="success"></p-badge>
+                      @if (group.coordinatorName) {
+                        <p-badge [value]="'Coordinador: ' + group.coordinatorName" styleClass="badge-sys-dark"></p-badge>
+                      } @else {
+                        <p-badge value="Sin Coordinador" severity="warn"></p-badge>
+                      }
+                    </div>
+                  </div>
+                </p-accordion-header>
+
+                <p-accordion-content>
+                  @if (group.subjects.length > 0) {
+                    <div class="px-3 pb-3">
+                      @for (semesterGroup of getSubjectsBySemester(group.subjects); track semesterGroup.semester) {
+                        <div class="mb-4">
+                          <div class="flex align-items-center gap-2 mb-2 px-3 py-2 border-round" [style.background-color]="getSemesterColor(semesterGroup.semester) + '15'">
+                            <p-badge [value]="'Semestre ' + semesterGroup.semester" [style]="{ 'background-color': getSemesterColor(semesterGroup.semester), 'color': '#ffffff' }"></p-badge>
+                            <span class="font-semibold" [style.color]="getSemesterColor(semesterGroup.semester)">Materias del Semestre</span>
+                          </div>
+                          
+                          <p-table [value]="semesterGroup.subjects" styleClass="p-datatable-sm" [rowHover]="true">
+                            <ng-template pTemplate="header">
+                              <tr>
+                                <th>Nombre de la Materia</th>
+                                <th>Docente Asignado</th>
+                              </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-subject>
+                              <tr>
+                                <td class="font-medium w-6 pl-4">{{ subject.name }}</td>
+                                <td class="w-6">
+                                  @if (subject.teacherName) {
+                                    <span class="text-600 font-medium"><i class="pi pi-user mr-1 text-sm"></i> {{ subject.teacherName }}</span>
+                                  } @else {
+                                    <span class="text-400 font-italic">Sin asignar</span>
+                                  }
+                                </td>
+                              </tr>
+                            </ng-template>
+                          </p-table>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="empty-state">
+                      <i class="pi pi-folder-open"></i>
+                      <p>No hay materias asignadas a esta carrera todavía.</p>
+                    </div>
+                  }
+                </p-accordion-content>
+              </p-accordion-panel>
+            }
+          </p-accordion>
+        } @else {
+          <div class="loading-state">
+            <i class="pi pi-spin pi-spinner"></i>
+            <p>Cargando información académica...</p>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<p-dialog header="Configuración de Colores de Semestres" [visible]="displayColorConfig()" (visibleChange)="displayColorConfig.set($event)" [modal]="true" [style]="{ width: '450px' }">
+  <p class="text-secondary mb-4">Selecciona un color para identificar rápidamente cada semestre en la plataforma.</p>
+  
+  <div class="flex flex-column gap-4">
+    @for (sem of semestersToConfig; track sem) {
+      <div class="flex align-items-center justify-content-between">
+        <span class="font-medium text-700">Semestre {{ sem }}</span>
+        
+        <p-select [options]="PREDEFINED_COLORS" [ngModel]="getSemesterColor(sem)" (ngModelChange)="saveColor(sem, $event)" optionLabel="label" optionValue="value" placeholder="Seleccionar" appendTo="body" styleClass="w-14rem">
+          <ng-template pTemplate="selectedItem" let-selected>
+            @if (selected) {
+              <div class="flex align-items-center gap-2">
+                <div class="w-1rem h-1rem border-circle" [style.background-color]="selected.value"></div>
+                <span>{{ selected.label }}</span>
+              </div>
+            }
+          </ng-template>
+          <ng-template pTemplate="item" let-color>
+            <div class="flex align-items-center gap-2">
+              <div class="w-1rem h-1rem border-circle" [style.background-color]="color.value"></div>
+              <span>{{ color.label }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+    }
+  </div>
+</p-dialog>

@@ -13,24 +13,24 @@
   <!-- Main Content Card -->
   <div class="content-wrapper">
     <div class="data-card">
-    <p-tabs value="terms">
+    <p-tabs [value]="activeTab" (valueChange)="activeTab = $event; onTabChange($event)">
       <p-tablist>
-        <p-tab value="terms">Ciclos Académicos</p-tab>
-        <p-tab value="modalities">Modalidades</p-tab>
-        <p-tab value="careers">Carreras</p-tab>
-        <p-tab value="subjects">Materias</p-tab>
+        <p-tab value="0">Ciclos Académicos</p-tab>
+        <p-tab value="1">Modalidades</p-tab>
+        <p-tab value="2">Carreras</p-tab>
+        <p-tab value="3">Materias</p-tab>
       </p-tablist>
       <p-tabpanels>
-        <p-tabpanel value="terms">
+        <p-tabpanel value="0">
           <app-academic-terms></app-academic-terms>
         </p-tabpanel>
-        <p-tabpanel value="modalities">
+        <p-tabpanel value="1">
           <app-modalities></app-modalities>
         </p-tabpanel>
-        <p-tabpanel value="careers">
+        <p-tabpanel value="2">
           <app-careers></app-careers>
         </p-tabpanel>
-        <p-tabpanel value="subjects">
+        <p-tabpanel value="3">
           <app-subjects></app-subjects>
         </p-tabpanel>
       </p-tabpanels>

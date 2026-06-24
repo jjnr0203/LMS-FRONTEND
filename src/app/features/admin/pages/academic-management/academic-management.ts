@@ -9,6 +9,8 @@ import { AcademicTerms } from './academic-terms/academic-terms';
 import { Modalities } from './modalities/modalities';
 import { Careers } from './careers/careers';
 import { Subjects } from './subjects/subjects';
+import { ActivatedRoute, Router } from '@angular/router';
+import { OnInit, inject } from '@angular/core';
 
 @Component({
   selector: 'app-academic-management',
@@ -27,6 +29,37 @@ import { Subjects } from './subjects/subjects';
   templateUrl: './academic-management.html',
   styleUrl: './academic-management.scss',
 })
-export class AcademicManagement {
-  activeTab = 'terms';
+export class AcademicManagement implements OnInit {
+  activeTab: string | number | undefined = '0';
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        switch (params['tab']) {
+          case 'terms': this.activeTab = '0'; break;
+          case 'modalities': this.activeTab = '1'; break;
+          case 'careers': this.activeTab = '2'; break;
+          case 'subjects': this.activeTab = '3'; break;
+        }
+      }
+    });
+  }
+  
+  onTabChange(value: string | number | undefined) {
+    if (value === undefined) return;
+    let tabStr = 'terms';
+    switch (value.toString()) {
+      case '0': tabStr = 'terms'; break;
+      case '1': tabStr = 'modalities'; break;
+      case '2': tabStr = 'careers'; break;
+      case '3': tabStr = 'subjects'; break;
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: tabStr },
+      queryParamsHandling: 'merge'
+    });
+  }
 }

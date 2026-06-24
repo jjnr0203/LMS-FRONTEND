@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -11,6 +11,9 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { BadgeModule } from 'primeng/badge';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { UserService } from '../../../../../core/services/user.service';
 import { Career, Modality, Subject, User } from '../../../../../core/models';
@@ -30,6 +33,9 @@ import { Career, Modality, Subject, User } from '../../../../../core/models';
     MultiSelectModule,
     CheckboxModule,
     ToastModule,
+    BadgeModule,
+    IconFieldModule,
+    InputIconModule,
   ],
   templateUrl: './careers.html',
 })
@@ -39,6 +45,7 @@ export class Careers implements OnInit {
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private cdr = inject(ChangeDetectorRef);
 
   careers: Career[] = [];
   modalities: Modality[] = [];
@@ -65,7 +72,7 @@ export class Careers implements OnInit {
       name: ['', Validators.required],
       code: ['', Validators.required],
       durationSemesters: [1, [Validators.required, Validators.min(1)]],
-      modalityId: [null],
+      modalityIds: [[]],
       coordinatorId: [null],
       isActive: [true],
     });
@@ -76,15 +83,33 @@ export class Careers implements OnInit {
   }
 
   loadData() {
-    this.academicService.getCareers().subscribe((data) => (this.careers = data));
+    this.academicService.getCareers().subscribe((data) => {
+      this.careers = data;
+      this.cdr.detectChanges();
+    });
     this.academicService.getModalities().subscribe((data) => (this.modalities = data.filter(m => m.isActive)));
     this.userService.getUsers(1, 100, 'coordinator').subscribe((res) => (this.coordinators = res.data));
     this.academicService.getSubjects().subscribe((data) => (this.subjects = data));
   }
 
-  getModalityName(id: string | undefined): string {
-    if (!id) return 'No asignada';
-    return this.modalities.find(m => m.id === id)?.name || id;
+  getModalityNames(ids: string[] | undefined): string {
+    if (!ids || ids.length === 0) return 'No asignada';
+    return ids.map(id => this.modalities.find(m => m.id === id)?.name || id).join(', ');
+  }
+
+  getModalityList(ids: string[] | undefined): string[] {
+    if (!ids || ids.length === 0) return [];
+    return ids.map(id => this.modalities.find(m => m.id === id)?.name || id);
+  }
+
+  getSemesterColor(sem: number): string {
+    const colors = this.academicService.semesterColors();
+    const found = colors.find(c => c.semester === sem);
+    if (found) return found.color;
+    
+    // Default fallback colors
+    const fallbacks = ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#64748b', '#0f172a', '#0ea5e9', '#22c55e', '#f59e0b', '#ef4444'];
+    return fallbacks[(sem - 1) % fallbacks.length] || '#0ea5e9';
   }
 
   getCoordinatorName(id: string | undefined): string {

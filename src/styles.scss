@@ -58,3 +58,16 @@ body {
 .p-card {
   border-radius: 6px !important;
 }
+
+/* System Green for Badges */
+.p-badge.p-badge-success,
+.badge-sys-green {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+}
+
+/* System Dark Green for non-configurable Badges */
+.badge-sys-dark {
+  background-color: #064e3b !important;
+  color: #ffffff !important;
+}

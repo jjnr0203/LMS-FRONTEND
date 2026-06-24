@@ -1,14 +1,32 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AcademicTerm, Modality, Career, Subject } from '../models';
+import { AcademicTerm, Modality, Career, Subject, SemesterColor } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class AcademicService {
   private apiUrl = `${environment.apiUrl}/admin/academic`;
 
-  constructor(private http: HttpClient) {}
+  public semesterColors = signal<SemesterColor[]>([]);
+
+  constructor(private http: HttpClient) {
+    this.loadSemesterColors();
+  }
+
+  // --- SEMESTER COLORS ---
+  loadSemesterColors() {
+    this.http.get<SemesterColor[]>(`${this.apiUrl}/semester-colors`).subscribe({
+      next: (colors) => this.semesterColors.set(colors),
+      error: (err) => console.error('Failed to load semester colors', err)
+    });
+  }
+
+  saveSemesterColor(semester: number, color: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/semester-colors`, { semester, color }).pipe(
+      tap(() => this.loadSemesterColors())
+    );
+  }
 
   // --- ACADEMIC TERMS ---
   getTerms(): Observable<AcademicTerm[]> {
@@ -76,6 +94,10 @@ export class AcademicService {
 
   createSubject(data: Partial<Subject>): Observable<Subject> {
     return this.http.post<Subject>(`${this.apiUrl}/subjects`, data);
+  }
+
+  bulkCreateSubjects(careerId: string, subjects: any[]): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/subjects/bulk-upload`, { careerId, subjects });
   }
 
   updateSubject(id: string, data: Partial<Subject>): Observable<Subject> {

@@ -1,12 +1,15 @@
-<div class="p-4">
   <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div class="flex align-items-center gap-3">
       <h3 class="m-0 text-xl font-medium text-800">Carreras</h3>
       <p-button label="Nueva Carrera" icon="pi pi-plus" (onClick)="openNew()" severity="success" size="small"></p-button>
     </div>
+    <p-iconField iconPosition="left" styleClass="w-20rem">
+      <p-inputIcon styleClass="pi pi-search" />
+      <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar por código o nombre..." class="w-full" />
+    </p-iconField>
   </div>
 
-  <p-table [value]="careers" [paginator]="true" [rows]="10" styleClass="p-datatable-sm" responsiveLayout="scroll">
+  <p-table #dt [value]="careers" [paginator]="true" [rows]="10" styleClass="p-datatable-sm" responsiveLayout="scroll" [globalFilterFields]="['code', 'name']">
     <ng-template pTemplate="header">
       <tr>
         <th>Código</th>
@@ -22,9 +25,20 @@
       <tr>
         <td class="font-medium text-slate-600">{{ c.code }}</td>
         <td class="font-medium text-slate-800">{{ c.name }}</td>
-        <td>{{ getModalityName(c.modalityId) }}</td>
+        <td>
+          <div class="flex gap-1 flex-wrap">
+            @for (modName of getModalityList(c.modalityIds); track modName) {
+              <p-badge [value]="modName" severity="success"></p-badge>
+            }
+            @if (getModalityList(c.modalityIds).length === 0) {
+              <p-badge value="No asignada" severity="secondary"></p-badge>
+            }
+          </div>
+        </td>
         <td>{{ getCoordinatorName(c.coordinatorId) }}</td>
-        <td>{{ c.durationSemesters }}</td>
+        <td>
+          <p-badge [value]="c.durationSemesters + ' Semestres'" styleClass="badge-sys-dark"></p-badge>
+        </td>
         <td>
           <span class="px-2 py-1 text-xs font-semibold rounded-full"
                 [class.bg-emerald-100]="c.isActive" [class.text-emerald-800]="c.isActive"
@@ -53,31 +67,31 @@
     <form [formGroup]="form" (ngSubmit)="saveCareer()" class="mt-3">
       <div class="grid">
         <div class="col-12 md:col-12">
-          <div class="flex flex-column gap-2 mb-3">
+          <div class="flex flex-column gap-2 mb-4">
             <label for="name" class="font-semibold text-sm text-slate-700">Nombre de la Carrera</label>
             <input pInputText id="name" formControlName="name" placeholder="Ej: Ingeniería en Software" class="w-full" />
           </div>
         </div>
         <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-3">
+          <div class="flex flex-column gap-2 mb-4">
             <label for="code" class="font-semibold text-sm text-slate-700">Código</label>
             <input pInputText id="code" formControlName="code" placeholder="Ej: SOFT" class="w-full" />
           </div>
         </div>
         <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-3">
+          <div class="flex flex-column gap-2 mb-4">
             <label for="durationSemesters" class="font-semibold text-sm text-slate-700">Duración (Semestres)</label>
             <p-inputNumber formControlName="durationSemesters" inputId="durationSemesters" [min]="1" [max]="9" [useGrouping]="false" styleClass="w-full" class="w-full"></p-inputNumber>
           </div>
         </div>
         <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-3">
-            <label for="modalityId" class="font-semibold text-sm text-slate-700">Modalidad</label>
-            <p-select formControlName="modalityId" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione una modalidad" [showClear]="true" styleClass="w-full"></p-select>
+          <div class="flex flex-column gap-2 mb-4">
+            <label for="modalityIds" class="font-semibold text-sm text-slate-700">Modalidades</label>
+            <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
           </div>
         </div>
         <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-3">
+          <div class="flex flex-column gap-2 mb-4">
             <label for="coordinatorId" class="font-semibold text-sm text-slate-700">Coordinador</label>
             <p-select formControlName="coordinatorId" [options]="coordinators" optionLabel="firstName" optionValue="id" placeholder="Seleccione un coordinador" [filter]="true" filterBy="firstName,lastName" [showClear]="true" styleClass="w-full">
               <ng-template let-coord pTemplate="item">
@@ -109,7 +123,7 @@
     <form [formGroup]="subjectsForm" (ngSubmit)="saveAssignedSubjects()" class="mt-3">
       <div class="grid">
         <div class="col-12 md:col-12">
-          <div class="flex flex-column gap-2 mb-3">
+          <div class="flex flex-column gap-2 mb-4">
             <label class="font-semibold text-sm text-slate-700">Materias</label>
             <p-multiSelect 
               formControlName="subjectIds" 
@@ -133,4 +147,3 @@
       </div>
     </form>
   </p-dialog>
-</div>

@@ -1,10 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { BadgeModule } from 'primeng/badge';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast';
 import { TextareaModule } from 'primeng/textarea';
@@ -25,6 +26,7 @@ import { Modality } from '../../../../../core/models';
     CheckboxModule,
     ToastModule,
     TextareaModule,
+    BadgeModule,
   ],
   templateUrl: './modalities.html',
 })
@@ -33,6 +35,7 @@ export class Modalities implements OnInit {
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private cdr = inject(ChangeDetectorRef);
 
   modalities: Modality[] = [];
   displayDialog = false;
@@ -55,8 +58,14 @@ export class Modalities implements OnInit {
 
   loadModalities() {
     this.academicService.getModalities().subscribe({
-      next: (data: Modality[]) => (this.modalities = data),
-      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las modalidades' }),
+      next: (data) => {
+        this.modalities = data;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las modalidades' });
+        this.cdr.detectChanges();
+      }
     });
   }
 

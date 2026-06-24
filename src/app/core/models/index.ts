@@ -21,6 +21,18 @@ export interface Tuition {
   paidInstallments: number;
 }
 
+export interface CareerSubject {
+  id: string;
+  name: string;
+  semester: number;
+  modalityNames?: string[];
+}
+
+export interface SemesterColor {
+  semester: number;
+  color: string;
+}
+
 export interface Subject {
   id: string;
   code: string;
@@ -28,6 +40,9 @@ export interface Subject {
   credits: number;
   teacherId?: string;
   description?: string;
+  careerId?: string;
+  semester?: number;
+  modalityIds?: string[];
 }
 
 export interface Enrollment {
@@ -105,7 +120,7 @@ export interface Career {
   code: string;
   name: string;
   durationSemesters: number;
-  modalityId?: string;
+  modalityIds?: string[];
   coordinatorId?: string;
   isActive: boolean;
 }
