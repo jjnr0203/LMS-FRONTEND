@@ -1,0 +1,39 @@
+
+> lms-frontend@0.0.0 start
+> ng serve
+
+[33m❯[39m Building...
+[32m✔[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                           [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                          [2m | [22m[36m465.66 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                            [2m | [22m  [36m6.81 kB[39m[2m | [22m
+[32mchunk-2WSMOTOO.js[39m  [2m | [22m[2m-[22m                               [2m | [22m  [36m4.11 kB[39m[2m | [22m
+[32mchunk-CESLCR4E.js[39m  [2m | [22m[2m-[22m                               [2m | [22m  [36m2.41 kB[39m[2m | [22m
+[32mchunk-VUJOFXKG.js[39m  [2m | [22m[2m-[22m                               [2m | [22m[36m938 bytes[39m[2m | [22m
+[32mchunk-P37EOHI7.js[39m  [2m | [22m[2m-[22m                               [2m | [22m[36m187 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m                   [2m | [22m[1m480.12 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                           [2m | [22m [1mRaw size[22m
+[32mchunk-SRXREXOK.js[39m  [2m | [22m[2macademic-management[22m             [2m | [22m[36m138.53 kB[39m[2m | [22m
+[32mchunk-MG3H5I2M.js[39m  [2m | [22m[2madmin-dashboard-component[22m       [2m | [22m [36m67.27 kB[39m[2m | [22m
+[32mchunk-5UAETP7U.js[39m  [2m | [22m[2musers-list-component[22m            [2m | [22m [36m37.54 kB[39m[2m | [22m
+[32mchunk-5OKIK6MX.js[39m  [2m | [22m[2mmain-layout-component[22m           [2m | [22m [36m32.73 kB[39m[2m | [22m
+[32mchunk-WD6DVKUF.js[39m  [2m | [22m[2m-[22m                               [2m | [22m [36m24.05 kB[39m[2m | [22m
+[32mchunk-BCH3CN2C.js[39m  [2m | [22m[2mregister-student-component[22m      [2m | [22m [36m20.09 kB[39m[2m | [22m
+[32mchunk-5M5VV5IO.js[39m  [2m | [22m[2mlogin-component[22m                 [2m | [22m [36m19.87 kB[39m[2m | [22m
+[32mchunk-CQ62KTNL.js[39m  [2m | [22m[2mcreate-assignment-component[22m     [2m | [22m [36m17.37 kB[39m[2m | [22m
+[32mchunk-SUHTHFFM.js[39m  [2m | [22m[2mprofile-component[22m               [2m | [22m [36m16.21 kB[39m[2m | [22m
+[32mchunk-PZVZA6FZ.js[39m  [2m | [22m[2menroll-student-subject-component[22m[2m | [22m [36m15.55 kB[39m[2m | [22m
+[32mchunk-QCDTA7KY.js[39m  [2m | [22m[2mregister-payment-component[22m      [2m | [22m [36m15.36 kB[39m[2m | [22m
+[32mchunk-MHYJ4PST.js[39m  [2m | [22m[2mcreate-subject-component[22m        [2m | [22m [36m15.23 kB[39m[2m | [22m
+[32mchunk-KXCPTLO5.js[39m  [2m | [22m[2massign-teacher-component[22m        [2m | [22m [36m15.16 kB[39m[2m | [22m
+[32mchunk-O3JGW55H.js[39m  [2m | [22m[2mdisable-account-component[22m       [2m | [22m [36m15.05 kB[39m[2m | [22m
+[32mchunk-IK35IH32.js[39m  [2m | [22m[2mtuition-list-component[22m          [2m | [22m [36m14.99 kB[39m[2m | [22m
+[2m...and 18 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [13.124 seconds] - 2026-06-26T05:54:14.815Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m4200[22m/[39m

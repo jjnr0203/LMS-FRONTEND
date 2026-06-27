@@ -1,14 +1,14 @@
 # LMS-FRONTEND
 
-Angular 21 standalone app with PrimeNG Aura theme + PrimeIcons.
-SCSS for component styles; `src/styles.scss` imports `primeicons/primeicons.css`.
+Angular 21 standalone app with PrimeNG Aura theme, PrimeIcons, PrimeFlex.
+SCSS styles; `src/styles.scss` imports `primeicons/primeicons.css` and `primeflex/primeflex.css`.
 
 ## Commands
 
 | Command                  | Action                                             |
 | ------------------------ | -------------------------------------------------- |
-| `npm start`              | Dev server (`ng serve`)                            |
-| `npm run build`          | Prod build (budgets: initial 500kB/1MB)            |
+| `npm start`              | Dev server (`ng serve`, proxies `/api` → `:3000`)  |
+| `npm run build`          | Prod build (budgets: initial 900kB/1MB)            |
 | `npm test`               | Unit tests (Vitest via `@angular/build:unit-test`) |
 | `npm run watch`          | Build with watch + dev config                      |
 | `npx prettier --write .` | Format everything                                  |
@@ -18,40 +18,58 @@ SCSS for component styles; `src/styles.scss` imports `primeicons/primeicons.css`
 ## Architecture
 
 - **Entrypoint:** `src/main.ts` bootstraps standalone `App` via `bootstrapApplication`
-- **Config:** `src/app/app.config.ts` — router, HTTP client (auth interceptor), PrimeNG Aura theme, async animations
-- **Routes** (`src/app/app.routes.ts`): lazy-loaded via `loadComponent`:
-  - `/login` — public, loads `LoginComponent`
-  - `/dashboard` — protected by `AuthGuard` (class-based `CanActivate`), child `/dashboard/users`
-  - `/` redirects to `/login`
-  - _Dashboard nav has a `/dashboard/courses` menu item but no route or feature exists yet_
-- **Core:** `src/app/core/` — `guards/`, `interceptors/`, `services/`
-- **Features:** `src/app/features/` — `auth/login`, `dashboard`, `users/users-list`
+- **Config:** `src/app/app.config.ts` — router, HTTP client (`authInterceptor` + `errorInterceptor`), PrimeNG Aura theme, async animations
+- **Routing** (role-based, lazy-loaded via `loadComponent`/`loadChildren`):
+  - `''` → redirects to `login`
+  - `/login` — public
+  - `/admin`, `/coordinator`, `/treasury`, `/teacher` — each guarded by `AuthGuard` + `RoleGuard` with `data.roles`, loads `MainLayoutComponent` + role child routes
+  - `/perfil` — guarded by `AuthGuard`, children: `''` (ProfileComponent), `cambiar-password` (ChangePasswordComponent)
+  - `**` → redirects to `login`
+- **Layout:** `MainLayoutComponent` (template with sidebar + `<router-outlet />`), `SidebarComponent` filters nav items by `user.role()`
+- **Core:** `src/app/core/` — `guards/`, `interceptors/`, `services/`, `models/`
+- **Features:** `src/app/features/` — `auth/`, `admin/`, `coordinator/`, `treasury/`, `teacher/`, `profile/`, `users/`
 - **API base:** `http://localhost:3000/api` (`src/environments/environment*.ts`, dev file-replacement in `angular.json`)
+- **Proxy:** `proxy.conf.json` forwards `/api` → `http://localhost:3000` (dev server only)
+
+## Guards & Interceptors
+
+- `AuthGuard` (class-based `CanActivate`): checks `isLoggedIn()`, redirects to `/login` if false
+- `RoleGuard` (class-based `CanActivate`): checks `route.data['roles']` against `role()`, navigates to `/dashboard` on mismatch
+  - ⚠️ `/dashboard` is not a valid route (likely should redirect to role's root path instead)
+- `authInterceptor` (functional, `HttpInterceptorFn`): adds `Authorization: Bearer <token>` to all requests except `/auth/refresh`
+- `errorInterceptor` (functional): on 401 (not `/auth/login` or `/auth/refresh`) attempts token refresh via `AuthService.refresh()`, queues concurrent requests with `BehaviorSubject`; on 403 with `"suspendida"` message clears session and redirects with `?suspended=true`
 
 ## Auth pattern
 
 - JWT in `localStorage` keys `accessToken` / `refreshToken`
-- `authInterceptor` (functional interceptor, `HttpInterceptorFn`) adds `Authorization: Bearer <token>`
-- `AuthGuard` checks `isLoggedIn()`, redirects to `/login` if missing
-- `AuthService.login(id, password)` POSTs `{ emailOrCedula, password }` to `${apiUrl}/auth/login`, stores tokens
-- Also: `register()`, `logout()`, `getRoleFromToken()` (decodes JWT payload for `role`), `getProfile()` (GET `/users/me`)
+- `AuthService` stores auth state as `signal<AuthState>` with derived `computed()` signals (`accessToken`, `role`, `isLoggedIn`, `user`)
+- `login(id, password)` POSTs `{ id, passwordRaw: password }` to `/auth/login`
+- `refresh()` POSTs `{ refreshToken }` to `/auth/refresh`, updates tokens
+- `getProfile()` GETs `/users/me`, updates user signal
+- `role` decoded from JWT payload (`atob` of token segment 1), field `role`
+- `clearSession()` wipes localStorage and resets state signal
+- `logout()` POSTs to `/auth/logout`, then clears session
 
-## Services
+## Services (all `providedIn: 'root'`)
 
-- `AuthService` — auth operations, token storage, role extraction from JWT
-- `UserService` — paginated user CRUD (`getUsers`, `updateUser`, `deleteUser`). GET params: `page`, `limit`, `role`. Response shape: `{ data: User[], pagination: { total, current_page, last_page } }`.
+- `AuthService` — auth ops, token/state management via signals
+- `UserService` — CRUD at `/users`, paginated GET with `page`, `limit`, `role`, `search` params; also `changePassword()`, `uploadAvatar()` (FormData)
+- `AdminService` — admin-specific endpoints at `/admin`
+- `AcademicService` — CRUD for academic terms, modalities, careers, subjects at `/admin/academic`
+- `CoordinatorService` — coordinator operations
+- `TeacherService` — teacher operations
+- `TreasuryService` — treasury operations
 
-## Stub files to be aware of
+## Models (`src/app/core/models/index.ts`)
 
-- `auth/login/` has two components: `LoginComponent` (full, used by router) and `Login` (stub, imported by spec `login.spec.ts`)
-- `core/services/auth.ts` + `auth.spec.ts` are scaffold stubs (unused)
+Key types: `User`, `LoginResponse`, `AuthState`, `AppRole`, `PaginatedResponse<T>`, `Tuition`, `CareerSubject`, `Subject`, `Enrollment`, `Assignment`, `Submission`, `AcademicTerm`, `Modality`, `Career`, `SemesterColor`.
 
 ## Testing (Vitest)
 
 - `ng test` runs Vitest via `@angular/build:unit-test` builder
-- Specs use standard Angular `TestBed` (see `app.spec.ts`, `login.spec.ts`)
 - `tsconfig.spec.json` has `types: ["vitest/globals"]`
-- No snapshot testing
+- No spec files currently exist; no snapshot testing
+- Dependencies: `jsdom` for DOM emulation
 
 ## Conventions (target state for new code)
 
@@ -67,14 +85,9 @@ SCSS for component styles; `src/styles.scss` imports `primeicons/primeicons.css`
 - Prettier: single quotes, trailing comma, Angular HTML parser
 - `providedIn: 'root'` for services
 
-> Note: Existing components still use class properties, constructor DI, `standalone: true`, `*ngIf`/`*ngFor`, and no `OnPush`. Follow the conventions above for **new** code.
+> Existing components may still use older patterns (class properties, constructor DI, `*ngIf`/`*ngFor`). Follow the conventions above for new code.
 
-## Cross-platform AI instruction files
+## AI instruction files
 
-- `.claude/CLAUDE.md` and `.cursor/rules/cursor.mdc` contain near-identical generic Angular best-practice rules (same conventions as above). Keep them in sync if updating conventions.
-
-## Tooling
-
-- Node: npm 11.12.1 (pinned in `packageManager`)
-- `.editorconfig`: 2-space indent, UTF-8
-- `.vscode/extensions.json` recommends `angular.ng-template`
+Six identical generic Angular-best-practice files exist across AI tool dirs. Keep them in sync if updating conventions:
+`.claude/CLAUDE.md`, `.cursor/rules/cursor.mdc`, `.gemini/GEMINI.md`, `.junie/guidelines.md`, `.windsurf/rules/guidelines.md`, `.github/copilot-instructions.md`

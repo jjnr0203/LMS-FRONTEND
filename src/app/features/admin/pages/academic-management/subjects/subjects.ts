@@ -17,7 +17,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { UserService } from '../../../../../core/services/user.service';
-import { Subject, User, Career, Modality } from '../../../../../core/models';
+import { Subject, User, Career, Modality, Curriculum } from '../../../../../core/models';
 
 @Component({
   selector: 'app-subjects',
@@ -53,12 +53,14 @@ export class Subjects implements OnInit {
   teachers: User[] = [];
   careers: Career[] = [];
   modalities: Modality[] = [];
+  curriculums: Curriculum[] = [];
   availableModalities: Modality[] = [];
   availableSemesters: number[] = [];
   displayDialog = false;
   displayBulkDialog = false;
   selectedFile: File | null = null;
   bulkCareerId: string | null = null;
+  bulkUploading = false;
   form!: FormGroup;
   isEdit = false;
   currentId: string | null = null;
@@ -75,6 +77,7 @@ export class Subjects implements OnInit {
       credits: [1, [Validators.required, Validators.min(1)]],
       teacherId: [null],
       careerId: [null],
+      curriculumId: [{ value: null, disabled: true }],
       modalityIds: [{ value: [], disabled: true }],
       semester: [{ value: null, disabled: true }],
       description: [''],
@@ -82,6 +85,26 @@ export class Subjects implements OnInit {
 
     this.form.get('careerId')?.valueChanges.subscribe((careerId) => {
       this.updateSemestersAndModalities(careerId);
+      this.loadCurriculumsForCareer(careerId);
+    });
+  }
+
+  loadCurriculumsForCareer(careerId: string | null) {
+    if (!careerId) {
+      this.curriculums = [];
+      this.form.get('curriculumId')?.disable();
+      this.form.get('curriculumId')?.setValue(null);
+      return;
+    }
+    this.academicService.getCurriculumsByCareer(careerId).subscribe({
+      next: (data) => {
+        this.curriculums = data.filter(m => m.isActive);
+        if (this.curriculums.length > 0) {
+          this.form.get('curriculumId')?.enable();
+        } else {
+          this.form.get('curriculumId')?.disable();
+        }
+      },
     });
   }
 
@@ -168,8 +191,12 @@ export class Subjects implements OnInit {
     
     if (s.careerId) {
       this.updateSemestersAndModalities(s.careerId);
+      this.loadCurriculumsForCareer(s.careerId);
       this.form.get('semester')?.setValue(s.semester);
-      this.form.get('careerId')?.disable(); // Prevent changing career when editing
+      if (s.curriculumId) {
+        this.form.get('curriculumId')?.setValue(s.curriculumId);
+      }
+      this.form.get('careerId')?.disable();
     } else {
       this.form.get('careerId')?.enable();
     }
@@ -179,7 +206,18 @@ export class Subjects implements OnInit {
 
   saveSubject() {
     if (this.form.invalid) return;
-    const data = this.form.getRawValue(); // Use getRawValue to include disabled fields like careerId
+    const raw = this.form.getRawValue();
+    const data: any = {
+      code: raw.code,
+      name: raw.name,
+      credits: raw.credits,
+      teacherId: raw.teacherId,
+      description: raw.description,
+      modalityIds: raw.modalityIds,
+      careerId: raw.careerId,
+      semester: raw.semester,
+    };
+    if (raw.curriculumId) data.curriculumId = raw.curriculumId;
 
     if (this.isEdit && this.currentId) {
       this.academicService.updateSubject(this.currentId, data).subscribe({
@@ -250,6 +288,7 @@ export class Subjects implements OnInit {
     if (!this.selectedFile || !this.bulkCareerId) return;
     const careerId = this.bulkCareerId;
 
+    this.bulkUploading = true;
     const reader = new FileReader();
     reader.onload = (e) => {
       const bstr = e.target?.result;
@@ -287,11 +326,15 @@ export class Subjects implements OnInit {
 
       this.academicService.bulkCreateSubjects(careerId, payload).subscribe({
         next: () => {
+          this.bulkUploading = false;
           this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Materias procesadas y asignadas correctamente' });
           this.loadData();
           this.displayBulkDialog = false;
         },
-        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo procesar el archivo' })
+        error: () => {
+          this.bulkUploading = false;
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo procesar el archivo' });
+        },
       });
     };
     reader.readAsBinaryString(this.selectedFile);

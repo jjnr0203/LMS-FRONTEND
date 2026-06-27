@@ -1,7 +1,9 @@
+@if (!selectedCareer) {
+  <!-- ═══════════════ CAREER LIST ═══════════════ -->
   <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div class="flex align-items-center gap-3">
       <h3 class="m-0 text-xl font-medium text-800">Carreras</h3>
-      <p-button label="Nueva Carrera" icon="pi pi-plus" (onClick)="openNew()" severity="success" size="small"></p-button>
+      <p-button label="Nueva Carrera" icon="pi pi-plus" (onClick)="openNewCareer()" severity="success" size="small"></p-button>
     </div>
     <p-iconField iconPosition="left" styleClass="w-20rem">
       <p-inputIcon styleClass="pi pi-search" />
@@ -18,11 +20,11 @@
         <th>Coordinador</th>
         <th>Semestres</th>
         <th>Estado</th>
-        <th style="width: 150px">Acciones</th>
+        <th style="width: 130px">Acciones</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-c>
-      <tr>
+      <tr style="cursor:pointer" (click)="selectCareer(c)">
         <td class="font-medium text-slate-600">{{ c.code }}</td>
         <td class="font-medium text-slate-800">{{ c.name }}</td>
         <td>
@@ -36,9 +38,7 @@
           </div>
         </td>
         <td>{{ getCoordinatorName(c.coordinatorId) }}</td>
-        <td>
-          <p-badge [value]="c.durationSemesters + ' Semestres'" styleClass="badge-sys-dark"></p-badge>
-        </td>
+        <td><p-badge [value]="c.durationSemesters + ' Semestres'" styleClass="badge-sys-dark"></p-badge></td>
         <td>
           <span class="px-2 py-1 text-xs font-semibold rounded-full"
                 [class.bg-emerald-100]="c.isActive" [class.text-emerald-800]="c.isActive"
@@ -48,102 +48,261 @@
         </td>
         <td>
           <div class="flex gap-2">
-            <p-button icon="pi pi-book" pTooltip="Asignar Materias" [rounded]="true" [text]="true" severity="help" (onClick)="openAssignSubjects(c)"></p-button>
-            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (onClick)="editCareer(c)"></p-button>
-            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteCareer(c.id)"></p-button>
+            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editCareer(c); $event.stopPropagation()"></p-button>
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="deleteCareer(c.id); $event.stopPropagation()"></p-button>
           </div>
         </td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="7" class="text-center py-4 text-slate-500">No se encontraron carreras.</td>
-      </tr>
+      <tr><td colspan="7" class="text-center py-4 text-slate-500">No se encontraron carreras.</td></tr>
     </ng-template>
   </p-table>
+}
 
-  <!-- Career Edit/Create Dialog -->
-  <p-dialog [(visible)]="displayDialog" [header]="isEdit ? 'Editar Carrera' : 'Nueva Carrera'" [modal]="true" [style]="{ width: '800px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
-    <form [formGroup]="form" (ngSubmit)="saveCareer()" class="mt-3">
-      <div class="grid">
-        <div class="col-12 md:col-12">
-          <div class="flex flex-column gap-2 mb-4">
-            <label for="name" class="font-semibold text-sm text-slate-700">Nombre de la Carrera</label>
-            <input pInputText id="name" formControlName="name" placeholder="Ej: Ingeniería en Software" class="w-full" />
-          </div>
-        </div>
-        <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-4">
-            <label for="code" class="font-semibold text-sm text-slate-700">Código</label>
-            <input pInputText id="code" formControlName="code" placeholder="Ej: SOFT" class="w-full" />
-          </div>
-        </div>
-        <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-4">
-            <label for="durationSemesters" class="font-semibold text-sm text-slate-700">Duración (Semestres)</label>
-            <p-inputNumber formControlName="durationSemesters" inputId="durationSemesters" [min]="1" [max]="9" [useGrouping]="false" styleClass="w-full" class="w-full"></p-inputNumber>
-          </div>
-        </div>
-        <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-4">
-            <label for="modalityIds" class="font-semibold text-sm text-slate-700">Modalidades</label>
-            <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
-          </div>
-        </div>
-        <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-4">
-            <label for="coordinatorId" class="font-semibold text-sm text-slate-700">Coordinador</label>
-            <p-select formControlName="coordinatorId" [options]="coordinators" optionLabel="firstName" optionValue="id" placeholder="Seleccione un coordinador" [filter]="true" filterBy="firstName,lastName" [showClear]="true" styleClass="w-full">
-              <ng-template let-coord pTemplate="item">
-                {{coord.firstName}} {{coord.lastName}}
+@if (selectedCareer && !selectedCurriculum) {
+  <!-- ═══════════════ CURRICULUM LIST ═══════════════ -->
+  <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div class="flex align-items-center gap-2">
+      <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="backToCareers()"></p-button>
+      <h3 class="m-0 text-xl font-medium text-800">{{ selectedCareer.name }} — Curriculums</h3>
+      <p-button label="New Curriculum" icon="pi pi-plus" (onClick)="openNewCurriculum()" severity="success" size="small"></p-button>
+    </div>
+  </div>
+
+  @if (curriculums.length === 0) {
+    <div class="text-center py-6 text-slate-500">
+      <i class="pi pi-book text-4xl mb-3 block"></i>
+      <p class="text-lg">This career has no curriculums</p>
+    </div>
+  } @else {
+    <p-table [value]="curriculums" styleClass="p-datatable-sm" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th>Creada</th>
+          <th style="width: 140px">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-cu>
+        <tr style="cursor:pointer" (click)="selectCurriculum(cu)">
+          <td class="font-medium text-slate-800">{{ cu.name }}</td>
+          <td class="text-slate-500">{{ cu.description || '-' }}</td>
+          <td>
+            <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                  [class.bg-emerald-100]="cu.isActive" [class.text-emerald-800]="cu.isActive"
+                  [class.bg-slate-100]="!cu.isActive" [class.text-slate-600]="!cu.isActive">
+              {{ cu.isActive ? 'Activa' : 'Inactiva' }}
+            </span>
+          </td>
+          <td class="text-slate-500">{{ cu.createdAt | date:'shortDate' }}</td>
+          <td>
+            <div class="flex gap-2">
+              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editCurriculum(cu); $event.stopPropagation()"></p-button>
+              <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="deleteCurriculum(cu.id); $event.stopPropagation()"></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="5" class="text-center py-4 text-slate-500">No curriculums found.</td></tr>
+      </ng-template>
+    </p-table>
+  }
+}
+
+@if (selectedCurriculum) {
+  <!-- ═══════════════ SUBJECT LIST ═══════════════ -->
+  <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div class="flex align-items-center gap-2">
+      <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="backToCurriculums()"></p-button>
+      <h3 class="m-0 text-xl font-medium text-800">{{ selectedCurriculum.name }} — Materias</h3>
+      <p-button label="Nueva Materia" icon="pi pi-plus" (onClick)="openNewSubject()" severity="success" size="small"></p-button>
+      <p-button label="Subir Excel" icon="pi pi-upload" (onClick)="displayBulkDialog = true" severity="warn" size="small"></p-button>
+      <p-button label="Borrar Todas" icon="pi pi-trash" (onClick)="deleteAllSubjects()" severity="danger" size="small"></p-button>
+    </div>
+  </div>
+
+  @if (subjects.length === 0) {
+    <div class="text-center py-6 text-slate-500">
+      <i class="pi pi-book text-4xl mb-3 block"></i>
+      <p class="text-lg">This curriculum has no subjects assigned</p>
+    </div>
+  } @else {
+    <p-accordion [multiple]="true">
+      @for (group of groupedSubjects; track group.semester) {
+        <p-accordion-panel [value]="group.semester">
+          <p-accordion-header>
+            <div class="flex align-items-center gap-2">
+              <span [style]="{ 'background-color': getSemesterColor(group.semester) }" class="inline-flex align-items-center justify-content-center border-circle text-white font-bold" style="width: 2rem; height: 2rem; font-size: 0.85rem">{{ group.semester }}</span>
+              <span class="font-medium text-slate-700">Semestre {{ group.semester }}</span>
+              <p-badge [value]="group.subjects.length + ' materias'" severity="info"></p-badge>
+            </div>
+          </p-accordion-header>
+          <p-accordion-content>
+            <p-table [value]="group.subjects" styleClass="p-datatable-sm" responsiveLayout="scroll">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Código</th>
+                  <th>Nombre</th>
+                  <th>Créditos</th>
+                  <th>Modalidad</th>
+                  <th style="width: 110px">Acciones</th>
+                </tr>
               </ng-template>
-              <ng-template let-coord pTemplate="selectedItem">
-                {{coord ? coord.firstName + ' ' + coord.lastName : 'Seleccione un coordinador'}}
+              <ng-template pTemplate="body" let-s>
+                <tr>
+                  <td class="font-medium text-slate-600">{{ s.code }}</td>
+                  <td class="font-medium text-slate-800">{{ s.name }}</td>
+                  <td>{{ s.credits }}</td>
+                  <td>
+                    <div class="flex gap-1 flex-wrap">
+                      @if (s.modalityIds && s.modalityIds.length > 0) {
+                        @for (modId of s.modalityIds; track modId) {
+                          <p-badge [value]="getModalityName(modId)" severity="success"></p-badge>
+                        }
+                      } @else {
+                        <p-badge value="No asignada" severity="secondary"></p-badge>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex gap-2">
+                      <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editSubject(s)"></p-button>
+                      <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="deleteSubject(s.id)"></p-button>
+                    </div>
+                  </td>
+                </tr>
               </ng-template>
-            </p-select>
-          </div>
-        </div>
-        <div class="col-12">
-          <div class="flex align-items-center gap-2 mt-2">
-            <p-checkbox formControlName="isActive" [binary]="true" inputId="isActiveCar"></p-checkbox>
-            <label for="isActiveCar" class="font-semibold text-sm text-slate-700 cursor-pointer">Activa</label>
-          </div>
-        </div>
-      </div>
+            </p-table>
+          </p-accordion-content>
+        </p-accordion-panel>
+      }
+    </p-accordion>
+  }
+}
 
-      <div class="flex justify-content-end gap-2 mt-4">
-        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayDialog = false"></p-button>
-        <p-button label="Guardar" icon="pi pi-check" type="submit" [disabled]="form.invalid" severity="success"></p-button>
-      </div>
-    </form>
-  </p-dialog>
+<!-- ═══════════════ DIALOGS ═══════════════ -->
 
-  <!-- Assign Subjects Dialog -->
-  <p-dialog [(visible)]="displaySubjectsDialog" [header]="'Asignar Materias a ' + currentCareerForSubjects?.name" [modal]="true" [style]="{ width: '800px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
-    <form [formGroup]="subjectsForm" (ngSubmit)="saveAssignedSubjects()" class="mt-3">
-      <div class="grid">
-        <div class="col-12 md:col-12">
-          <div class="flex flex-column gap-2 mb-4">
-            <label class="font-semibold text-sm text-slate-700">Materias</label>
-            <p-multiSelect 
-              formControlName="subjectIds" 
-              [options]="subjects" 
-              optionLabel="name" 
-              optionValue="id" 
-              placeholder="Seleccione las materias" 
-              [filter]="true" 
-              filterPlaceHolder="Buscar materia"
-              display="chip"
-              styleClass="w-full"
-              [style]="{'width':'100%'}">
-            </p-multiSelect>
-          </div>
-        </div>
-      </div>
+<!-- Career Form -->
+<p-dialog [(visible)]="displayCareerDialog" [header]="isEditCareer ? 'Editar Carrera' : 'Nueva Carrera'" [modal]="true" [style]="{ width: '800px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
+  <form [formGroup]="careerForm" (ngSubmit)="saveCareer()" class="mt-3">
+    <div class="grid">
+      <div class="col-12"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Nombre de la Carrera</label>
+        <input pInputText formControlName="name" placeholder="Ej: Ingeniería en Software" class="w-full" />
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Código</label>
+        <input pInputText formControlName="code" placeholder="Ej: SOFT" class="w-full" />
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Duración (Semestres)</label>
+        <p-inputNumber formControlName="durationSemesters" [min]="1" [max]="9" [useGrouping]="false" styleClass="w-full" class="w-full"></p-inputNumber>
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Modalidades</label>
+        <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Coordinador</label>
+        <p-select formControlName="coordinatorId" [options]="coordinators" optionLabel="firstName" optionValue="id" placeholder="Seleccione un coordinador" [filter]="true" filterBy="firstName,lastName" [showClear]="true" styleClass="w-full">
+          <ng-template let-coord pTemplate="item">{{coord.firstName}} {{coord.lastName}}</ng-template>
+          <ng-template let-coord pTemplate="selectedItem">{{coord ? coord.firstName + ' ' + coord.lastName : 'Seleccione un coordinador'}}</ng-template>
+        </p-select>
+      </div></div>
+      <div class="col-12"><div class="flex align-items-center gap-2 mt-2">
+        <p-checkbox formControlName="isActive" [binary]="true" inputId="carIsActive"></p-checkbox>
+        <label for="carIsActive" class="font-semibold text-sm text-slate-700 cursor-pointer">Activa</label>
+      </div></div>
+    </div>
+    <div class="flex justify-content-end gap-2 mt-4">
+      <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayCareerDialog = false"></p-button>
+      <p-button label="Guardar" icon="pi pi-check" type="submit" [disabled]="careerForm.invalid" severity="success"></p-button>
+    </div>
+  </form>
+</p-dialog>
 
-      <div class="flex justify-content-end gap-2 mt-4">
-        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displaySubjectsDialog = false"></p-button>
-        <p-button label="Guardar Asignación" icon="pi pi-check" type="submit" severity="success"></p-button>
+<!-- Curriculum Form -->
+<p-dialog [(visible)]="displayCurriculumDialog" [header]="isEditCurriculum ? 'Edit Curriculum' : 'New Curriculum'" [modal]="true" [style]="{ width: '500px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
+  <form [formGroup]="curriculumForm" (ngSubmit)="saveCurriculum()" class="mt-3">
+    <div class="flex flex-column gap-3">
+      <div class="flex flex-column gap-2">
+        <label class="font-semibold text-sm text-slate-700">Curriculum Name</label>
+        <input pInputText formControlName="name" placeholder="e.g. Curriculum 2024" class="w-full" />
       </div>
-    </form>
-  </p-dialog>
+      <div class="flex flex-column gap-2">
+        <label class="font-semibold text-sm text-slate-700">Descripción (Opcional)</label>
+        <textarea pTextarea formControlName="description" rows="3" class="w-full"></textarea>
+      </div>
+      <div class="flex align-items-center gap-2">
+        <p-checkbox formControlName="isActive" [binary]="true" inputId="curIsActive"></p-checkbox>
+        <label for="curIsActive" class="font-semibold text-sm text-slate-700 cursor-pointer">Activa</label>
+      </div>
+    </div>
+    <div class="flex justify-content-end gap-2 mt-4">
+      <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayCurriculumDialog = false"></p-button>
+      <p-button label="Save Curriculum" icon="pi pi-check" type="submit" [disabled]="curriculumForm.invalid" severity="success"></p-button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Subject Form -->
+<p-dialog [(visible)]="displaySubjectDialog" [header]="isEditSubject ? 'Editar Materia' : 'Nueva Materia'" [modal]="true" [style]="{ width: '600px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
+  <form [formGroup]="subjectForm" (ngSubmit)="saveSubject()" class="mt-3">
+    <div class="grid">
+      <div class="col-12"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Nombre de la Materia</label>
+        <input pInputText formControlName="name" placeholder="Ej: Álgebra Lineal" class="w-full" />
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Código</label>
+        <input pInputText formControlName="code" placeholder="Ej: ALG101" class="w-full" />
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Créditos</label>
+        <p-inputNumber formControlName="credits" [min]="1" [max]="20" [useGrouping]="false" styleClass="w-full" class="w-full"></p-inputNumber>
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Semestre</label>
+        <p-select formControlName="semester" [options]="subjectSemesters" placeholder="Seleccione el semestre" [showClear]="true" styleClass="w-full">
+          <ng-template let-sem pTemplate="item">Semestre {{ sem }}</ng-template>
+          <ng-template let-sem pTemplate="selectedItem">{{ sem ? 'Semestre ' + sem : 'Seleccione el semestre' }}</ng-template>
+        </p-select>
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Modalidades</label>
+        <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
+      </div></div>
+      <div class="col-12"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Descripción (Opcional)</label>
+        <textarea pTextarea formControlName="description" rows="2" class="w-full"></textarea>
+      </div></div>
+    </div>
+    <div class="flex justify-content-end gap-2 mt-4">
+      <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displaySubjectDialog = false"></p-button>
+      <p-button label="Guardar Materia" icon="pi pi-check" type="submit" [disabled]="subjectForm.invalid" severity="success"></p-button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Bulk Upload Dialog -->
+<p-dialog [(visible)]="displayBulkDialog" header="Carga Masiva de Materias" [modal]="true" [style]="{ width: '500px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
+  <div class="flex flex-column gap-3 mt-3">
+    <div class="surface-100 p-3 border-round text-sm text-slate-700">
+      <p class="m-0"><i class="pi pi-info-circle mr-2 text-blue-500"></i>Upload an Excel file with subjects. They will be automatically linked to curriculum "{{ selectedCurriculum?.name }}".</p>
+    </div>
+    <p-button label="Descargar Plantilla Excel" icon="pi pi-download" severity="success" (onClick)="downloadTemplate()" styleClass="w-full"></p-button>
+    <div class="flex flex-column gap-2">
+      <label class="font-semibold text-sm text-slate-700">Seleccionar archivo Excel (.xlsx)</label>
+      <input type="file" accept=".xlsx" (change)="onBulkFileSelected($event)" class="w-full p-2 border-1 surface-border border-round" />
+      <small class="text-slate-500">Columnas: Código, Nombre, Créditos, Semestre, Modalidades</small>
+    </div>
+    <div class="flex justify-content-end gap-2 mt-2">
+      <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayBulkDialog = false" [disabled]="bulkUploading"></p-button>
+      <p-button label="Importar" icon="pi pi-upload" severity="success" (onClick)="processBulkUpload()" [disabled]="!selectedBulkFile || bulkUploading" [loading]="bulkUploading"></p-button>
+    </div>
+  </div>
+</p-dialog>

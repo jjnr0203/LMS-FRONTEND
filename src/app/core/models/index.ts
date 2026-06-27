@@ -43,6 +43,7 @@ export interface Subject {
   careerId?: string;
   semester?: number;
   modalityIds?: string[];
+  curriculumId?: string;
 }
 
 export interface Enrollment {
@@ -123,4 +124,13 @@ export interface Career {
   modalityIds?: string[];
   coordinatorId?: string;
   isActive: boolean;
+}
+
+export interface Curriculum {
+  id: string;
+  careerId: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string;
 }

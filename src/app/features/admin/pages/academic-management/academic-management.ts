@@ -8,7 +8,6 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { AcademicTerms } from './academic-terms/academic-terms';
 import { Modalities } from './modalities/modalities';
 import { Careers } from './careers/careers';
-import { Subjects } from './subjects/subjects';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OnInit, inject } from '@angular/core';
 
@@ -21,7 +20,6 @@ import { OnInit, inject } from '@angular/core';
     AcademicTerms,
     Modalities,
     Careers,
-    Subjects,
     ToastModule,
     ConfirmDialogModule,
   ],
@@ -41,7 +39,7 @@ export class AcademicManagement implements OnInit {
           case 'terms': this.activeTab = '0'; break;
           case 'modalities': this.activeTab = '1'; break;
           case 'careers': this.activeTab = '2'; break;
-          case 'subjects': this.activeTab = '3'; break;
+          case 'subjects': this.activeTab = '2'; break;
         }
       }
     });

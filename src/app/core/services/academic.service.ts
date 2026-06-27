@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AcademicTerm, Modality, Career, Subject, SemesterColor } from '../models';
+import { AcademicTerm, Modality, Career, Subject, SemesterColor, Curriculum } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class AcademicService {
@@ -106,5 +106,30 @@ export class AcademicService {
 
   deleteSubject(id: string): Observable<{ success: boolean }> {
     return this.http.delete<{ success: boolean }>(`${this.apiUrl}/subjects/${id}`);
+  }
+
+  deleteAllSubjects(): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/subjects/clear-all`);
+  }
+
+  // --- CURRICULUMS ---
+  getCurriculumsByCareer(careerId: string): Observable<Curriculum[]> {
+    return this.http.get<Curriculum[]>(`${this.apiUrl}/careers/${careerId}/curriculums`);
+  }
+
+  createCurriculum(careerId: string, data: Partial<Curriculum>): Observable<Curriculum> {
+    return this.http.post<Curriculum>(`${this.apiUrl}/careers/${careerId}/curriculums`, data);
+  }
+
+  updateCurriculum(id: string, data: Partial<Curriculum>): Observable<Curriculum> {
+    return this.http.put<Curriculum>(`${this.apiUrl}/curriculums/${id}`, data);
+  }
+
+  deleteCurriculum(id: string): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/curriculums/${id}`);
+  }
+
+  getCurriculumSubjects(curriculumId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/curriculums/${curriculumId}/subjects`);
   }
 }

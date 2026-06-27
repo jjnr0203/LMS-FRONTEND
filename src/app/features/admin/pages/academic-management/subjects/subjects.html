@@ -96,6 +96,16 @@
         </div>
         <div class="col-12 md:col-6">
           <div class="flex flex-column gap-2 mb-4">
+            <label for="curriculumId" class="font-semibold text-sm text-slate-700">Curriculum</label>
+            <p-select formControlName="curriculumId" [options]="curriculums" optionLabel="name" optionValue="id" placeholder="Select a curriculum" [showClear]="true" styleClass="w-full">
+            </p-select>
+            @if (!form.get('careerId')?.value) {
+              <small class="text-slate-500">Debe seleccionar una carrera primero</small>
+            }
+          </div>
+        </div>
+        <div class="col-12 md:col-6">
+          <div class="flex flex-column gap-2 mb-4">
             <label for="semester" class="font-semibold text-sm text-slate-700">Semestre</label>
             <p-select formControlName="semester" [options]="availableSemesters" placeholder="Seleccione el semestre" [showClear]="true" styleClass="w-full">
               <ng-template let-sem pTemplate="item">
@@ -156,8 +166,8 @@
       </div>
 
       <div class="flex justify-content-end gap-2 mt-4">
-        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayBulkDialog = false"></p-button>
-        <p-button label="Importar" icon="pi pi-upload" severity="success" (onClick)="processBulkUpload()" [disabled]="!selectedFile || !bulkCareerId" pTooltip="Importar datos" tooltipPosition="bottom"></p-button>
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayBulkDialog = false" [disabled]="bulkUploading"></p-button>
+        <p-button label="Importar" icon="pi pi-upload" severity="success" (onClick)="processBulkUpload()" [disabled]="!selectedFile || !bulkCareerId || bulkUploading" [loading]="bulkUploading" pTooltip="Importar datos" tooltipPosition="bottom"></p-button>
       </div>
     </div>
   </p-dialog>
