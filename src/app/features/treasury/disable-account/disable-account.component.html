@@ -1,0 +1,46 @@
+<p-toast />
+<p-confirmDialog />
+<div class="surface-ground min-h-screen">
+  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Deshabilitar Cuenta</h1>
+    <p class="text-green-100 m-0">Bloquea el acceso al sistema para un estudiante.</p>
+  </div>
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <div class="flex align-items-center gap-2 p-3 bg-yellow-50 border-1 border-yellow-300 border-round mb-4 text-sm text-700">
+        <i class="pi pi-exclamation-triangle text-yellow-500" style="font-size: 1.25rem"></i>
+        <span>Esta acción deshabilitará el acceso del estudiante al sistema. Solo funciona si la matrícula está en estado <strong>no paga</strong>.</span>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="confirm()">
+        <div class="flex flex-column gap-2 mb-4">
+          <label class="font-semibold text-sm text-700" for="studentId">Seleccione el Estudiante</label>
+          <p-select
+            id="studentId"
+            [options]="students()"
+            formControlName="studentId"
+            optionLabel="fullName"
+            optionValue="id"
+            placeholder="Seleccione un estudiante"
+            [filter]="true"
+            filterBy="fullName"
+            [showClear]="true"
+          ></p-select>
+          @if (studentId.invalid && studentId.touched) {
+            <small class="p-error">Debe seleccionar un estudiante.</small>
+          }
+        </div>
+
+        <div class="flex justify-content-end mt-3">
+          <p-button
+            type="submit"
+            label="Deshabilitar"
+            severity="danger"
+            [loading]="loading()"
+            [disabled]="form.invalid"
+          />
+        </div>
+      </form>
+    </p-card>
+  </div>
+</div>

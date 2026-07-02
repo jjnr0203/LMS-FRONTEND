@@ -32,7 +32,7 @@ import { Modality } from '../../../../../core/models';
 })
 export class Modalities implements OnInit {
   private academicService = inject(AcademicService);
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private cdr = inject(ChangeDetectorRef);
@@ -49,7 +49,7 @@ export class Modalities implements OnInit {
   }
 
   initForm() {
-    this.form = this.fb.group({
+    this.form = this.formBuilder.group({
       name: ['', Validators.required],
       description: [''],
       isActive: [true],

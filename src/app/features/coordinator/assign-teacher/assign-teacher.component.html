@@ -1,0 +1,56 @@
+<p-toast />
+<div class="surface-ground min-h-screen">
+  <div class="text-white p-5 mb-5 border-round-xl" style="background: #064e3b">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Asignar Docente</h1>
+    <p class="m-0" style="color: #d1fae5">Asigna un docente registrado a una de las materias existentes.</p>
+  </div>
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label class="font-semibold text-sm text-700" for="teacherId">Seleccione un Docente</label>
+              <p-select
+                id="teacherId"
+                [options]="teachers()"
+                formControlName="teacherId"
+                optionLabel="fullName"
+                optionValue="id"
+                placeholder="Seleccione un docente"
+                [filter]="true"
+                filterBy="fullName"
+                [showClear]="true"
+              ></p-select>
+              @if (teacherId.invalid && teacherId.touched) {
+                <small class="p-error">Debe seleccionar un docente.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label class="font-semibold text-sm text-700" for="subjectId">Seleccione la Materia</label>
+              <p-select
+                id="subjectId"
+                [options]="subjects()"
+                formControlName="subjectId"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Seleccione una materia"
+                [filter]="true"
+                filterBy="name"
+                [showClear]="true"
+              ></p-select>
+              @if (subjectId.invalid && subjectId.touched) {
+                <small class="p-error">Debe seleccionar una materia.</small>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-content-end mt-3">
+          <p-button type="submit" label="Asignar Docente" [loading]="loading()" [disabled]="form.invalid" />
+        </div>
+      </form>
+    </p-card>
+  </div>
+</div>

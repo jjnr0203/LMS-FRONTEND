@@ -1,0 +1,13 @@
+<p-toast />
+<div class="surface-ground min-h-screen">
+  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Bienvenido de nuevo, {{ user()?.firstName }}</h1>
+    <p class="text-green-100 m-0">Aquí puedes gestionar matrículas, registrar abonos y administrar la seguridad en tu rol de Tesorería.</p>
+  </div>
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <h3>Panel de Tesorería</h3>
+      <p>Utiliza el menú lateral para acceder a las opciones de gestión financiera y de usuarios.</p>
+    </p-card>
+  </div>
+</div>

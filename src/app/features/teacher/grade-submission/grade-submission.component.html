@@ -1,0 +1,52 @@
+<p-toast />
+<div class="surface-ground min-h-screen">
+  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Calificar Entrega</h1>
+    <p class="text-green-100 m-0">Asigna una calificación y retroalimentación a la tarea de un estudiante.</p>
+  </div>
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="grid">
+          <div class="col-12">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="submissionId" class="font-semibold text-sm text-700">ID de la Entrega (Submission)</label>
+              <input
+                id="submissionId"
+                pInputText
+                formControlName="submissionId"
+                placeholder="UUID de la entrega"
+              />
+              @if (submissionId.invalid && submissionId.touched) {
+                <small class="p-error">Requerido.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="grade" class="font-semibold text-sm text-700">Nota</label>
+              <p-inputNumber
+                id="grade"
+                formControlName="grade"
+                [min]="0"
+                [max]="100"
+                [minFractionDigits]="0"
+                [maxFractionDigits]="2"
+              />
+              @if (grade.invalid && grade.touched) {
+                <small class="p-error">Debe ser entre 0 y 100.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="feedback" class="font-semibold text-sm text-700">Retroalimentación (opcional)</label>
+              <input id="feedback" pInputText formControlName="feedback" />
+            </div>
+          </div>
+        </div>
+        <p-button type="submit" label="Calificar" [loading]="loading()" [disabled]="form.invalid" />
+      </form>
+    </p-card>
+  </div>
+</div>

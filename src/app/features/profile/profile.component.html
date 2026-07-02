@@ -1,0 +1,62 @@
+<p-toast />
+
+@if (user(); as u) {
+  <div class="surface-ground min-h-screen">
+    <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
+      <h1 class="text-3xl font-semibold m-0 mb-2">Mi Perfil</h1>
+      <p class="text-green-100 m-0">Información personal de tu cuenta.</p>
+    </div>
+    <div class="flex justify-content-center">
+      <p-card styleClass="shadow-2" [style]="{ maxWidth: '700px', width: '100%' }">
+        <div class="profile-header">
+          <div class="avatar-container">
+            @if (u.avatarUrl) {
+              <p-avatar
+                [image]="u.avatarUrl"
+                shape="circle"
+                size="xlarge"
+              />
+            } @else {
+              <p-avatar
+                [label]="initials()"
+                shape="circle"
+                size="xlarge"
+                styleClass="profile-avatar-fallback"
+              />
+            }
+            <div class="avatar-overlay" (click)="fileInput.click()">
+              <i class="pi pi-camera"></i>
+            </div>
+            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none" />
+          </div>
+          <div>
+            <h2 class="m-0 text-2xl font-semibold text-900">{{ u.firstName }} {{ u.lastName }}</h2>
+            <p class="role-badge">{{ formatRoleName(u.roleName) }}</p>
+            <p class="text-sm text-color-secondary m-0">{{ u.email }}</p>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Cédula</label>
+            <span>{{ u.id }}</span>
+          </div>
+          <div class="info-item">
+            <label>Estado</label>
+            <span [style.color]="u.isActive ? '#22c55e' : '#ef4444'">
+              {{ u.isActive ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <label>Miembro desde</label>
+            <span>{{ u.createdAt | date: 'shortDate' }}</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2 mt-3">
+          <p-button label="Cambiar Contraseña" icon="pi pi-key" (onClick)="goChangePassword()" />
+        </div>
+      </p-card>
+    </div>
+  </div>
+}

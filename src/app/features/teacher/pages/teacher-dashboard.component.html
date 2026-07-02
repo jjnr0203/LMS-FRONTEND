@@ -1,0 +1,12 @@
+<div class="surface-ground min-h-screen">
+  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Bienvenido de nuevo, <span>{{ user()?.firstName }}</span></h1>
+    <p class="text-green-100 m-0">Aquí puedes gestionar tus materias, crear tareas y revisar calificaciones en tu rol de Docente.</p>
+  </div>
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <h3 class="text-xl font-semibold text-800 m-0 mb-2">Panel de Docente</h3>
+      <p class="text-600 m-0">Utiliza el menú lateral para acceder a las opciones de gestión académica.</p>
+    </p-card>
+  </div>
+</div>

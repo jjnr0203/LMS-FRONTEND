@@ -1,0 +1,56 @@
+<p-toast />
+<div class="surface-ground min-h-screen">
+  <div class="text-white p-5 mb-5 border-round-xl" style="background: #064e3b">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Crear Materia</h1>
+    <p class="m-0" style="color: #d1fae5">Completa el siguiente formulario para registrar una nueva materia en el sistema.</p>
+  </div>
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label class="font-semibold text-sm text-700" for="name">Nombre de la Materia</label>
+              <input id="name" pInputText formControlName="name" />
+              @if (name.invalid && name.touched) {
+                <small class="p-error">Requerido.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label class="font-semibold text-sm text-700" for="code">Código</label>
+              <input id="code" pInputText formControlName="code" placeholder="MAT-101" />
+              @if (code.invalid && code.touched) {
+                <small class="p-error">Requerido.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label class="font-semibold text-sm text-700" for="credits">Créditos</label>
+              <p-inputNumber id="credits" formControlName="credits" [min]="1" [max]="12" />
+              @if (credits.invalid && credits.touched) {
+                <small class="p-error">Debe ser entre 1 y 12.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="flex flex-column gap-2 mb-4">
+              <label class="font-semibold text-sm text-700" for="description">Descripción (opcional)</label>
+              <input id="description" pInputText formControlName="description" />
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-content-end mt-3">
+          <p-button
+            type="submit"
+            label="Crear Materia"
+            [loading]="loading()"
+            [disabled]="form.invalid"
+          />
+        </div>
+      </form>
+    </p-card>
+  </div>
+</div>

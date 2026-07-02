@@ -1,0 +1,38 @@
+<p-toast />
+<div class="surface-ground min-h-screen">
+  <div class="text-white p-5 mb-5 border-round-xl" style="background: #064e3b">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Matricular Estudiante</h1>
+    <p class="m-0" style="color: #d1fae5">Matricula a un estudiante registrado en el ciclo académico.</p>
+  </div>
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="flex flex-column gap-2 mb-4">
+          <label class="font-semibold text-sm text-700" for="studentId">Seleccione el Estudiante</label>
+          <p-select
+            id="studentId"
+            [options]="students()"
+            formControlName="studentId"
+            optionLabel="fullName"
+            optionValue="id"
+            placeholder="Seleccione un estudiante"
+            [filter]="true"
+            filterBy="fullName"
+            [showClear]="true"
+          ></p-select>
+          @if (studentId.invalid && studentId.touched) {
+            <small class="p-error">Debe seleccionar un estudiante.</small>
+          }
+        </div>
+        <div class="flex justify-content-end mt-3">
+          <p-button
+            type="submit"
+            label="Matricular"
+            [loading]="loading()"
+            [disabled]="form.invalid"
+          />
+        </div>
+      </form>
+    </p-card>
+  </div>
+</div>

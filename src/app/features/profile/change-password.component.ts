@@ -7,7 +7,6 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-change-password',
@@ -17,75 +16,20 @@ import { CommonModule } from '@angular/common';
     ButtonModule,
     ToastModule,
     CardModule,
-    CommonModule,
   ],
   providers: [MessageService],
-  template: `
-    <p-toast />
-    <p-card header="Cambiar Contraseña">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="field">
-          <label for="currentPassword">Contraseña Actual</label>
-          <p-password
-            id="currentPassword"
-            formControlName="currentPassword"
-            [feedback]="false"
-            [toggleMask]="true"
-          />
-          @if (currentPassword.invalid && currentPassword.touched) {
-            <small class="p-error">Requerida.</small>
-          }
-        </div>
-        <div class="field">
-          <label for="newPassword">Nueva Contraseña</label>
-          <p-password id="newPassword" formControlName="newPassword" [toggleMask]="true" />
-          @if (newPassword.invalid && newPassword.touched) {
-            <small class="p-error">Mínimo 6 caracteres.</small>
-          }
-        </div>
-
-        <div class="actions">
-          <p-button label="Cancelar" severity="secondary" variant="text" (onClick)="cancel()" />
-          <p-button
-            type="submit"
-            label="Cambiar Contraseña"
-            [loading]="loading()"
-            [disabled]="form.invalid"
-          />
-        </div>
-      </form>
-    </p-card>
-
-    <style>
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-        margin-bottom: 1rem;
-        max-width: 400px;
-      }
-      .field label {
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: #334155;
-      }
-      .actions {
-        display: flex;
-        gap: 0.75rem;
-        margin-top: 1rem;
-      }
-    </style>
-  `,
+  templateUrl: './change-password.component.html',
+  styleUrl: './change-password.component.scss',
 })
 export class ChangePasswordComponent {
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private userService = inject(UserService);
   private messageService = inject(MessageService);
   private router = inject(Router);
 
   loading = signal(false);
 
-  form = this.fb.nonNullable.group({
+  form = this.formBuilder.group({
     currentPassword: ['', Validators.required],
     newPassword: ['', [Validators.required, Validators.minLength(6)]],
   });

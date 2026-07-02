@@ -1,0 +1,72 @@
+<p-toast />
+
+<div class="surface-ground min-h-screen">
+  <div class="text-white p-5 mb-5 border-round-xl" style="background: #064e3b">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Carreras</h1>
+    <p class="m-0" style="color: #d1fae5">Carreras a tu cargo organizadas por modalidad.</p>
+  </div>
+
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <div class="p-3">
+        @if (loading()) {
+          <div class="flex justify-content-center p-5">
+            <i class="pi pi-spin pi-spinner text-4xl text-600"></i>
+          </div>
+        } @else if (careers().length > 0) {
+          <div class="grid">
+            @for (career of careers(); track career.id) {
+              <div class="col-12 md:col-6 lg:col-4">
+                <p-card
+                  styleClass="shadow-1 cursor-pointer surface-0"
+                  [style]="{ transition: 'box-shadow 0.2s' }"
+                  (click)="goToCareer(career.id)"
+                >
+                  <ng-template pTemplate="header">
+                    <div class="flex align-items-center justify-content-between p-3 pb-0">
+                      <div class="flex align-items-center gap-2">
+                        <i class="pi pi-graduation-cap text-green-600"></i>
+                        <span class="font-semibold text-900">{{ career.name }}</span>
+                      </div>
+                      <p-badge [value]="career.code" severity="contrast" />
+                    </div>
+                  </ng-template>
+
+                  <div class="p-3 pt-2">
+                    <div class="flex align-items-center gap-2 mb-2">
+                      <span class="text-600 text-sm">Duración:</span>
+                      <span class="text-900 text-sm font-medium">{{ career.durationSemesters }} semestres</span>
+                    </div>
+                    <div class="flex align-items-center gap-2">
+                      <span class="text-600 text-sm">Modalidades:</span>
+                      @if (career.modalityNames && career.modalityNames.length > 0) {
+                        <div class="flex flex-wrap gap-1">
+                          @for (mod of career.modalityNames; track mod) {
+                            <span class="bg-green-50 text-green-700 text-xs font-medium px-2 py-1 border-round" style="border: 1px solid #a7f3d0">{{ mod }}</span>
+                          }
+                        </div>
+                      } @else {
+                        <span class="text-400 text-sm">Sin modalidades</span>
+                      }
+                    </div>
+                  </div>
+
+                  <ng-template pTemplate="footer">
+                    <div class="flex align-items-center justify-content-between p-3 pt-0">
+                      <span class="text-green-600 text-sm font-medium">Ver detalle <i class="pi pi-arrow-right text-xs"></i></span>
+                    </div>
+                  </ng-template>
+                </p-card>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="flex flex-column align-items-center p-5 text-400">
+            <i class="pi pi-folder-open text-5xl mb-3"></i>
+            <p class="m-0">No tienes carreras asignadas.</p>
+          </div>
+        }
+      </div>
+    </p-card>
+  </div>
+</div>

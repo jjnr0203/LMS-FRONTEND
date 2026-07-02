@@ -50,7 +50,7 @@ import { Career, Modality, Subject, User, Curriculum } from '../../../../../core
 export class Careers implements OnInit {
   private academicService = inject(AcademicService);
   private userService = inject(UserService);
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private cdr = inject(ChangeDetectorRef);
@@ -113,7 +113,7 @@ export class Careers implements OnInit {
   }
 
   initForms() {
-    this.careerForm = this.fb.group({
+    this.careerForm = this.formBuilder.group({
       name: ['', Validators.required],
       code: ['', Validators.required],
       durationSemesters: [1, [Validators.required, Validators.min(1)]],
@@ -122,13 +122,13 @@ export class Careers implements OnInit {
       isActive: [true],
     });
 
-    this.curriculumForm = this.fb.group({
+    this.curriculumForm = this.formBuilder.group({
       name: ['', Validators.required],
       description: [''],
       isActive: [true],
     });
 
-    this.subjectForm = this.fb.group({
+    this.subjectForm = this.formBuilder.group({
       code: ['', Validators.required],
       name: ['', Validators.required],
       credits: [1, [Validators.required, Validators.min(1)]],

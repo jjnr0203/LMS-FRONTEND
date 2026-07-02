@@ -1,109 +1,55 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { CoordinatorService } from '../../../core/services/coordinator.service';
+import { CardModule } from 'primeng/card';
+import { ToastModule } from 'primeng/toast';
+import { BadgeModule } from 'primeng/badge';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-coordinator-dashboard',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="dashboard-container">
-      <!-- Dark Header -->
-      <div class="dashboard-header">
-        <div class="header-content">
-          <h1 class="title">Bienvenido de nuevo, <span>{{ user()?.firstName }}</span></h1>
-          <p class="description">
-            Aquí puedes gestionar materias, docentes y matriculaciones en tu rol de Coordinador.
-          </p>
-        </div>
-      </div>
-
-      <!-- Content -->
-      <div class="stats-grid">
-        <div class="stat-card welcome-card">
-          <div class="stat-info">
-            <h3>Panel de Coordinación</h3>
-            <p>Utiliza el menú lateral para acceder a las opciones de gestión académica.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [
-    `
-      .dashboard-container {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-        margin-top: -1.5rem;
-        margin-left: -1.5rem;
-        margin-right: -1.5rem;
-      }
-
-      /* Dark Header */
-      .dashboard-header {
-        background: #064e3b;
-        color: #ffffff;
-        border-bottom: none;
-        padding: 2.5rem 2rem 5rem 2rem;
-        min-height: 250px;
-        box-sizing: border-box;
-        display: flex;
-        align-items: flex-start;
-      }
-      .title {
-        font-size: 2.2rem;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-        color: #ffffff;
-      }
-      .title span {
-        font-weight: 600;
-        color: #ffffff;
-      }
-      .description {
-        color: #d1fae5;
-        font-size: 0.95rem;
-        line-height: 1.5;
-      }
-
-      /* Stats Grid */
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-        padding: 0 2rem;
-        margin-top: -3.5rem;
-        justify-content: center;
-        max-width: 1400px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .stat-card {
-        background: #ffffff;
-        border-radius: 6px;
-        padding: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-      .welcome-card h3 {
-        font-size: 1.5rem;
-        color: #1e293b;
-      }
-      .welcome-card p {
-        color: #64748b;
-      }
-    `
-  ]
+  imports: [CardModule, ToastModule, BadgeModule],
+  providers: [MessageService],
+  templateUrl: './coordinator-dashboard.component.html',
+  styleUrl: './coordinator-dashboard.component.scss',
 })
-export class CoordinatorDashboardComponent {
+export class CoordinatorDashboardComponent implements OnInit {
   private authService = inject(AuthService);
+  private coordinatorService = inject(CoordinatorService);
+  private messageService = inject(MessageService);
+  private router = inject(Router);
+
   user = this.authService.user;
+  careers = signal<any[]>([]);
+  totalSubjects = signal(0);
+  loading = signal(false);
+
+  ngOnInit() {
+    this.loadDashboard();
+  }
+
+  loadDashboard() {
+    this.loading.set(true);
+    this.coordinatorService.getDashboard().subscribe({
+      next: (res) => {
+        this.careers.set(res.careers);
+        this.totalSubjects.set(res.totalSubjects);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo cargar el panel',
+        });
+        this.loading.set(false);
+      },
+    });
+  }
+
+  goToCareer(id: string) {
+    this.router.navigate(['/coordinator/carrera', id]);
+  }
 }
-
-
-
-
-
