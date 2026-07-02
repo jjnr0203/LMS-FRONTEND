@@ -76,28 +76,26 @@
   align-items: center;
   position: relative;
   gap: 1.25rem;
-  height: 115px; /* Made slightly larger */
+  height: 115px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   border: 1px solid #f3f4f6;
   transition: all 0.3s ease;
   overflow: hidden;
-  cursor: pointer; /* Apply cursor pointer to all cards as requested to have unified hover */
+  cursor: pointer;
 }
 
 .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  background: linear-gradient(135deg, #059669 0%, #047857 100%); /* Unified green */
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
   border-color: #047857;
 }
 
-/* Hover effects for text inside the card */
 .stat-card:hover .stat-info h3,
 .stat-card:hover .stat-info p {
   color: #ffffff;
 }
 
-/* Hover effects for the icon inside the card */
 .stat-card:hover .stat-icon {
   transform: scale(1.1);
   background: rgba(255, 255, 255, 0.2) !important;
@@ -179,79 +177,125 @@
   font-size: 0.95rem;
 }
 
-/* Accordion Styling overrides */
-::ng-deep .academic-accordion {
-  .p-accordion-header-link {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 6px !important;
-    padding: 1rem 1.25rem !important;
-    transition: all 0.2s ease !important;
-    
-    &:hover {
-      background: #f8fafc !important;
-      border-color: #cbd5e1 !important;
-    }
-  }
-
-  .p-accordion-panel {
-    margin-bottom: 1rem !important;
-    border-radius: 6px !important;
-    border: none !important;
-  }
-
-  .p-accordion-panel-active .p-accordion-header-link {
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    background: #f8fafc !important;
-  }
-
-  .p-accordion-content {
-    border: 1px solid #e2e8f0 !important;
-    border-top: none !important;
-    border-bottom-left-radius: 6px !important;
-    border-bottom-right-radius: 6px !important;
-    padding: 1.25rem !important;
-    background: #ffffff !important;
-  }
+/* Career Grid */
+.career-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.25rem;
 }
 
-.accordion-header-content {
+.career-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.career-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-color: #10b981;
+}
+
+.career-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  padding-right: 1rem;
+  gap: 0.75rem;
 }
 
-.career-title {
+.career-card-title {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 1rem;
+  gap: 0.6rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #1e293b;
 
   i {
     color: #10b981;
-    font-size: 1.15rem;
+    font-size: 1.2rem;
   }
 }
 
-.career-badges {
+.career-card-body {
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
-.semester-badge {
-  background: #f1f5f9;
-  color: #475569;
-  padding: 0.25rem 0.75rem;
+.career-detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.detail-label {
+  color: #64748b;
+  font-weight: 500;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #334155;
+  font-weight: 500;
+}
+
+.detail-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.modality-chip {
+  background: #ecfdf5;
+  color: #059669;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
   border-radius: 9999px;
+  border: 1px solid #a7f3d0;
+}
+
+.malla-chip {
+  background: #eff6ff;
+  color: #3b82f6;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid #bfdbfe;
+}
+
+.career-card-footer {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.view-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #10b981;
   font-size: 0.85rem;
   font-weight: 600;
-  border: 1px solid #e2e8f0;
+
+  i {
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+  }
+}
+
+.career-card:hover .view-detail i {
+  transform: translateX(3px);
 }
 
 .empty-state {
@@ -261,13 +305,13 @@
   justify-content: center;
   padding: 2.5rem;
   color: #94a3b8;
-  
+
   i {
     font-size: 2.5rem;
     margin-bottom: 1rem;
     color: #cbd5e1;
   }
-  
+
   p {
     margin: 0;
     font-size: 1rem;
@@ -284,13 +328,13 @@
   background: #ffffff;
   border-radius: 6px;
   border: 1px dashed #cbd5e1;
-  
+
   i {
     font-size: 2rem;
     margin-bottom: 1rem;
     color: #10b981;
   }
-  
+
   p {
     margin: 0;
     font-size: 1rem;

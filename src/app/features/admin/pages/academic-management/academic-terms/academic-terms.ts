@@ -31,7 +31,7 @@ import { DatePipe } from '@angular/common';
 })
 export class AcademicTerms implements OnInit {
   private academicService = inject(AcademicService);
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private messageService = inject(MessageService); // Inherits from parent
   private confirmationService = inject(ConfirmationService); // Inherits from parent
   private cdr = inject(ChangeDetectorRef);
@@ -48,7 +48,7 @@ export class AcademicTerms implements OnInit {
   }
 
   initForm() {
-    this.termForm = this.fb.group({
+    this.termForm = this.formBuilder.group({
       name: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],

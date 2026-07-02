@@ -23,11 +23,35 @@ export class CoordinatorService {
     return this.http.post<any>(`${this.apiUrl}/materias`, data);
   }
 
-  assignTeacher(data: { teacherId: string; subjectId: string }): Observable<{ message: string }> {
+  assignTeacher(data: { teacherId: string; subjectId: string; curriculumId?: string }): Observable<{ message: string }> {
     return this.http.post<any>(`${this.apiUrl}/asignar-docente`, data);
+  }
+
+  unassignTeacher(subjectId: string, curriculumId?: string): Observable<{ message: string }> {
+    return this.http.post<any>(`${this.apiUrl}/quitar-docente`, { subjectId, curriculumId });
   }
 
   enrollStudent(studentId: string): Observable<{ message: string; enrollment: Enrollment }> {
     return this.http.post<any>(`${this.apiUrl}/matricular`, { studentId });
+  }
+
+  registerTeacher(data: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    birthDate?: string;
+    phone?: string;
+  }): Observable<{ message: string; user: any }> {
+    return this.http.post<any>(`${this.apiUrl}/register-teacher`, data);
+  }
+
+  getDashboard(): Observable<{ careers: any[]; totalSubjects: number }> {
+    return this.http.get<any>(`${this.apiUrl}/dashboard`);
+  }
+
+  getCareerDetail(id: string): Observable<{ career: any; curriculums: any[] }> {
+    return this.http.get<any>(`${this.apiUrl}/carrera/${id}`);
   }
 }

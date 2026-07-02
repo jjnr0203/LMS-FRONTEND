@@ -1,0 +1,75 @@
+<p-toast />
+
+<div class="surface-ground min-h-screen">
+  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Crear Tarea</h1>
+    <p class="text-green-100 m-0">
+      Configura una nueva tarea o evaluación para tus estudiantes.
+    </p>
+  </div>
+
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="title" class="font-semibold text-sm text-700">Título</label>
+              <input id="title" pInputText formControlName="title" />
+              @if (title.invalid && title.touched) {
+                <small class="p-error">Requerido.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="subjectId" class="font-semibold text-sm text-700">ID de la Materia</label>
+              <input id="subjectId" pInputText formControlName="subjectId" />
+              @if (subjectId.invalid && subjectId.touched) {
+                <small class="p-error">Requerido.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="description" class="font-semibold text-sm text-700">Descripción</label>
+              <input id="description" pInputText formControlName="description" />
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="dueDate" class="font-semibold text-sm text-700">Fecha de Entrega</label>
+              <p-datePicker
+                id="dueDate"
+                formControlName="dueDate"
+                [showTime]="true"
+                dateFormat="yy-mm-dd"
+              />
+              @if (dueDate.invalid && dueDate.touched) {
+                <small class="p-error">Requerida.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="maxScore" class="font-semibold text-sm text-700">Puntaje Máximo</label>
+              <p-inputNumber id="maxScore" formControlName="maxScore" [min]="1" [max]="100" />
+              @if (maxScore.invalid && maxScore.touched) {
+                <small class="p-error">Debe ser entre 1 y 100.</small>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-content-end mt-3">
+          <p-button
+            type="submit"
+            label="Crear Tarea"
+            [loading]="loading()"
+            [disabled]="form.invalid"
+          />
+        </div>
+      </form>
+    </p-card>
+  </div>
+</div>

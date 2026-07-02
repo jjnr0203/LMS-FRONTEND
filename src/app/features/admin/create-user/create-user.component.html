@@ -1,0 +1,202 @@
+<p-toast />
+@if (!isModal()) {
+  <div class="surface-ground min-h-screen">
+    <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
+      <h1 class="text-3xl font-semibold m-0 mb-2">Crear Nuevo Usuario</h1>
+      <p class="text-green-100 m-0">Completa el siguiente formulario para registrar un nuevo usuario (Docente, Coordinador o Tesorería) en la plataforma.</p>
+    </div>
+    <div class="flex justify-content-center">
+      <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="grid">
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-4">
+                <label for="id" class="font-semibold text-sm text-700">Cédula (10 dígitos)</label>
+                <input id="id" pInputText formControlName="id" placeholder="0000000000" />
+                @if (id.invalid && id.touched) {
+                  <small class="p-error">La cédula debe tener exactamente 10 dígitos.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-4">
+                <label for="roleName" class="font-semibold text-sm text-700">Rol</label>
+                <p-select
+                  id="roleName"
+                  formControlName="roleName"
+                  [options]="roles"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Seleccione rol"
+                  styleClass="w-full"
+                />
+                @if (roleName.invalid && roleName.touched) {
+                  <small class="p-error">El rol es requerido.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-4">
+                <label for="firstName" class="font-semibold text-sm text-700">Nombres</label>
+                <input id="firstName" pInputText formControlName="firstName" />
+                @if (firstName.invalid && firstName.touched) {
+                  <small class="p-error">Requerido.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-4">
+                <label for="lastName" class="font-semibold text-sm text-700">Apellidos</label>
+                <input id="lastName" pInputText formControlName="lastName" />
+                @if (lastName.invalid && lastName.touched) {
+                  <small class="p-error">Requerido.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-4">
+                <label for="email" class="font-semibold text-sm text-700">Correo Electrónico</label>
+                <input id="email" pInputText formControlName="email" type="email" />
+                @if (email.invalid && email.touched) {
+                  <small class="p-error">Correo inválido.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-4">
+                <label for="password" class="font-semibold text-sm text-700">Contraseña</label>
+                <p-password
+                  id="password"
+                  formControlName="password"
+                  [feedback]="false"
+                  [toggleMask]="true"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                />
+                @if (password.invalid && password.touched) {
+                  <small class="p-error">Debe tener al menos 6 caracteres.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-4">
+                <label for="birthDate" class="font-semibold text-sm text-700">Fecha de Nacimiento (Opcional)</label>
+                <input id="birthDate" type="date" pInputText formControlName="birthDate" />
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-4">
+                <label for="phone" class="font-semibold text-sm text-700">Teléfono (Opcional)</label>
+                <input id="phone" type="tel" pInputText formControlName="phone" />
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 flex justify-content-end">
+            <p-button
+              type="submit"
+              label="Registrar Usuario"
+              icon="pi pi-check"
+              [loading]="loading()"
+              [disabled]="form.invalid"
+            />
+          </div>
+        </form>
+      </p-card>
+    </div>
+  </div>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label for="id" class="font-semibold text-sm text-700">Cédula (10 dígitos)</label>
+          <input id="id" pInputText formControlName="id" placeholder="0000000000" />
+          @if (id.invalid && id.touched) {
+            <small class="p-error">La cédula debe tener exactamente 10 dígitos.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label for="roleName" class="font-semibold text-sm text-700">Rol</label>
+          <p-select
+            id="roleName"
+            formControlName="roleName"
+            [options]="roles"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccione rol"
+            styleClass="w-full"
+          />
+          @if (roleName.invalid && roleName.touched) {
+            <small class="p-error">El rol es requerido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label for="firstName" class="font-semibold text-sm text-700">Nombres</label>
+          <input id="firstName" pInputText formControlName="firstName" />
+          @if (firstName.invalid && firstName.touched) {
+            <small class="p-error">Requerido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label for="lastName" class="font-semibold text-sm text-700">Apellidos</label>
+          <input id="lastName" pInputText formControlName="lastName" />
+          @if (lastName.invalid && lastName.touched) {
+            <small class="p-error">Requerido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label for="email" class="font-semibold text-sm text-700">Correo Electrónico</label>
+          <input id="email" pInputText formControlName="email" type="email" />
+          @if (email.invalid && email.touched) {
+            <small class="p-error">Correo inválido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label for="password" class="font-semibold text-sm text-700">Contraseña</label>
+          <p-password
+            id="password"
+            formControlName="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+          @if (password.invalid && password.touched) {
+            <small class="p-error">Debe tener al menos 6 caracteres.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label for="birthDate" class="font-semibold text-sm text-700">Fecha de Nacimiento (Opcional)</label>
+          <input id="birthDate" type="date" pInputText formControlName="birthDate" />
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label for="phone" class="font-semibold text-sm text-700">Teléfono (Opcional)</label>
+          <input id="phone" type="tel" pInputText formControlName="phone" />
+        </div>
+      </div>
+    </div>
+    <div class="mt-4 flex justify-content-end">
+      <p-button
+        type="submit"
+        label="Registrar Usuario"
+        icon="pi pi-check"
+        [loading]="loading()"
+        [disabled]="form.invalid"
+      />
+    </div>
+  </form>
+}

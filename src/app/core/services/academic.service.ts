@@ -132,4 +132,9 @@ export class AcademicService {
   getCurriculumSubjects(curriculumId: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/curriculums/${curriculumId}/subjects`);
   }
+
+  // --- CAREER BREAKDOWN ---
+  getCareerBreakdown(careerId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/careers/${careerId}/breakdown`);
+  }
 }

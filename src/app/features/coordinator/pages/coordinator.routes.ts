@@ -39,6 +39,27 @@ export default [
             (m) => m.EnrollStudentComponent,
           ),
       },
+      {
+        path: 'registrar-docente',
+        loadComponent: () =>
+          import('../register-teacher/register-teacher.component').then(
+            (m) => m.RegisterTeacherComponent,
+          ),
+      },
+      {
+        path: 'carreras',
+        loadComponent: () =>
+          import('../careers-list/careers-list.component').then(
+            (m) => m.CareersListComponent,
+          ),
+      },
+      {
+        path: 'carrera/:id',
+        loadComponent: () =>
+          import('../career-detail/career-detail.component').then(
+            (m) => m.CareerDetailComponent,
+          ),
+      },
     ],
   },
 ] as Routes;

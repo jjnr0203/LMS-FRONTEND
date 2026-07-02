@@ -1,0 +1,54 @@
+<p-toast />
+<div class="surface-ground min-h-screen">
+  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Inscribir Alumno en Materia</h1>
+    <p class="text-green-100 m-0">Inscribe a un estudiante en la lista de tu materia para que pueda ver y enviar tareas.</p>
+  </div>
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="studentId" class="font-semibold text-sm text-700">Seleccione el Estudiante</label>
+              <p-select
+                id="studentId"
+                [options]="students()"
+                formControlName="studentId"
+                optionLabel="fullName"
+                optionValue="id"
+                placeholder="Seleccione un estudiante"
+                [filter]="true"
+                filterBy="fullName"
+                [showClear]="true"
+              ></p-select>
+              @if (studentId.invalid && studentId.touched) {
+                <small class="p-error">Debe seleccionar un estudiante.</small>
+              }
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2 mb-4">
+              <label for="subjectId" class="font-semibold text-sm text-700">Seleccione la Materia</label>
+              <p-select
+                id="subjectId"
+                [options]="subjects()"
+                formControlName="subjectId"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Seleccione una materia"
+                [filter]="true"
+                filterBy="name"
+                [showClear]="true"
+              ></p-select>
+              @if (subjectId.invalid && subjectId.touched) {
+                <small class="p-error">Debe seleccionar una materia.</small>
+              }
+            </div>
+          </div>
+        </div>
+        <p-button type="submit" label="Inscribir" [loading]="loading()" [disabled]="form.invalid" />
+      </form>
+    </p-card>
+  </div>
+</div>

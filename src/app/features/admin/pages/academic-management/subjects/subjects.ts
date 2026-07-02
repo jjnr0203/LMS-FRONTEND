@@ -44,7 +44,7 @@ import { Subject, User, Career, Modality, Curriculum } from '../../../../../core
 export class Subjects implements OnInit {
   private academicService = inject(AcademicService);
   private userService = inject(UserService);
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private cdr = inject(ChangeDetectorRef);
@@ -71,7 +71,7 @@ export class Subjects implements OnInit {
   }
 
   initForm() {
-    this.form = this.fb.group({
+    this.form = this.formBuilder.group({
       name: ['', Validators.required],
       code: ['', Validators.required],
       credits: [1, [Validators.required, Validators.min(1)]],

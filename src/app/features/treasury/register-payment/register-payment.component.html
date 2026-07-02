@@ -1,0 +1,46 @@
+<p-toast />
+<div class="surface-ground min-h-screen">
+  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
+    <h1 class="text-3xl font-semibold m-0 mb-2">Registrar Abono</h1>
+    <p class="text-green-100 m-0">Registra un nuevo abono para la matrícula de un estudiante.</p>
+  </div>
+  <div class="flex justify-content-center">
+    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="flex flex-column gap-2 mb-4">
+          <label class="font-semibold text-sm text-700" for="studentId">Seleccione el Estudiante</label>
+          <p-select
+            id="studentId"
+            [options]="students()"
+            formControlName="studentId"
+            optionLabel="fullName"
+            optionValue="id"
+            placeholder="Seleccione un estudiante"
+            [filter]="true"
+            filterBy="fullName"
+            [showClear]="true"
+          ></p-select>
+          @if (studentId.invalid && studentId.touched) {
+            <small class="p-error">Debe seleccionar un estudiante.</small>
+          }
+        </div>
+        <div class="flex justify-content-end mt-3">
+          <p-button
+            type="submit"
+            label="Registrar Abono"
+            [loading]="loading()"
+            [disabled]="form.invalid"
+          />
+        </div>
+      </form>
+
+      @if (result(); as r) {
+        <div class="bg-gray-50 p-3 border-1 border-gray-200 border-round mt-4">
+          <h3>Resultado</h3>
+          <p><strong>Estado:</strong> <p-tag [value]="statusLabel(r.status)" [severity]="statusSeverity(r.status)" /></p>
+          <p><strong>Cuotas pagadas:</strong> {{ r.paidInstallments }} / 4</p>
+        </div>
+      }
+    </p-card>
+  </div>
+</div>

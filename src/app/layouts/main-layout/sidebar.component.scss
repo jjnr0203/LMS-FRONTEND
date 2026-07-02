@@ -1,0 +1,15 @@
+.active {
+  background: #064e3b !important;
+  color: #ffffff !important;
+}
+
+li.active {
+  background: transparent !important;
+  color: #064e3b !important;
+  font-weight: 600;
+
+  .w-1.h-1.border-circle {
+    background: #064e3b !important;
+    box-shadow: 0 0 0 2px rgba(6, 78, 59, 0.2);
+  }
+}

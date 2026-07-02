@@ -29,6 +29,11 @@ export default [
         loadComponent: () =>
           import('./academic-management/academic-management').then((m) => m.AcademicManagement),
       },
+      {
+        path: 'desglose/:careerId',
+        loadComponent: () =>
+          import('./career-breakdown/career-breakdown.component').then((m) => m.CareerBreakdownComponent),
+      },
     ],
   },
 ] as Routes;
