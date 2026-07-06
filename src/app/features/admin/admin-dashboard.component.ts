@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
 import { CardModule } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
-import { AcademicService } from '../../core/services/academic.service';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -36,6 +35,7 @@ interface DashboardStats {
   academic: {
     totalCareers: number;
     totalSubjects: number;
+    totalFaculties: number;
     careers: CareerDetail[];
   };
 }
@@ -49,7 +49,6 @@ interface DashboardStats {
 })
 export class AdminDashboardComponent implements OnInit {
   private authService = inject(AuthService);
-  private academicService = inject(AcademicService);
   private http = inject(HttpClient);
   private router = inject(Router);
 

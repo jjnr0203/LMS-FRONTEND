@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AcademicTerm, Modality, Career, Subject, SemesterColor, Curriculum } from '../models';
+import { AcademicTerm, Modality, Career, Subject, SemesterColor, Curriculum, Faculty, Permission } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class AcademicService {
@@ -136,5 +136,51 @@ export class AcademicService {
   // --- CAREER BREAKDOWN ---
   getCareerBreakdown(careerId: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/careers/${careerId}/breakdown`);
+  }
+
+  // --- FACULTIES ---
+  getFaculties(): Observable<Faculty[]> {
+    return this.http.get<Faculty[]>(`${this.apiUrl}/faculties`);
+  }
+
+  createFaculty(data: Partial<Faculty>): Observable<Faculty> {
+    return this.http.post<Faculty>(`${this.apiUrl}/faculties`, data);
+  }
+
+  updateFaculty(id: string, data: Partial<Faculty>): Observable<Faculty> {
+    return this.http.put<Faculty>(`${this.apiUrl}/faculties/${id}`, data);
+  }
+
+  deleteFaculty(id: string): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/faculties/${id}`);
+  }
+
+  // --- PERMISSIONS ---
+  getPermissions(): Observable<Permission[]> {
+    return this.http.get<Permission[]>(`${this.apiUrl}/permissions`);
+  }
+
+  createPermission(data: Partial<Permission>): Observable<Permission> {
+    return this.http.post<Permission>(`${this.apiUrl}/permissions`, data);
+  }
+
+  updatePermission(id: string, data: Partial<Permission>): Observable<Permission> {
+    return this.http.put<Permission>(`${this.apiUrl}/permissions/${id}`, data);
+  }
+
+  deletePermission(id: string): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/permissions/${id}`);
+  }
+
+  getPermissionRoles(): Observable<{ id: string; name: string }[]> {
+    return this.http.get<{ id: string; name: string }[]>(`${this.apiUrl}/permissions/roles`);
+  }
+
+  getPermissionsByRole(roleId: string): Observable<{ permissionIds: string[] }> {
+    return this.http.get<{ permissionIds: string[] }>(`${this.apiUrl}/permissions/roles/${roleId}`);
+  }
+
+  assignPermissionsToRole(roleId: string, permissionIds: string[]): Observable<{ success: boolean }> {
+    return this.http.put<{ success: boolean }>(`${this.apiUrl}/permissions/roles/${roleId}`, { permissionIds });
   }
 }

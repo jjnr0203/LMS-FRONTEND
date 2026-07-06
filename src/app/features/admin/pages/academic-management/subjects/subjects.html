@@ -96,8 +96,8 @@
         </div>
         <div class="col-12 md:col-6">
           <div class="flex flex-column gap-2 mb-4">
-            <label for="curriculumId" class="font-semibold text-sm text-slate-700">Curriculum</label>
-            <p-select formControlName="curriculumId" [options]="curriculums" optionLabel="name" optionValue="id" placeholder="Select a curriculum" [showClear]="true" styleClass="w-full">
+            <label for="curriculumId" class="font-semibold text-sm text-slate-700">Pensum</label>
+            <p-select formControlName="curriculumId" [options]="curriculums" optionLabel="name" optionValue="id" placeholder="Seleccione un pensum" [showClear]="true" styleClass="w-full">
             </p-select>
             @if (!form.get('careerId')?.value) {
               <small class="text-slate-500">Debe seleccionar una carrera primero</small>

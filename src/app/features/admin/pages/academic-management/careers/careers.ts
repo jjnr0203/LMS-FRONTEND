@@ -20,7 +20,7 @@ import { AccordionModule } from 'primeng/accordion';
 import * as XLSX from 'xlsx';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { UserService } from '../../../../../core/services/user.service';
-import { Career, Modality, Subject, User, Curriculum } from '../../../../../core/models';
+import { Career, Modality, Subject, User, Curriculum, Faculty } from '../../../../../core/models';
 
 @Component({
   selector: 'app-careers',
@@ -58,6 +58,7 @@ export class Careers implements OnInit {
   careers: Career[] = [];
   modalities: Modality[] = [];
   coordinators: User[] = [];
+  faculties: Faculty[] = [];
 
   // --- Career dialog ---
   displayCareerDialog = false;
@@ -119,6 +120,7 @@ export class Careers implements OnInit {
       durationSemesters: [1, [Validators.required, Validators.min(1)]],
       modalityIds: [[]],
       coordinatorId: [null],
+      facultyId: [null],
       isActive: [true],
     });
 
@@ -143,10 +145,19 @@ export class Careers implements OnInit {
   loadCareers() {
     this.academicService.getCareers().subscribe((data) => {
       this.careers = data;
+    });
+    this.academicService.getModalities().subscribe((data) => {
+      this.modalities = data.filter(m => m.isActive);
       this.cdr.detectChanges();
     });
-    this.academicService.getModalities().subscribe((data) => (this.modalities = data.filter(m => m.isActive)));
-    this.userService.getUsers(1, 100, 'coordinator').subscribe((res) => (this.coordinators = res.data));
+    this.academicService.getFaculties().subscribe((data) => {
+      this.faculties = data.filter(f => f.isActive);
+      this.cdr.detectChanges();
+    });
+    this.userService.getUsers(1, 100, 'coordinator').subscribe((res) => {
+      this.coordinators = res.data;
+      this.cdr.detectChanges();
+    });
   }
 
   loadCurriculums(careerId: string) {
@@ -282,30 +293,30 @@ export class Careers implements OnInit {
     if (this.isEditCurriculum && this.editCurriculumId) {
       this.academicService.updateCurriculum(this.editCurriculumId, data).subscribe({
         next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Curriculum updated' });
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Pensum actualizado' });
           this.loadCurriculums(this.selectedCareer!.id);
           this.displayCurriculumDialog = false;
         },
-        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not update curriculum' }),
+        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el pensum' }),
       });
     } else {
       this.academicService.createCurriculum(this.selectedCareer.id, data).subscribe({
         next: (created) => {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Curriculum created' });
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Pensum creado' });
           this.loadCurriculums(this.selectedCareer!.id);
           this.displayCurriculumDialog = false;
           this.pendingWizardCurriculumId = created.id;
           setTimeout(() => this.promptAddSubjects(), 300);
         },
-        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not create curriculum' }),
+        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear el pensum' }),
       });
     }
   }
 
   deleteCurriculum(id: string) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete this curriculum?',
-      header: 'Confirm Deletion',
+      message: '¿Está seguro de eliminar este pensum?',
+      header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, Eliminar',
       rejectLabel: 'Cancelar',
@@ -313,11 +324,11 @@ export class Careers implements OnInit {
       accept: () => {
         this.academicService.deleteCurriculum(id).subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Curriculum deleted' });
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Pensum eliminado' });
             if (this.selectedCareer) this.loadCurriculums(this.selectedCareer.id);
             if (this.selectedCurriculum?.id === id) this.backToCurriculums();
           },
-          error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Could not delete curriculum' }),
+          error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudo eliminar el pensum' }),
         });
       }
     });
@@ -439,11 +450,11 @@ export class Careers implements OnInit {
 
   promptCreateCurriculum() {
     this.confirmationService.confirm({
-      message: `Do you want to create a curriculum for "${this.selectedCareer?.name}"?`,
-      header: 'Create Curriculum',
+      message: `¿Deseas crear un pensum para "${this.selectedCareer?.name}"?`,
+      header: 'Crear Pensum',
       icon: 'pi pi-question-circle',
-      acceptLabel: 'Yes, Create',
-      rejectLabel: 'Not now',
+      acceptLabel: 'Sí, Crear',
+      rejectLabel: 'Ahora no',
       accept: () => {
         this.curriculumForm.reset({ isActive: true });
         this.displayCurriculumDialog = true;
@@ -453,11 +464,11 @@ export class Careers implements OnInit {
 
   promptAddSubjects() {
     this.confirmationService.confirm({
-      message: `Do you want to add subjects to the curriculum of "${this.selectedCareer?.name}"?`,
-      header: 'Add Subjects',
+      message: `¿Deseas agregar materias al pensum de "${this.selectedCareer?.name}"?`,
+      header: 'Agregar Materias',
       icon: 'pi pi-question-circle',
-      acceptLabel: 'Yes, Add',
-      rejectLabel: 'Not now',
+      acceptLabel: 'Sí, Agregar',
+      rejectLabel: 'Ahora no',
       accept: () => {
         this.displayBulkDialog = true;
       },
@@ -585,5 +596,10 @@ export class Careers implements OnInit {
 
   getModalityName(id: string): string {
     return this.modalities.find(m => m.id === id)?.name || id;
+  }
+
+  getFacultyName(id: string | undefined): string {
+    if (!id) return 'No asignada';
+    return this.faculties.find(f => f.id === id)?.name || id;
   }
 }

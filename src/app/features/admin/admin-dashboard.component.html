@@ -154,6 +154,26 @@
             <i class="pi pi-arrow-right"></i>
           </div>
         </div>
+
+        <!-- Facultades -->
+        <div class="stat-card clickable" (click)="goToAcademic('faculties')">
+          <div class="stat-icon" style="background: #fef3c7;">
+            <i class="pi pi-building" style="color: #d97706;"></i>
+          </div>
+          <div class="stat-info">
+            <h3>
+              @if (stats()) {
+                <span translate="no">{{ stats()!.academic.totalFaculties }}</span>
+              } @else {
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #cbd5e1;"></i>
+              }
+            </h3>
+            <p>Facultades</p>
+          </div>
+          <div class="action-arrow">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+        </div>
       </div>
 
       <!-- Academic Breakdown Section -->

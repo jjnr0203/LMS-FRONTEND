@@ -60,36 +60,31 @@
         </div>
       }
 
-      @for (curriculum of data.curriculums; track curriculum.id) {
-        <div class="curriculum-section">
-          <div class="curriculum-header">
-            <div class="curriculum-title-row">
-              <h2>{{ curriculum.name }}</h2>
-              @if (curriculum.isActive) {
-                <p-badge value="Activa" severity="success"></p-badge>
-              } @else {
-                <p-badge value="Inactiva" severity="warn"></p-badge>
+      <p-accordion #accordion (onOpen)="scrollToPanel()">
+        @for (cur of data.curriculums; track cur.id) {
+          <p-accordion-panel [value]="cur.id">
+            <p-accordion-header>
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-sitemap text-green-600"></i>
+                <span class="font-semibold">{{ cur.name }}</span>
+                @if (cur.isActive) {
+                  <p-badge value="Activa" severity="success"></p-badge>
+                } @else {
+                  <p-badge value="Inactiva" severity="warn"></p-badge>
+                }
+              </div>
+            </p-accordion-header>
+            <p-accordion-content>
+              @if (cur.description) {
+                <p class="text-600 text-sm mb-3">{{ cur.description }}</p>
               }
-            </div>
-            @if (curriculum.description) {
-              <p class="curriculum-desc">{{ curriculum.description }}</p>
-            }
-          </div>
 
-          <div class="semesters-container">
-            @for (semGroup of curriculum.semesters; track semGroup.semester) {
-              <div class="semester-block">
-                <div class="semester-header" [style.background-color]="getSemesterColor(semGroup.semester)">
-                  <div class="semester-label">
-                    <i class="pi pi-bookmark"></i>
-                    <span>Semestre {{ semGroup.semester }}</span>
-                  </div>
-                  <span class="semester-count">{{ semGroup.subjects.length }} materia{{ semGroup.subjects.length !== 1 ? 's' : '' }}</span>
-                </div>
-
-                <p-table [value]="semGroup.subjects" styleClass="p-datatable-sm" [rowHover]="true">
+              @let subjects = allSubjects(cur);
+              @if (subjects.length > 0) {
+                <p-table [value]="subjects" styleClass="p-datatable-sm" [rowHover]="true">
                   <ng-template pTemplate="header">
                     <tr>
+                      <th>Semestre</th>
                       <th>Código</th>
                       <th>Nombre</th>
                       <th>Créditos</th>
@@ -99,6 +94,9 @@
                   </ng-template>
                   <ng-template pTemplate="body" let-subject>
                     <tr>
+                      <td>
+                        <span [style]="{ 'background-color': getSemesterColor(subject.semester) }" class="inline-flex align-items-center justify-content-center border-circle text-white font-bold" style="width: 1.8rem; height: 1.8rem; font-size: 0.75rem">{{ subject.semester }}</span>
+                      </td>
                       <td class="font-mono text-600">{{ subject.code }}</td>
                       <td class="font-medium">{{ subject.name }}</td>
                       <td>
@@ -125,11 +123,13 @@
                     </tr>
                   </ng-template>
                 </p-table>
-              </div>
-            }
-          </div>
-        </div>
-      }
+              } @else {
+                <p class="text-400 text-center py-3">Esta malla no tiene materias asignadas.</p>
+              }
+            </p-accordion-content>
+          </p-accordion-panel>
+        }
+      </p-accordion>
     }
   </div>
 </div>
