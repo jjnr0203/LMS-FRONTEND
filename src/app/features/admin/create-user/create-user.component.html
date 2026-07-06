@@ -30,12 +30,12 @@
                   placeholder="Seleccione rol"
                   styleClass="w-full"
                 />
-                @if (roleName.invalid && roleName.touched) {
-                  <small class="p-error">El rol es requerido.</small>
-                }
-              </div>
-            </div>
-            <div class="col-12 md:col-6">
+            @if (roleName.invalid && roleName.touched) {
+              <small class="p-error">El rol es requerido.</small>
+            }
+          </div>
+        </div>
+        <div class="col-12 md:col-6">
               <div class="flex flex-column gap-2 mb-4">
                 <label for="firstName" class="font-semibold text-sm text-700">Nombres</label>
                 <input id="firstName" pInputText formControlName="firstName" />
@@ -128,14 +128,14 @@
             placeholder="Seleccione rol"
             styleClass="w-full"
           />
-          @if (roleName.invalid && roleName.touched) {
-            <small class="p-error">El rol es requerido.</small>
-          }
+            @if (roleName.invalid && roleName.touched) {
+              <small class="p-error">El rol es requerido.</small>
+            }
+          </div>
         </div>
-      </div>
-      <div class="col-12 md:col-6">
-        <div class="flex flex-column gap-2 mb-4">
-          <label for="firstName" class="font-semibold text-sm text-700">Nombres</label>
+        <div class="col-12 md:col-6">
+          <div class="flex flex-column gap-2 mb-4">
+            <label for="firstName" class="font-semibold text-sm text-700">Nombres</label>
           <input id="firstName" pInputText formControlName="firstName" />
           @if (firstName.invalid && firstName.touched) {
             <small class="p-error">Requerido.</small>

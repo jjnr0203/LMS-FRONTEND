@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, ElementRef, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AcademicService } from '../../../../core/services/academic.service';
@@ -64,7 +64,7 @@ export class CareerBreakdownComponent implements OnInit {
   error = signal<string | null>(null);
   careerId = signal<string>('');
 
-  activeCurriculumId = signal<string | null>(null);
+  accordionEl = viewChild<ElementRef<HTMLElement>>('accordion');
 
   semesterColors = this.academicService.semesterColors;
 
@@ -91,6 +91,25 @@ export class CareerBreakdownComponent implements OnInit {
         console.error('Error loading career breakdown', err);
       }
     });
+  }
+
+  allSubjects(cur: CurriculumBreakdown): SubjectItem[] {
+    if (!cur.semesters || !Array.isArray(cur.semesters)) return [];
+    const result: SubjectItem[] = [];
+    for (const sem of cur.semesters) {
+      if (sem.subjects && Array.isArray(sem.subjects)) {
+        for (const sub of sem.subjects) {
+          result.push(sub);
+        }
+      }
+    }
+    return result;
+  }
+
+  scrollToPanel() {
+    setTimeout(() => {
+      this.accordionEl()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
   }
 
   getSemesterColor(sem: number): string {

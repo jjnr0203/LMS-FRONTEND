@@ -124,6 +124,25 @@ export interface Career {
   modalityIds?: string[];
   coordinatorId?: string;
   isActive: boolean;
+  facultyId?: string;
+}
+
+export interface Faculty {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  resource: string;
+  createdAt: string;
 }
 
 export interface Curriculum {

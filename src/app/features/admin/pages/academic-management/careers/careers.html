@@ -16,6 +16,7 @@
       <tr>
         <th>Código</th>
         <th>Nombre</th>
+        <th>Facultad</th>
         <th>Modalidad</th>
         <th>Coordinador</th>
         <th>Semestres</th>
@@ -27,12 +28,14 @@
       <tr style="cursor:pointer" (click)="selectCareer(c)">
         <td class="font-medium text-slate-600">{{ c.code }}</td>
         <td class="font-medium text-slate-800">{{ c.name }}</td>
+        <td><p-badge [value]="getFacultyName(c.facultyId)" severity="info"></p-badge></td>
         <td>
           <div class="flex gap-1 flex-wrap">
-            @for (modName of getModalityList(c.modalityIds); track modName) {
+            @let modNames = getModalityList(c.modalityIds);
+            @for (modName of modNames; track $index) {
               <p-badge [value]="modName" severity="success"></p-badge>
             }
-            @if (getModalityList(c.modalityIds).length === 0) {
+            @if (modNames.length === 0) {
               <p-badge value="No asignada" severity="secondary"></p-badge>
             }
           </div>
@@ -55,7 +58,7 @@
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
-      <tr><td colspan="7" class="text-center py-4 text-slate-500">No se encontraron carreras.</td></tr>
+        <tr><td colspan="8" class="text-center py-4 text-slate-500">No se encontraron carreras.</td></tr>
     </ng-template>
   </p-table>
 }
@@ -65,15 +68,15 @@
   <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div class="flex align-items-center gap-2">
       <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="backToCareers()"></p-button>
-      <h3 class="m-0 text-xl font-medium text-800">{{ selectedCareer.name }} — Curriculums</h3>
-      <p-button label="New Curriculum" icon="pi pi-plus" (onClick)="openNewCurriculum()" severity="success" size="small"></p-button>
+      <h3 class="m-0 text-xl font-medium text-800">{{ selectedCareer.name }} — Pensums</h3>
+      <p-button label="Nuevo Pensum" icon="pi pi-plus" (onClick)="openNewCurriculum()" severity="success" size="small"></p-button>
     </div>
   </div>
 
   @if (curriculums.length === 0) {
     <div class="text-center py-6 text-slate-500">
       <i class="pi pi-book text-4xl mb-3 block"></i>
-      <p class="text-lg">This career has no curriculums</p>
+      <p class="text-lg">Esta carrera no tiene pensums</p>
     </div>
   } @else {
     <p-table [value]="curriculums" styleClass="p-datatable-sm" responsiveLayout="scroll">
@@ -107,7 +110,7 @@
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
-        <tr><td colspan="5" class="text-center py-4 text-slate-500">No curriculums found.</td></tr>
+        <tr><td colspan="5" class="text-center py-4 text-slate-500">No se encontraron pensums.</td></tr>
       </ng-template>
     </p-table>
   }
@@ -128,7 +131,7 @@
   @if (subjects.length === 0) {
     <div class="text-center py-6 text-slate-500">
       <i class="pi pi-book text-4xl mb-3 block"></i>
-      <p class="text-lg">This curriculum has no subjects assigned</p>
+      <p class="text-lg">Este pensum no tiene materias asignadas</p>
     </div>
   } @else {
     <p-accordion [multiple]="true">
@@ -203,6 +206,10 @@
         <p-inputNumber formControlName="durationSemesters" [min]="1" [max]="9" [useGrouping]="false" styleClass="w-full" class="w-full"></p-inputNumber>
       </div></div>
       <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Facultad</label>
+        <p-select formControlName="facultyId" [options]="faculties" optionLabel="name" optionValue="id" placeholder="Seleccione una facultad" [showClear]="true" [filter]="true" styleClass="w-full"></p-select>
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
         <label class="font-semibold text-sm text-slate-700">Modalidades</label>
         <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
       </div></div>
@@ -226,12 +233,12 @@
 </p-dialog>
 
 <!-- Curriculum Form -->
-<p-dialog [(visible)]="displayCurriculumDialog" [header]="isEditCurriculum ? 'Edit Curriculum' : 'New Curriculum'" [modal]="true" [style]="{ width: '500px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
+<p-dialog [(visible)]="displayCurriculumDialog" [header]="isEditCurriculum ? 'Editar Pensum' : 'Nuevo Pensum'" [modal]="true" [style]="{ width: '500px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
   <form [formGroup]="curriculumForm" (ngSubmit)="saveCurriculum()" class="mt-3">
     <div class="flex flex-column gap-3">
       <div class="flex flex-column gap-2">
-        <label class="font-semibold text-sm text-slate-700">Curriculum Name</label>
-        <input pInputText formControlName="name" placeholder="e.g. Curriculum 2024" class="w-full" />
+        <label class="font-semibold text-sm text-slate-700">Nombre del Pensum</label>
+        <input pInputText formControlName="name" placeholder="Ej: Pensum 2024" class="w-full" />
       </div>
       <div class="flex flex-column gap-2">
         <label class="font-semibold text-sm text-slate-700">Descripción (Opcional)</label>
@@ -244,7 +251,7 @@
     </div>
     <div class="flex justify-content-end gap-2 mt-4">
       <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayCurriculumDialog = false"></p-button>
-      <p-button label="Save Curriculum" icon="pi pi-check" type="submit" [disabled]="curriculumForm.invalid" severity="success"></p-button>
+      <p-button label="Guardar Pensum" icon="pi pi-check" type="submit" [disabled]="curriculumForm.invalid" severity="success"></p-button>
     </div>
   </form>
 </p-dialog>
@@ -292,7 +299,7 @@
 <p-dialog [(visible)]="displayBulkDialog" header="Carga Masiva de Materias" [modal]="true" [style]="{ width: '500px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
   <div class="flex flex-column gap-3 mt-3">
     <div class="surface-100 p-3 border-round text-sm text-slate-700">
-      <p class="m-0"><i class="pi pi-info-circle mr-2 text-blue-500"></i>Upload an Excel file with subjects. They will be automatically linked to curriculum "{{ selectedCurriculum?.name }}".</p>
+      <p class="m-0"><i class="pi pi-info-circle mr-2 text-blue-500"></i>Sube un archivo Excel con las materias. Se vincularán automáticamente al pensum "{{ selectedCurriculum?.name }}".</p>
     </div>
     <p-button label="Descargar Plantilla Excel" icon="pi pi-download" severity="success" (onClick)="downloadTemplate()" styleClass="w-full"></p-button>
     <div class="flex flex-column gap-2">

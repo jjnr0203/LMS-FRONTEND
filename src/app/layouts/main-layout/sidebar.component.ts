@@ -156,6 +156,18 @@ export class SidebarComponent {
     this.isCollapsed.update(v => !v);
   }
 
+  translateRole(roleName?: string): string {
+    if (!roleName) return '';
+    const map: Record<string, string> = {
+      admin: 'Administrador',
+      coordinator: 'Coordinador',
+      teacher: 'Docente',
+      student: 'Estudiante',
+      treasury: 'Tesorería',
+    };
+    return map[roleName.toLowerCase()] || roleName;
+  }
+
   logout(event: Event) {
     event.stopPropagation();
     this.authService.logout().subscribe({

@@ -9,7 +9,6 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 
-
 @Component({
   selector: 'app-create-user',
   imports: [
@@ -52,30 +51,14 @@ export class CreateUserComponent {
     roleName: ['', Validators.required],
   });
 
-  get id() {
-    return this.form.controls.id;
-  }
-  get firstName() {
-    return this.form.controls.firstName;
-  }
-  get lastName() {
-    return this.form.controls.lastName;
-  }
-  get email() {
-    return this.form.controls.email;
-  }
-  get password() {
-    return this.form.controls.password;
-  }
-  get roleName() {
-    return this.form.controls.roleName;
-  }
-  get birthDate() {
-    return this.form.controls.birthDate;
-  }
-  get phone() {
-    return this.form.controls.phone;
-  }
+  get id() { return this.form.controls.id; }
+  get firstName() { return this.form.controls.firstName; }
+  get lastName() { return this.form.controls.lastName; }
+  get email() { return this.form.controls.email; }
+  get password() { return this.form.controls.password; }
+  get roleName() { return this.form.controls.roleName; }
+  get birthDate() { return this.form.controls.birthDate; }
+  get phone() { return this.form.controls.phone; }
 
   onSubmit() {
     if (this.form.invalid) {
@@ -113,8 +96,3 @@ export class CreateUserComponent {
     });
   }
 }
-
-
-
-
-
