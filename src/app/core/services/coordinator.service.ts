@@ -23,12 +23,38 @@ export class CoordinatorService {
     return this.http.post<any>(`${this.apiUrl}/materias`, data);
   }
 
-  assignTeacher(data: { teacherId: string; subjectId: string; curriculumId?: string }): Observable<{ message: string }> {
+  assignTeacher(data: { 
+    teacherId: string; 
+    subjectId: string; 
+    curriculumId?: string;
+    academicTermId?: string;
+    modalityId?: string;
+    jornadaId?: string;
+  }): Observable<{ message: string }> {
     return this.http.post<any>(`${this.apiUrl}/asignar-docente`, data);
   }
 
-  unassignTeacher(subjectId: string, curriculumId?: string): Observable<{ message: string }> {
-    return this.http.post<any>(`${this.apiUrl}/quitar-docente`, { subjectId, curriculumId });
+  bulkAssignTeachers(data: {
+    curriculumId?: string;
+    academicTermId: string;
+    subjects: {
+      subjectId: string;
+      assignments: {
+        teacherId: string;
+        modalityIds: string[];
+        jornadaIds: string[];
+      }[];
+    }[];
+  }): Observable<{ message: string }> {
+    return this.http.post<any>(`${this.apiUrl}/ofertar-semestre`, data);
+  }
+
+  unassignTeacher(subjectId: string, curriculumId?: string, assignmentId?: string) {
+    return this.http.post(`${this.apiUrl}/quitar-docente`, {
+      subjectId,
+      curriculumId,
+      assignmentId,
+    });
   }
 
   enrollStudent(studentId: string): Observable<{ message: string; enrollment: Enrollment }> {
@@ -53,5 +79,25 @@ export class CoordinatorService {
 
   getCareerDetail(id: string): Observable<{ career: any; curriculums: any[] }> {
     return this.http.get<any>(`${this.apiUrl}/carrera/${id}`);
+  }
+
+  getTerms(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/ciclos`);
+  }
+
+  getModalities(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/modalidades`);
+  }
+
+  getJornadas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/jornadas`);
+  }
+
+  getSchedules(teacherSubjectId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/horarios/${teacherSubjectId}`);
+  }
+
+  saveSchedules(teacherSubjectId: string, schedules: any[]): Observable<{ success: boolean }> {
+    return this.http.post<any>(`${this.apiUrl}/horarios`, { teacherSubjectId, schedules });
   }
 }

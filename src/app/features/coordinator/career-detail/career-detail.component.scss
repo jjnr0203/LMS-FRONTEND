@@ -1,0 +1,308 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: -1.5rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+}
+
+.page-header {
+  background: #064e3b;
+  color: #ffffff;
+  border-bottom: none;
+  padding: 2.5rem 2rem 5rem 2rem;
+  min-height: 250px;
+  box-sizing: border-box;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.content-wrapper {
+  padding: 0 2rem;
+  margin-top: -3.5rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+.data-card {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #a7f3d0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  width: fit-content;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
+.career-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.career-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+    color: #ffffff;
+  }
+}
+
+.career-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #d1fae5;
+
+  i {
+    font-size: 0.85rem;
+  }
+}
+
+.modality-tag {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  margin-left: 0.25rem;
+}
+
+.skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.breakdown-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #64748b;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+
+  i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #10b981;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  color: #94a3b8;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+
+  i {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #cbd5e1;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+::ng-deep .p-datatable-sm {
+  .p-datatable-thead > tr > th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .p-datatable-tbody > tr > td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .p-datatable-tbody > tr:last-child > td {
+    border-bottom: none;
+  }
+}
+
+::ng-deep .fixed-layout-table table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+/* 1. Malla Green Header (Dark System Green #064e3b) */
+::ng-deep .malla-panel .p-accordion-header-link,
+::ng-deep .malla-panel .p-accordionheader {
+  background-color: #064e3b !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  border: none !important;
+}
+
+::ng-deep .malla-panel .p-accordion-header-link svg,
+::ng-deep .malla-panel .p-accordion-header-link .icon-malla,
+::ng-deep .malla-panel .p-accordion-header-link .title-malla,
+::ng-deep .malla-panel .p-accordion-header-link .subtitle-malla,
+::ng-deep .malla-panel .p-accordionheader svg {
+  color: #ffffff !important;
+}
+
+/* Badge for Malla (White background, green text) */
+::ng-deep .malla-panel .badge-malla,
+::ng-deep .malla-panel .badge-malla .p-badge {
+  background-color: #ffffff !important;
+  color: #064e3b !important;
+  border: 1px solid #ffffff !important;
+}
+
+/* 2. Nested Accordion (Semesters) */
+::ng-deep .nested-accordion .p-accordion-header-link {
+  position: relative !important;
+  background-color: transparent !important;
+  padding: 1.25rem 1.5rem !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+::ng-deep .nested-accordion .p-accordionheader {
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+/* Fix semester chevron color */
+::ng-deep .nested-accordion .p-accordion-header-link svg,
+::ng-deep .nested-accordion .p-accordionheader svg {
+  color: #475569 !important;
+}
+
+/* 3. Table Alignment inside Semesters */
+::ng-deep .nested-accordion .p-accordion-content,
+::ng-deep .nested-accordion .p-toggleable-content,
+::ng-deep .nested-accordion .p-accordioncontent,
+::ng-deep .nested-accordion .p-accordioncontent-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+::ng-deep .nested-accordion p-table,
+::ng-deep .nested-accordion .p-datatable,
+::ng-deep .nested-accordion .p-datatable-wrapper,
+::ng-deep .nested-accordion table {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+::ng-deep .nested-accordion.p-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+::ng-deep .nested-accordion .p-accordion-panel {
+  margin-bottom: 0.25rem !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+  overflow: hidden;
+}
+
+::ng-deep .nested-accordion .p-accordionheader,
+::ng-deep .nested-accordion .p-accordion-header-link,
+::ng-deep .nested-accordion .p-accordion-header-action {
+  background-color: #ffffff !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 0.6rem 1rem !important;
+}
+
+::ng-deep .nested-accordion .p-accordionheader > svg,
+::ng-deep .nested-accordion .p-accordionheader svg,
+::ng-deep .nested-accordion .p-accordion-header-link > svg,
+::ng-deep .nested-accordion .p-accordion-toggle-icon,
+::ng-deep .nested-accordion .p-icon {
+  display: inline-block !important;
+  color: #64748b !important;
+  fill: #64748b !important;
+  stroke: #64748b !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  opacity: 1 !important;
+  position: static !important;
+  pointer-events: auto !important;
+}
+
+/* Force disable horizontal scroll in table */
+::ng-deep .fixed-layout-table .p-datatable-wrapper,
+::ng-deep .fixed-layout-table table {
+  overflow-x: hidden !important;
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+/* Hide native details marker for teacher assignments */
+details.teacher-details summary::-webkit-details-marker {
+  display: none;
+}
+details.teacher-details summary {
+  list-style: none;
+}
+

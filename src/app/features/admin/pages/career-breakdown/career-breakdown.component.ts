@@ -173,6 +173,48 @@ export class CareerBreakdownComponent implements OnInit {
 
     this.academicService.getCareerBreakdown(id).subscribe({
       next: (data) => {
+        // Map assignments to groupedAssignments
+        if (data.curriculums) {
+          data.curriculums = data.curriculums.map((cur: any) => {
+            if (cur.semesters) {
+              cur.semesters = cur.semesters.map((sem: any) => {
+                if (sem.subjects) {
+                  sem.subjects = sem.subjects.map((sub: any) => {
+                    if (sub.assignments && sub.assignments.length > 0) {
+                      const groups = new Map<string, any>();
+                      for (const assign of sub.assignments) {
+                        if (!groups.has(assign.teacherId)) {
+                          groups.set(assign.teacherId, {
+                            teacherId: assign.teacherId,
+                            teacherName: assign.teacherName,
+                            modalityNames: new Set<string>(),
+                            jornadaNames: new Set<string>(),
+                            assignmentIds: []
+                          });
+                        }
+                        const group = groups.get(assign.teacherId);
+                        if (assign.modalityName) group.modalityNames.add(assign.modalityName);
+                        if (assign.jornadaName) group.jornadaNames.add(assign.jornadaName);
+                        group.assignmentIds.push(assign.id);
+                      }
+                      sub.groupedAssignments = Array.from(groups.values()).map(g => ({
+                        ...g,
+                        modalityNames: Array.from(g.modalityNames).join(', '),
+                        jornadaNames: Array.from(g.jornadaNames).join(', ')
+                      }));
+                    } else {
+                      sub.groupedAssignments = [];
+                    }
+                    return sub;
+                  });
+                }
+                return sem;
+              });
+            }
+            return cur;
+          });
+        }
+        
         this.breakdown.set(data);
         const validCurriculums = data.curriculums.filter((c: any) => c.name && c.id);
         if (validCurriculums.length > 0) {

@@ -75,22 +75,6 @@ export class SidebarComponent {
       ]
     },
     {
-      label: 'Carreras',
-      icon: 'pi pi-graduation-cap',
-      route: '/coordinator/carreras',
-      roles: ['coordinator'],
-    },
-    {
-      label: 'Docentes',
-      icon: 'pi pi-users',
-      roles: ['coordinator'],
-      expanded: false,
-      children: [
-        { label: 'Registrar Docente', icon: '', route: '/coordinator/registrar-docente', roles: ['coordinator'] },
-        { label: 'Asignar Docente', icon: '', route: '/coordinator/asignar-docente', roles: ['coordinator'] },
-      ]
-    },
-    {
       label: 'Pagos',
       icon: 'pi pi-credit-card',
       roles: ['treasury'],

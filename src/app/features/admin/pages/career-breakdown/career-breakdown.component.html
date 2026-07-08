@@ -173,16 +173,16 @@
                         <p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full" responsiveLayout="scroll">
                           <ng-template pTemplate="header">
                             <tr>
-                              <th class="text-center" style="width: 12%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Código</th>
-                              <th style="width: 43%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Nombre</th>
-                              <th class="text-center" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
-                              <th class="text-center" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
-                              <th class="text-center" style="width: 25%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Docente</th>
+                              <th class="text-center" style="width: 8%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Código</th>
+                              <th style="width: 25%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Nombre</th>
+                              <th class="text-center" style="width: 7%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
+                              <th class="text-center" style="width: 7%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
+                              <th class="text-center" style="width: 53%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Docentes Asignados</th>
                             </tr>
                           </ng-template>
                           <ng-template pTemplate="body" let-s>
                             <tr>
-                              <td class="font-mono text-600 text-center">{{ s.code }}</td>
+                              <td class="font-mono font-bold text-700 text-center">{{ s.code }}</td>
                               <td class="font-medium text-left">{{ s.name }}</td>
                               <td class="text-center">
                                 <span class="font-semibold text-600">{{ s.credits }}</span>
@@ -194,11 +194,41 @@
                                   <span class="text-400">-</span>
                                 }
                               </td>
-                              <td class="text-center" style="white-space: nowrap;">
-                                @if (s.teacherName) {
-                                  <span class="text-600">{{ s.teacherName }}</span>
+                              <td style="width: 25%;">
+                                @if (s.groupedAssignments && s.groupedAssignments.length > 0) {
+                                  <div class="flex flex-column gap-1 align-items-center">
+                                    <!-- Docente Principal -->
+                                    <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" style="width: fit-content; min-width: 22rem; margin: 0 auto;">
+                                      <div class="flex flex-column text-left w-full">
+                                        <span class="text-900 font-medium text-xs">{{ s.groupedAssignments[0].teacherName }}</span>
+                                        <span class="text-600" style="font-size: 0.65rem">
+                                          {{ s.groupedAssignments[0].modalityNames }} - {{ s.groupedAssignments[0].jornadaNames }}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    @if (s.groupedAssignments.length > 1) {
+                                      <details style="width: fit-content; min-width: 22rem; margin: 0 auto;">
+                                        <summary class="text-xs text-500 hover:text-700 cursor-pointer p-0 m-0 mt-1 select-none hide-marker text-left">
+                                          Ver más...
+                                        </summary>
+                                        <div class="flex flex-column gap-1 mt-1">
+                                          @for (assign of s.groupedAssignments.slice(1); track assign.teacherId) {
+                                            <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" style="width: 100%;">
+                                              <div class="flex flex-column text-left w-full">
+                                                <span class="text-900 font-medium text-xs">{{ assign.teacherName }}</span>
+                                                <span class="text-600" style="font-size: 0.65rem">
+                                                  {{ assign.modalityNames }} - {{ assign.jornadaNames }}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          }
+                                        </div>
+                                      </details>
+                                    }
+                                  </div>
                                 } @else {
-                                  <span class="text-400 font-italic">Sin asignar</span>
+                                  <span class="text-400 font-italic text-center block">Sin asignar</span>
                                 }
                               </td>
                             </tr>

@@ -1,192 +1,505 @@
-<p-toast />
+<p-toast></p-toast>
 
-<div class="surface-ground min-h-screen">
-  <div class="text-white p-5 mb-5 border-round-xl" style="background: #064e3b">
-    <div class="flex align-items-center gap-3 mb-2">
-      <p-button icon="pi pi-arrow-left" (click)="goBack()" styleClass="p-button-rounded p-button-text p-button-plain" [style]="{ color: '#ffffff' }" />
-      <h1 class="text-3xl font-semibold m-0">{{ career()?.name || 'Cargando...' }}</h1>
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <button class="back-btn" (click)="goBack()" style="color: #a7f3d0;">
+        <i class="pi pi-arrow-left"></i> Volver al panel
+      </button>
+
+      @if (career(); as data) {
+        <div class="career-info mt-3">
+          <div class="career-title-row">
+            <h1 style="color: white; margin: 0; font-size: 1.6rem;">{{ data.name }}</h1>
+            <p-badge [value]="data.code" severity="contrast"></p-badge>
+          </div>
+          <div class="career-meta mt-2 flex gap-4 text-sm text-green-100">
+            <span class="meta-item flex align-items-center gap-2">
+              <i class="pi pi-calendar"></i> {{ data.durationSemesters }} semestres
+            </span>
+            <span class="meta-item flex align-items-center gap-2">
+              <i class="pi pi-check-circle"></i> {{ data.isActive ? 'Activa' : 'Inactiva' }}
+            </span>
+            <span class="meta-item flex align-items-center gap-2">
+              <i class="pi pi-tags"></i>
+              @for (mod of data.modalityNames; track mod) {
+                <span class="modality-tag bg-white text-green-800 px-2 py-1 border-round-xl text-xs font-bold">{{ mod }}</span>
+              }
+              @if (data.modalityNames.length === 0) {
+                <span class="text-500">Sin modalidades</span>
+              }
+            </span>
+          </div>
+        </div>
+      } @else if (loading()) {
+        <div class="skeleton-header mt-3">
+          <p-skeleton width="60%" height="2rem" styleClass="bg-green-700" />
+          <p-skeleton width="40%" height="1rem" styleClass="mt-2 bg-green-700" />
+        </div>
+      }
     </div>
-    <p class="m-0 ml-5" style="color: #d1fae5">Mallas curriculares — selecciona una malla para ver sus materias por semestre.</p>
   </div>
 
-  <div class="flex justify-content-center">
-    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
-      <ng-template pTemplate="header">
-        <div class="flex align-items-center gap-3 flex-wrap p-3 pb-0">
-          <p-badge [value]="career()?.code" severity="contrast" />
-          <span class="text-600 text-sm">{{ career()?.durationSemesters }} semestres</span>
-          <p-badge [value]="career()?.isActive ? 'Activa' : 'Inactiva'" [severity]="career()?.isActive ? 'success' : 'danger'" />
-          @if (career()?.modalityNames?.length) {
-            @for (mod of career()?.modalityNames; track mod) {
-              <span class="bg-green-50 text-green-700 text-xs font-medium px-2 py-1 border-round" style="border: 1px solid #a7f3d0">{{ mod }}</span>
-            }
-          }
-        </div>
-      </ng-template>
-
-      <div class="p-3">
+  <div class="content-wrapper">
+    <div class="data-card p-4">
+      <div class="breakdown-content">
         @if (loading()) {
-          <div class="flex justify-content-center p-5">
-            <i class="pi pi-spin pi-spinner text-4xl text-600"></i>
+          <div class="loading-state">
+            <i class="pi pi-spin pi-spinner"></i>
+            <p>Cargando detalle de carrera...</p>
           </div>
         } @else if (curriculums().length > 0) {
-          <div class="grid">
-            @for (cur of curriculums(); track cur.id) {
-              <div class="col-12 sm:col-6 lg:col-4">
-                <p-card
-                  styleClass="shadow-1 surface-0 border-round-xl cursor-pointer"
-                  [style]="{
-                    border: selectedCurriculum()?.id === cur.id ? '2px solid #10b981' : '1px solid #e0e0e0',
-                    transition: 'border 0.2s'
-                  }"
-                  (click)="selectCurriculum(cur)"
-                >
-                  <ng-template pTemplate="header">
-                    <div class="flex align-items-center gap-2 p-3 pb-0">
-                      <i class="pi pi-sitemap text-green-600"></i>
-                      <span class="font-semibold text-900">{{ cur.name }}</span>
-                    </div>
-                  </ng-template>
-
-                  <div class="p-3 pt-2">
-                    <div class="flex align-items-center gap-2 mb-2">
-                      <span class="text-600 text-sm">Semestres:</span>
-                      <span class="text-900 text-sm font-medium">{{ cur.semesters?.length || 0 }}</span>
-                    </div>
-                    <div class="flex align-items-center gap-2">
-                      <span class="text-600 text-sm">Materias:</span>
-                      <span class="text-900 text-sm font-medium">{{ totalSubjects(cur) }}</span>
-                    </div>
-                  </div>
-                </p-card>
-              </div>
-            }
+          
+          <div class="mb-4 flex flex-column md:flex-row gap-3">
+            <p-iconField iconPosition="left" styleClass="flex-1">
+              <p-inputIcon styleClass="pi pi-search" />
+              <input pInputText type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Buscar materia por código o nombre..." class="w-full" />
+            </p-iconField>
+            
+            <div class="flex gap-2">
+              <p-multiSelect 
+                [options]="availableSemesters()" 
+                [ngModel]="selectedSemesters()" 
+                (ngModelChange)="selectedSemesters.set($event)"
+                placeholder="Semestre" 
+                display="chip" 
+                styleClass="w-15rem" 
+              />
+            </div>
           </div>
 
-          @if (selectedCurriculum()) {
-            <div class="mt-4">
-              <div class="flex align-items-center gap-2 mb-3">
-                <i class="pi pi-angle-right text-green-600 text-xl"></i>
-                <span class="text-xl font-semibold text-900">{{ selectedCurriculum()?.name }}</span>
-                <p-button
-                  icon="pi pi-times"
-                  size="small"
-                  styleClass="p-button-rounded p-button-text p-button-plain"
-                  (click)="selectedCurriculum.set(null)"
-                />
-              </div>
+          <p-accordion [multiple]="true">
+            @for (cur of filteredCurriculums(); track cur.id) {
+              <p-accordion-panel [value]="cur.id" class="malla-panel">
+                <p-accordion-header [ngClass]="{'malla-active': true}">
+                  <div class="flex align-items-center flex-wrap gap-3 w-full">
+                    <i class="pi pi-sitemap text-xl icon-malla"></i>
+                    <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
+                    <span class="text-sm flex align-items-center gap-2 subtitle-malla">
+                      <span><i class="pi pi-book"></i> {{ totalSubjects(cur) }} materias</span> &nbsp;|&nbsp; 
+                      <span><i class="pi pi-calendar"></i> {{ cur.semesters?.length || 0 }} semestres</span> &nbsp;|&nbsp;
+                      <span><i class="pi pi-star"></i> {{ totalCredits(cur) }} créditos</span>
+                    </span>
+                    <div class="ml-auto mr-4">
+                      @if (cur.isActive) {
+                        <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
+                      } @else {
+                        <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
+                      }
+                    </div>
+                  </div>
+                </p-accordion-header>
+                <p-accordion-content>
+                  @if (cur.description) {
+                    <p class="text-600 text-sm mb-4">{{ cur.description }}</p>
+                  }
+                  
+                  <p-accordion [multiple]="true" class="nested-accordion">
+                    @for (sem of cur.semesters; track sem.semester) {
+                      <p-accordion-panel [value]="sem.semester">
+                        <p-accordion-header>
+                          <div class="flex align-items-center justify-content-between w-full pr-3">
+                            <div class="flex align-items-center gap-3">
+                              <div class="flex align-items-center justify-content-center" 
+                                   [ngStyle]="{'background-color': getSemesterColor(sem.semester)}"
+                                   style="padding: 0.35rem 0.8rem; border-radius: 4px;">
+                                <span class="font-bold text-sm text-white m-0">Semestre {{ sem.semester }}</span>
+                              </div>
+                              <span class="text-700 text-sm font-medium ml-2">
+                                {{ sem.subjects.length }} materias &nbsp;|&nbsp; {{ semesterCredits(sem) }} créditos &nbsp;|&nbsp; <i class="pi pi-clock mx-1"></i> {{ semesterHours(sem) }} horas
+                              </span>
+                            </div>
+                            <p-button 
+                              icon="pi pi-calendar-plus" 
+                              label="Planificar Oferta" 
+                              severity="success" 
+                              size="small"
+                              (click)="$event.stopPropagation(); openBulkOfferModal(sem.semester, sem.subjects, cur.id)"
+                            />
+                          </div>
+                        </p-accordion-header>
+                        <p-accordion-content>
+                          <p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                  <th class="text-center" style="width: 8%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Código</th>
+                                  <th style="width: 25%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Materia</th>
+                                  <th class="text-center" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
+                                  <th class="text-center" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
+                                  <th style="width: 43%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Docentes Asignados</th>
+                                  <th class="text-center" style="width: 10%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Acciones</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-sub>
+                              <tr>
+                                <td class="font-mono font-bold text-700 text-center">{{ sub.code }}</td>
+                                <td class="font-medium text-left">{{ sub.name }}</td>
+                                <td class="text-center"><span class="font-semibold text-600">{{ sub.credits }}</span></td>
+                                <td class="text-center"><span class="font-semibold text-600">{{ sub.credits * 48 }}h</span></td>
+                                <td>
+                                  @if (sub.groupedAssignments && sub.groupedAssignments.length > 0) {
+                                    <div class="flex flex-column gap-1 align-items-start">
+                                      <!-- Docente Principal -->
+                                      <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" style="width: 100%;">
+                                        <div class="flex flex-column text-left">
+                                          <span class="text-900 font-medium text-xs">{{ sub.groupedAssignments[0].teacherName }}</span>
+                                          <span class="text-600" style="font-size: 0.65rem">
+                                            {{ sub.groupedAssignments[0].modalityNames }} - {{ sub.groupedAssignments[0].jornadaNames }}
+                                          </span>
+                                        </div>
+                                        <div class="flex gap-1">
+                                          <p-button
+                                            icon="pi pi-clock"
+                                            severity="info"
+                                            [text]="true"
+                                            [rounded]="true"
+                                            size="small"
+                                            [style]="{ width: '1.5rem', height: '1.5rem', padding: '0' }"
+                                            (click)="openScheduleModal(sub, sub.groupedAssignments[0].teacherId)"
+                                            pTooltip="Configurar Horario"
+                                            tooltipPosition="top"
+                                          />
+                                          <p-button
+                                            icon="pi pi-times"
+                                            severity="danger"
+                                            [text]="true"
+                                            [rounded]="true"
+                                            size="small"
+                                            [style]="{ width: '1.5rem', height: '1.5rem', padding: '0' }"
+                                            (click)="removeTeacher(sub.id, cur.id, sub.groupedAssignments[0].assignmentIds)"
+                                            pTooltip="Eliminar esta asignación"
+                                            tooltipPosition="top"
+                                          />
+                                        </div>
+                                      </div>
 
-              <p-accordion>
-                @for (sem of selectedCurriculum()?.semesters; track sem.semester) {
-                  <p-accordion-panel [value]="sem.semester">
-                    <p-accordion-header>
-                      <div class="flex align-items-center gap-2">
-                        <i class="pi pi-book text-green-600"></i>
-                        <span class="font-semibold">Semestre {{ sem.semester }}</span>
-                        <p-badge [value]="sem.subjects.length + ' materias'" severity="info" styleClass="ml-2" />
-                      </div>
-                    </p-accordion-header>
-                    <p-accordion-content>
-                      <p-table [value]="sem.subjects" styleClass="p-datatable-sm">
-                        <ng-template pTemplate="header">
-                          <tr>
-                            <th>Código</th>
-                            <th>Materia</th>
-                            <th>Créd.</th>
-
-                            <th>Docente</th>
-                            <th>Acción</th>
-                          </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-subject>
-                          <tr>
-                            <td><strong>{{ subject.code }}</strong></td>
-                            <td>{{ subject.name }}</td>
-                            <td>{{ subject.credits }}</td>
-
-                            <td>
-                              @if (editingSubject() === subject.id) {
-                                <p-select
-                                  [options]="teachers()"
-                                  [ngModel]="selectedTeacher[subject.id] || ''"
-                                  (ngModelChange)="selectedTeacher[subject.id] = $event"
-                                  optionLabel="fullName"
-                                  optionValue="id"
-                                  placeholder="Docente"
-                                  [filter]="true"
-                                  filterBy="fullName"
-                                  [showClear]="true"
-                                  [appendTo]="'body'"
-                                  styleClass="p-inputtext-sm"
-                                ></p-select>
-                              } @else if (subject.teacherName) {
-                                <span class="text-900 font-medium">{{ subject.teacherName }}</span>
-                              } @else {
-                                <span class="text-400">Sin asignar</span>
-                              }
-                            </td>
-                            <td>
-                              @if (subject.teacherName && editingSubject() !== subject.id) {
-                                <div class="flex align-items-center gap-1">
-                                  <p-button
-                                    icon="pi pi-user-edit"
-                                    label="Cambiar"
-                                    size="small"
-                                    (click)="startEdit(subject.id)"
-                                  />
-                                  <p-button
-                                    icon="pi pi-times"
-                                    label="Quitar"
-                                    size="small"
-                                    severity="danger"
-                                    [loading]="assigning()"
-                                    (click)="removeTeacher(subject.id)"
-                                  />
-                                </div>
-                              } @else if (editingSubject() === subject.id) {
-                                <div class="flex align-items-center gap-1">
-                                  <p-button
-                                    icon="pi pi-check"
-                                    label="Asignar"
-                                    size="small"
-                                    [disabled]="!selectedTeacher[subject.id]"
-                                    [loading]="assigning()"
-                                    (click)="assignTeacher(subject.id)"
-                                  />
-                                  <p-button
-                                    icon="pi pi-times"
-                                    size="small"
-                                    styleClass="p-button-rounded p-button-text p-button-plain"
-                                    (click)="cancelEdit()"
-                                  />
-                                </div>
-                              } @else {
-                                <div class="flex align-items-center gap-1">
-                                  <p-button
-                                    icon="pi pi-user-plus"
-                                    label="Asignar"
-                                    size="small"
-                                    (click)="startEdit(subject.id)"
-                                  />
-                                </div>
-                              }
-                            </td>
-                          </tr>
-                        </ng-template>
-                      </p-table>
-                    </p-accordion-content>
-                  </p-accordion-panel>
-                }
-              </p-accordion>
-            </div>
-          }
+                                      @if (sub.groupedAssignments.length > 1) {
+                                        <details class="w-full">
+                                          <summary class="text-xs text-500 hover:text-700 cursor-pointer p-0 m-0 mt-1 select-none hide-marker">
+                                            Ver más...
+                                          </summary>
+                                          <div class="flex flex-column gap-1 mt-1">
+                                            @for (assign of sub.groupedAssignments.slice(1); track assign.teacherId) {
+                                              <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" style="width: 100%;">
+                                                <div class="flex flex-column text-left">
+                                                  <span class="text-900 font-medium text-xs">{{ assign.teacherName }}</span>
+                                                  <span class="text-600" style="font-size: 0.65rem">
+                                                    {{ assign.modalityNames }} - {{ assign.jornadaNames }}
+                                                  </span>
+                                                </div>
+                                                <div class="flex gap-1">
+                                                  <p-button
+                                                    icon="pi pi-clock"
+                                                    severity="info"
+                                                    [text]="true"
+                                                    [rounded]="true"
+                                                    size="small"
+                                                    [style]="{ width: '1.5rem', height: '1.5rem', padding: '0' }"
+                                                    (click)="openScheduleModal(sub, assign.teacherId)"
+                                                    pTooltip="Configurar Horario"
+                                                    tooltipPosition="top"
+                                                  />
+                                                  <p-button
+                                                    icon="pi pi-times"
+                                                    severity="danger"
+                                                    [text]="true"
+                                                    [rounded]="true"
+                                                    size="small"
+                                                    [style]="{ width: '1.5rem', height: '1.5rem', padding: '0' }"
+                                                    (click)="removeTeacher(sub.id, cur.id, assign.assignmentIds)"
+                                                    pTooltip="Eliminar esta asignación"
+                                                    tooltipPosition="top"
+                                                  />
+                                                </div>
+                                              </div>
+                                            }
+                                          </div>
+                                        </details>
+                                      }
+                                    </div>
+                                  } @else {
+                                    <span class="text-500 italic">Sin Asignar</span>
+                                  }
+                                </td>
+                                <td class="text-center">
+                                  @if (sub.assignments && sub.assignments.length > 0) {
+                                    <p-button
+                                      icon="pi pi-trash"
+                                      severity="danger"
+                                      [rounded]="true"
+                                      [style]="{ width: '2.5rem', height: '2.5rem', padding: '0' }"
+                                      pTooltip="Limpiar todas las asignaciones"
+                                      tooltipPosition="top"
+                                      (click)="removeTeacher(sub.id, cur.id)"
+                                      [loading]="assigning()"
+                                    />
+                                  }
+                                </td>
+                              </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                              <tr>
+                                <td colspan="5" class="text-center p-4 text-500">
+                                  No hay materias registradas en este semestre.
+                                </td>
+                              </tr>
+                            </ng-template>
+                          </p-table>
+                        </p-accordion-content>
+                      </p-accordion-panel>
+                    }
+                  </p-accordion>
+                </p-accordion-content>
+              </p-accordion-panel>
+            }
+          </p-accordion>
         } @else {
-          <div class="flex flex-column align-items-center p-5 text-400">
-            <i class="pi pi-sitemap text-5xl mb-3"></i>
-            <p class="m-0">Esta carrera no tiene mallas curriculares registradas.</p>
+          <div class="empty-state">
+            <i class="pi pi-folder-open text-600 text-4xl mb-3"></i>
+            <h3 class="text-900 m-0">No hay mallas registradas</h3>
+            <p class="text-600 mt-2">Esta carrera aún no tiene currículos activos.</p>
           </div>
         }
       </div>
-    </p-card>
+    </div>
   </div>
 </div>
+
+<p-dialog 
+  [header]="'Planificar Oferta - Semestre ' + bulkOfferForm.semester" 
+  [(visible)]="showOfferModal" 
+  [modal]="true" 
+  [style]="{ width: '90vw', maxWidth: '1000px' }"
+  [draggable]="false"
+  [resizable]="false"
+  [maximizable]="true"
+>
+  <ng-template pTemplate="header">
+    <div class="flex align-items-center gap-2">
+      <i class="pi pi-calendar-plus text-green-600 text-xl"></i>
+      <span class="font-bold text-xl">Planificar Oferta Académica</span>
+    </div>
+  </ng-template>
+
+  <div class="flex flex-column gap-4 py-3">
+    <!-- Contexto Global -->
+    <div class="surface-ground p-3 border-round border-1 surface-border flex align-items-center gap-3">
+      <div class="flex-1 flex flex-column gap-2">
+        <label for="term" class="font-semibold text-900 text-sm">Ciclo Académico a Ofertar:</label>
+        <p-select 
+          id="term"
+          [options]="terms()" 
+          [(ngModel)]="bulkOfferForm.academicTermId"
+          (ngModelChange)="updateConfigsFromTerm()"
+          optionLabel="name" 
+          optionValue="id" 
+          placeholder="Seleccione el ciclo"
+          styleClass="w-full md:w-20rem"
+          appendTo="body"
+        />
+      </div>
+      <div class="text-500 text-sm flex-1">
+        <i class="pi pi-info-circle mr-1"></i>
+        Al guardar, se actualizará únicamente la oferta para el ciclo académico seleccionado.
+      </div>
+    </div>
+
+    <!-- Lista de Materias y Docentes -->
+    <div>
+      <h4 class="m-0 mb-3 text-900 flex align-items-center gap-2">
+        <i class="pi pi-list"></i>
+        Configuración por Materia (Semestre {{ bulkOfferForm.semester }})
+      </h4>
+      
+      <div class="flex flex-column gap-4">
+        @for (sub of bulkOfferForm.subjects; track sub.id) {
+          <div class="border-1 surface-border border-round-xl p-3 bg-white shadow-1">
+            <div class="flex align-items-center justify-content-between mb-3 border-bottom-1 surface-border pb-2">
+              <div>
+                <span class="font-bold text-900 text-lg block">{{ sub.name }}</span>
+                <span class="text-500 text-sm">{{ sub.code }} - {{ sub.credits }} créditos</span>
+              </div>
+              <p-button 
+                label="Añadir Docente" 
+                icon="pi pi-plus" 
+                size="small" 
+                severity="success" 
+                [outlined]="true"
+                (click)="addTeacherConfig(sub.id)"
+              />
+            </div>
+
+            <!-- List of configs for this subject -->
+            <div class="flex flex-column gap-3">
+              @if (!bulkOfferForm.subjectConfigs[sub.id] || bulkOfferForm.subjectConfigs[sub.id].length === 0) {
+                <div class="text-center p-3 text-500 bg-gray-50 border-round border-1 surface-border border-dashed">
+                  No hay docentes configurados para esta materia en este ciclo. Haz click en "Añadir Docente".
+                </div>
+              } @else {
+                @for (config of bulkOfferForm.subjectConfigs[sub.id]; track $index) {
+                  <div class="flex gap-3 align-items-start bg-green-50 p-3 border-round" style="border: 1px solid #a7f3d0">
+                    <div class="flex-1 flex flex-column gap-2" style="min-width: 0;">
+                      <label class="text-xs font-semibold text-900">Docente</label>
+                      <p-select 
+                        [options]="getAvailableTeachersForSubject(sub.id, config.teacherId)" 
+                        [(ngModel)]="config.teacherId" 
+                        optionLabel="fullName" 
+                        optionValue="id" 
+                        placeholder="Seleccione..."
+                        [filter]="true"
+                        filterBy="fullName"
+                        styleClass="w-full"
+                        appendTo="body"
+                      >
+                        <ng-template pTemplate="selectedItem" let-selectedOption>
+                          @if (selectedOption) {
+                            <div class="flex align-items-center gap-2">
+                              <i class="pi pi-user text-green-600"></i>
+                              <div>{{ selectedOption.fullName }}</div>
+                            </div>
+                          }
+                        </ng-template>
+                      </p-select>
+                    </div>
+
+                    <div class="flex-1 flex flex-column gap-2" style="min-width: 0;">
+                      <label class="text-xs font-semibold text-900">Modalidades (Múltiple)</label>
+                      <p-multiSelect 
+                        [options]="getAvailableModalitiesForSubject(sub.id, config)" 
+                        [(ngModel)]="config.modalityIds" 
+                        optionLabel="name" 
+                        optionValue="id" 
+                        placeholder="Elegir..."
+                        display="chip"
+                        styleClass="w-full"
+                        appendTo="body"
+                      />
+                    </div>
+
+                    <div class="flex-1 flex flex-column gap-2" style="min-width: 0;">
+                      <label class="text-xs font-semibold text-900">Jornadas (Múltiple)</label>
+                      <p-multiSelect 
+                        [options]="getAvailableJornadasForSubject(sub.id, config)" 
+                        [(ngModel)]="config.jornadaIds" 
+                        optionLabel="name" 
+                        optionValue="id" 
+                        placeholder="Elegir..."
+                        display="chip"
+                        styleClass="w-full"
+                        appendTo="body"
+                      />
+                    </div>
+
+                    <div class="flex flex-column align-items-center pt-4">
+                      <p-button 
+                        icon="pi pi-trash" 
+                        severity="danger" 
+                        [text]="true" 
+                        [rounded]="true"
+                        (click)="removeTeacherConfig(sub.id, $index)"
+                        pTooltip="Quitar este docente"
+                      />
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="w-full flex justify-content-between align-items-center">
+      <span class="text-500 text-sm italic">Recuerda: se crearán combinaciones por cada modalidad y jornada elegida.</span>
+      <div class="flex gap-2">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (click)="closeOfferModal()" />
+        <p-button label="Guardar Oferta" icon="pi pi-save" (click)="saveBulkOffer()" [loading]="assigning()" />
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Schedule Modal -->
+<p-dialog 
+  header="Configurar Horario" 
+  [visible]="displayScheduleModal()" 
+  (visibleChange)="displayScheduleModal.set($event)"
+  [modal]="true"
+  [style]="{width: '35vw', minWidth: '400px'}" 
+  [draggable]="false"
+  [resizable]="false"
+  (onHide)="closeScheduleModal()">
+  
+  @if (scheduleModalData(); as data) {
+    <div class="flex flex-column gap-3">
+      <div class="surface-card p-3 border-round border-1 surface-border shadow-1 border-left-3 border-green-500">
+        <h3 class="m-0 text-900 mb-1 text-lg">{{ data.subject.name }}</h3>
+        <span class="text-600 text-sm"><i class="pi pi-user mr-2 text-green-500"></i>{{ data.teacherName }}</span>
+      </div>
+
+      <div class="flex flex-column gap-3">
+        @for (assign of data.assignments; track assign.id; let i = $index) {
+          <div class="border-1 surface-border border-round surface-section">
+            <div class="flex justify-content-between align-items-center p-3 border-bottom-1 surface-border bg-gray-50 border-round-top">
+              <span class="font-semibold text-700 text-sm">
+                <i class="pi pi-tag mr-2 text-green-600"></i>
+                {{ assign.modalityName }} - {{ assign.jornadaName }}
+              </span>
+              <p-button 
+                label="Día" 
+                icon="pi pi-plus" 
+                size="small" 
+                severity="success"
+                [text]="true"
+                (click)="addScheduleLine(i)" />
+            </div>
+
+            <div class="p-3">
+              @if (assign.schedules.length === 0) {
+                <div class="text-center text-500 font-italic py-2 text-sm">
+                  Sin horarios configurados.
+                </div>
+              } @else {
+                <div class="flex flex-column gap-2">
+                  @for (sched of assign.schedules; track $index; let j = $index) {
+                    <div class="flex gap-2 align-items-center">
+                      <div class="flex-1">
+                        <select class="w-full p-2 border-round border-1 surface-border hover:border-green-400 focus:border-green-500 outline-none text-sm text-700 bg-white" [(ngModel)]="sched.dayOfWeek">
+                          <option value="Lunes">Lunes</option>
+                          <option value="Martes">Martes</option>
+                          <option value="Miercoles">Miércoles</option>
+                          <option value="Jueves">Jueves</option>
+                          <option value="Viernes">Viernes</option>
+                          <option value="Sabado">Sábado</option>
+                        </select>
+                      </div>
+                      <div class="flex align-items-center gap-1">
+                        <input type="time" class="p-2 border-round border-1 surface-border hover:border-green-400 focus:border-green-500 outline-none text-sm text-700 bg-white" [(ngModel)]="sched.startTime" />
+                        <span class="text-500 text-sm font-medium px-1">-</span>
+                        <input type="time" class="p-2 border-round border-1 surface-border hover:border-green-400 focus:border-green-500 outline-none text-sm text-700 bg-white" [(ngModel)]="sched.endTime" />
+                      </div>
+                      <p-button 
+                        icon="pi pi-trash" 
+                        severity="danger" 
+                        [text]="true" 
+                        [rounded]="true"
+                        size="small"
+                        (click)="removeScheduleLine(i, j)" />
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (click)="closeScheduleModal()" />
+    <p-button label="Guardar Horarios" severity="success" icon="pi pi-check" (click)="saveSchedules()" />
+  </ng-template>
+</p-dialog>
