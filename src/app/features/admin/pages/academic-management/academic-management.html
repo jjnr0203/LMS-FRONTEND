@@ -16,22 +16,26 @@
     <p-tabs [value]="activeTab" (valueChange)="activeTab = $event; onTabChange($event)">
       <p-tablist>
         <p-tab value="0">Ciclos Académicos</p-tab>
-        <p-tab value="1">Modalidades</p-tab>
-        <p-tab value="2">Carreras</p-tab>
-        <p-tab value="3">Facultades</p-tab>
+        <p-tab value="1">Facultades</p-tab>
+        <p-tab value="2">Modalidades</p-tab>
+        <p-tab value="3">Jornadas</p-tab>
+        <p-tab value="4">Carreras</p-tab>
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="0">
           <app-academic-terms></app-academic-terms>
         </p-tabpanel>
         <p-tabpanel value="1">
-          <app-modalities></app-modalities>
+          <app-faculties></app-faculties>
         </p-tabpanel>
         <p-tabpanel value="2">
-          <app-careers></app-careers>
+          <app-modalities></app-modalities>
         </p-tabpanel>
         <p-tabpanel value="3">
-          <app-faculties></app-faculties>
+          <app-jornadas></app-jornadas>
+        </p-tabpanel>
+        <p-tabpanel value="4">
+          <app-careers></app-careers>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>

@@ -11,37 +11,68 @@
     </p-iconField>
   </div>
 
-  <p-table #dt [value]="careers" [paginator]="true" [rows]="10" styleClass="p-datatable-sm" responsiveLayout="scroll" [globalFilterFields]="['code', 'name']">
+  <p-table #dt [value]="careers" [paginator]="true" [rows]="10" styleClass="p-datatable-sm interactive-table" responsiveLayout="scroll" [globalFilterFields]="['code', 'name']">
     <ng-template pTemplate="header">
       <tr>
-        <th>Código</th>
-        <th>Nombre</th>
-        <th>Facultad</th>
-        <th>Modalidad</th>
-        <th>Coordinador</th>
-        <th>Semestres</th>
-        <th>Estado</th>
-        <th style="width: 130px">Acciones</th>
+        <th style="width: 8%;">Código</th>
+        <th style="width: 12%;">Nombre</th>
+        <th style="width: 14%;">Facultad</th>
+        <th style="width: 12%;">Modalidad</th>
+        <th style="width: 12%;">Jornadas</th>
+        <th style="width: 14%;">Coordinador</th>
+        <th style="width: 8%;">Semestres</th>
+        <th style="width: 8%;">Estado</th>
+        <th style="width: 12%;">Acciones</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-c>
       <tr style="cursor:pointer" (click)="selectCareer(c)">
-        <td class="font-medium text-slate-600">{{ c.code }}</td>
-        <td class="font-medium text-slate-800">{{ c.name }}</td>
-        <td><p-badge [value]="getFacultyName(c.facultyId)" severity="info"></p-badge></td>
+        <td class="font-medium text-slate-600" style="white-space: nowrap">{{ c.code }}</td>
+        <td class="font-medium text-slate-800 hover-clickable-text">
+          <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; line-height: 1.2;">
+            {{ c.name }}
+          </div>
+        </td>
         <td>
-          <div class="flex gap-1 flex-wrap">
-            @let modNames = getModalityList(c.modalityIds);
-            @for (modName of modNames; track $index) {
-              <p-badge [value]="modName" severity="success"></p-badge>
-            }
-            @if (modNames.length === 0) {
-              <p-badge value="No asignada" severity="secondary"></p-badge>
+          <div class="flex gap-1 flex-wrap align-items-center">
+            @if (c.facultyId) {
+              <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; line-height: 1.2;">
+                <p-tag [value]="getFacultyName(c.facultyId)" severity="info" styleClass="text-xs px-2 py-1" [style]="{'white-space': 'normal'}"></p-tag>
+              </div>
+            } @else {
+              <span class="text-xs text-slate-400 whitespace-nowrap">No asignada</span>
             }
           </div>
         </td>
-        <td>{{ getCoordinatorName(c.coordinatorId) }}</td>
-        <td><p-badge [value]="c.durationSemesters + ' Semestres'" styleClass="badge-sys-dark"></p-badge></td>
+        <td>
+          <div class="flex gap-1 flex-wrap align-items-center">
+            @let modNames = getModalityList(c.modalityIds);
+            @if (modNames.length > 0) {
+              @for (m of modNames; track m) {
+                <p-tag [value]="m" severity="success" styleClass="text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag>
+              }
+            } @else {
+              <span class="text-xs text-slate-400 whitespace-nowrap">Ninguna</span>
+            }
+          </div>
+        </td>
+        <td>
+          <div class="flex gap-1 flex-wrap align-items-center">
+            @if (c.jornadaIds && c.jornadaIds.length > 0) {
+              @for (j of c.jornadaIds; track j) {
+                <p-tag [value]="getJornadaName(j)" severity="secondary" styleClass="text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag>
+              }
+            } @else {
+              <span class="text-xs text-slate-400 whitespace-nowrap">Ninguna</span>
+            }
+          </div>
+        </td>
+        <td style="font-size: 0.875rem;">
+          <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; line-height: 1.2;">
+            {{ getCoordinatorName(c.coordinatorId) }}
+          </div>
+        </td>
+        <td><p-tag [value]="c.durationSemesters + ' Semestres'" severity="info" styleClass="text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag></td>
         <td>
           <span class="px-2 py-1 text-xs font-semibold rounded-full"
                 [class.bg-emerald-100]="c.isActive" [class.text-emerald-800]="c.isActive"
@@ -51,8 +82,9 @@
         </td>
         <td>
           <div class="flex gap-2">
-            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editCareer(c); $event.stopPropagation()"></p-button>
-            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="deleteCareer(c.id); $event.stopPropagation()"></p-button>
+            <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="success" size="small" pTooltip="Ver Mallas" (click)="selectCareer(c); $event.stopPropagation()"></p-button>
+            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" size="small" (click)="editCareer(c); $event.stopPropagation()"></p-button>
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" size="small" (click)="deleteCareer(c.id); $event.stopPropagation()"></p-button>
           </div>
         </td>
       </tr>
@@ -65,21 +97,21 @@
 
 @if (selectedCareer && !selectedCurriculum) {
   <!-- ═══════════════ CURRICULUM LIST ═══════════════ -->
-  <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-    <div class="flex align-items-center gap-2">
+  <div class="mb-4">
+    <h3 class="m-0 text-3xl font-bold text-800 mb-3">{{ selectedCareer.name }}</h3>
+    <div class="flex flex-wrap align-items-center gap-2">
       <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="backToCareers()"></p-button>
-      <h3 class="m-0 text-xl font-medium text-800">{{ selectedCareer.name }} — Pensums</h3>
-      <p-button label="Nuevo Pensum" icon="pi pi-plus" (onClick)="openNewCurriculum()" severity="success" size="small"></p-button>
+      <p-button label="Nueva Malla" icon="pi pi-plus" (onClick)="openNewCurriculum()" severity="success" size="small"></p-button>
     </div>
   </div>
 
   @if (curriculums.length === 0) {
     <div class="text-center py-6 text-slate-500">
       <i class="pi pi-book text-4xl mb-3 block"></i>
-      <p class="text-lg">Esta carrera no tiene pensums</p>
+      <p class="text-lg">Esta carrera no tiene mallas académicas</p>
     </div>
   } @else {
-    <p-table [value]="curriculums" styleClass="p-datatable-sm" responsiveLayout="scroll">
+    <p-table [value]="curriculums" styleClass="p-datatable-sm interactive-table" responsiveLayout="scroll">
       <ng-template pTemplate="header">
         <tr>
           <th>Nombre</th>
@@ -90,8 +122,8 @@
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-cu>
-        <tr style="cursor:pointer" (click)="selectCurriculum(cu)">
-          <td class="font-medium text-slate-800">{{ cu.name }}</td>
+        <tr (click)="selectCurriculum(cu)" style="cursor: pointer;">
+          <td class="font-medium text-slate-800 hover-clickable-text">{{ cu.name }}</td>
           <td class="text-slate-500">{{ cu.description || '-' }}</td>
           <td>
             <span class="px-2 py-1 text-xs font-semibold rounded-full"
@@ -103,14 +135,15 @@
           <td class="text-slate-500">{{ cu.createdAt | date:'shortDate' }}</td>
           <td>
             <div class="flex gap-2">
-              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editCurriculum(cu); $event.stopPropagation()"></p-button>
-              <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="deleteCurriculum(cu.id); $event.stopPropagation()"></p-button>
+              <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="success" size="small" pTooltip="Ver Materias" (click)="selectCurriculum(cu); $event.stopPropagation()"></p-button>
+              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" size="small" (click)="editCurriculum(cu); $event.stopPropagation()"></p-button>
+              <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" size="small" (click)="deleteCurriculum(cu.id); $event.stopPropagation()"></p-button>
             </div>
           </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
-        <tr><td colspan="5" class="text-center py-4 text-slate-500">No se encontraron pensums.</td></tr>
+        <tr><td colspan="5" class="text-center py-4 text-slate-500">No se encontraron mallas académicas.</td></tr>
       </ng-template>
     </p-table>
   }
@@ -118,63 +151,123 @@
 
 @if (selectedCurriculum) {
   <!-- ═══════════════ SUBJECT LIST ═══════════════ -->
-  <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-    <div class="flex align-items-center gap-2">
+  <div class="mb-4">
+    <h3 class="m-0 text-3xl font-bold text-800 mb-3">{{ selectedCurriculum.name }}</h3>
+    <div class="flex flex-wrap align-items-center gap-2">
       <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="backToCurriculums()"></p-button>
-      <h3 class="m-0 text-xl font-medium text-800">{{ selectedCurriculum.name }} — Materias</h3>
       <p-button label="Nueva Materia" icon="pi pi-plus" (onClick)="openNewSubject()" severity="success" size="small"></p-button>
       <p-button label="Subir Excel" icon="pi pi-upload" (onClick)="displayBulkDialog = true" severity="warn" size="small"></p-button>
-      <p-button label="Borrar Todas" icon="pi pi-trash" (onClick)="deleteAllSubjects()" severity="danger" size="small"></p-button>
+      <p-button label="Borrar Todas" icon="pi pi-trash" (onClick)="deleteAllSubjects()" severity="danger" size="small" [loading]="deletingAllSubjects"></p-button>
+    </div>
+  </div>
+
+  <div class="mb-3 flex flex-column md:flex-row gap-3 align-items-center">
+    <p-iconField iconPosition="left" styleClass="flex-1 w-full">
+      <p-inputIcon styleClass="pi pi-search" />
+      <input pInputText type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Buscar materia por código o nombre..." class="w-full" />
+    </p-iconField>
+    
+    <div class="flex gap-2 w-full md:w-auto">
+      <p-multiSelect 
+        [options]="availableSemesters" 
+        [ngModel]="selectedSemesters()" 
+        (ngModelChange)="selectedSemesters.set($event)" 
+        placeholder="Semestre"
+        defaultLabel="Semestre" 
+        optionLabel="label" 
+        optionValue="value" 
+        styleClass="w-full md:w-20rem"
+        [filter]="false"
+        display="chip">
+      </p-multiSelect>
+
+      <p-button icon="pi pi-palette" label="Colores" styleClass="p-button-outlined" (onClick)="colorMenu.toggle($event)"></p-button>
+      
+      <p-popover #colorMenu [style]="{width: '350px'}">
+        <div class="p-2">
+          <h3 class="m-0 mb-3 text-lg font-bold text-700">Colores por Semestre</h3>
+          <div class="flex flex-column gap-2">
+            @for (sem of availableSemesters; track sem.value) {
+              <div class="flex align-items-center justify-content-between gap-3">
+                <span class="font-medium text-sm white-space-nowrap m-0">{{ sem.label }}</span>
+                <p-select [options]="predefinedColors" 
+                          [ngModel]="getSemesterColor(sem.value)" 
+                          (ngModelChange)="updateSemesterColor(sem.value, $event)" 
+                          optionLabel="name" 
+                          optionValue="value" 
+                          appendTo="body"
+                          styleClass="w-12rem">
+                  <ng-template pTemplate="selectedItem" let-selectedOption>
+                    <div class="flex align-items-center gap-2">
+                      <div class="w-1rem h-1rem border-round shadow-1 flex-shrink-0" [style.backgroundColor]="selectedOption?.value || getSemesterColor(sem.value)"></div>
+                      <span class="text-sm white-space-nowrap overflow-hidden text-overflow-ellipsis">{{ selectedOption?.name || 'Personalizado' }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template pTemplate="item" let-color>
+                    <div class="flex align-items-center gap-2">
+                      <div class="w-1rem h-1rem border-round shadow-1 flex-shrink-0" [style.backgroundColor]="color.value"></div>
+                      <span class="text-sm white-space-nowrap">{{ color.name }}</span>
+                    </div>
+                  </ng-template>
+                </p-select>
+              </div>
+            }
+          </div>
+        </div>
+      </p-popover>
     </div>
   </div>
 
   @if (subjects.length === 0) {
     <div class="text-center py-6 text-slate-500">
       <i class="pi pi-book text-4xl mb-3 block"></i>
-      <p class="text-lg">Este pensum no tiene materias asignadas</p>
+      <p class="text-lg">Esta malla no tiene materias asignadas</p>
     </div>
   } @else {
-    <p-accordion [multiple]="true">
+    <p-accordion [multiple]="true" styleClass="nested-accordion">
       @for (group of groupedSubjects; track group.semester) {
         <p-accordion-panel [value]="group.semester">
           <p-accordion-header>
-            <div class="flex align-items-center gap-2">
-              <span [style]="{ 'background-color': getSemesterColor(group.semester) }" class="inline-flex align-items-center justify-content-center border-circle text-white font-bold" style="width: 2rem; height: 2rem; font-size: 0.85rem">{{ group.semester }}</span>
-              <span class="font-medium text-slate-700">Semestre {{ group.semester }}</span>
-              <p-badge [value]="group.subjects.length + ' materias'" severity="info"></p-badge>
+            <div class="flex align-items-center gap-3">
+              <!-- Badge for Semestre -->
+              <div class="flex align-items-center justify-content-center" 
+                   [ngStyle]="{'background-color': getSemesterColor(group.semester)}"
+                   style="padding: 0.35rem 0.8rem; border-radius: 4px;">
+                <span class="font-bold text-sm text-white m-0">Semestre {{ group.semester }}</span>
+              </div>
+              <!-- Info Text (Dark) -->
+              <span class="text-700 text-sm font-medium">
+                {{ group.subjects.length }} materias &nbsp;|&nbsp; {{ group.totalCredits }} créditos &nbsp;|&nbsp; <i class="pi pi-clock mx-1"></i> {{ group.totalHours }} horas
+              </span>
             </div>
           </p-accordion-header>
           <p-accordion-content>
-            <p-table [value]="group.subjects" styleClass="p-datatable-sm" responsiveLayout="scroll">
+            <p-table [value]="group.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full" responsiveLayout="scroll">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Código</th>
-                  <th>Nombre</th>
-                  <th>Créditos</th>
-                  <th>Modalidad</th>
-                  <th style="width: 110px">Acciones</th>
+                  <th class="text-center" style="width: 20%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Código</th>
+                  <th style="width: 40%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Materia</th>
+                  <th class="text-center" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Créditos</th>
+                  <th class="text-center" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Horas</th>
+                  <th class="text-center" style="width: 110px" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Acciones</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-s>
                 <tr>
-                  <td class="font-medium text-slate-600">{{ s.code }}</td>
+                  <td class="font-medium text-slate-600 text-center">{{ s.code }}</td>
                   <td class="font-medium text-slate-800">{{ s.name }}</td>
-                  <td>{{ s.credits }}</td>
-                  <td>
-                    <div class="flex gap-1 flex-wrap">
-                      @if (s.modalityIds && s.modalityIds.length > 0) {
-                        @for (modId of s.modalityIds; track modId) {
-                          <p-badge [value]="getModalityName(modId)" severity="success"></p-badge>
-                        }
-                      } @else {
-                        <p-badge value="No asignada" severity="secondary"></p-badge>
-                      }
-                    </div>
+                  <td class="text-center"><span class="font-semibold text-600">{{ s.credits }}</span></td>
+                  <td class="text-center">
+                    @if (s.hours) {
+                      <span class="font-semibold text-600">{{ s.hours }}</span>
+                    } @else {
+                      <span class="text-slate-400">-</span>
+                    }
                   </td>
-                  <td>
-                    <div class="flex gap-2">
-                      <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editSubject(s)"></p-button>
-                      <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="deleteSubject(s.id)"></p-button>
+                  <td class="text-center">
+                    <div class="flex gap-2 justify-content-center">
+                      <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" size="small" (click)="editSubject(s)"></p-button>
+                      <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" size="small" (click)="deleteSubject(s.id)"></p-button>
                     </div>
                   </td>
                 </tr>
@@ -214,6 +307,10 @@
         <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
       </div></div>
       <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+        <label class="font-semibold text-sm text-slate-700">Jornadas</label>
+        <p-multiSelect formControlName="jornadaIds" [options]="jornadas" optionLabel="name" optionValue="id" placeholder="Seleccione jornadas" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
         <label class="font-semibold text-sm text-slate-700">Coordinador</label>
         <p-select formControlName="coordinatorId" [options]="coordinators" optionLabel="firstName" optionValue="id" placeholder="Seleccione un coordinador" [filter]="true" filterBy="firstName,lastName" [showClear]="true" styleClass="w-full">
           <ng-template let-coord pTemplate="item">{{coord.firstName}} {{coord.lastName}}</ng-template>
@@ -233,12 +330,12 @@
 </p-dialog>
 
 <!-- Curriculum Form -->
-<p-dialog [(visible)]="displayCurriculumDialog" [header]="isEditCurriculum ? 'Editar Pensum' : 'Nuevo Pensum'" [modal]="true" [style]="{ width: '500px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
+<p-dialog [(visible)]="displayCurriculumDialog" [header]="isEditCurriculum ? 'Editar Malla' : 'Nueva Malla'" [modal]="true" [style]="{ width: '500px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
   <form [formGroup]="curriculumForm" (ngSubmit)="saveCurriculum()" class="mt-3">
     <div class="flex flex-column gap-3">
       <div class="flex flex-column gap-2">
-        <label class="font-semibold text-sm text-slate-700">Nombre del Pensum</label>
-        <input pInputText formControlName="name" placeholder="Ej: Pensum 2024" class="w-full" />
+        <label class="font-semibold text-sm text-slate-700">Nombre de la Malla</label>
+        <input pInputText formControlName="name" placeholder="Ej: Malla 2024" class="w-full" />
       </div>
       <div class="flex flex-column gap-2">
         <label class="font-semibold text-sm text-slate-700">Descripción (Opcional)</label>
@@ -251,7 +348,7 @@
     </div>
     <div class="flex justify-content-end gap-2 mt-4">
       <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayCurriculumDialog = false"></p-button>
-      <p-button label="Guardar Pensum" icon="pi pi-check" type="submit" [disabled]="curriculumForm.invalid" severity="success"></p-button>
+      <p-button label="Guardar Malla" icon="pi pi-check" type="submit" [disabled]="curriculumForm.invalid" severity="success"></p-button>
     </div>
   </form>
 </p-dialog>
@@ -268,10 +365,18 @@
         <label class="font-semibold text-sm text-slate-700">Código</label>
         <input pInputText formControlName="code" placeholder="Ej: ALG101" class="w-full" />
       </div></div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Créditos</label>
-        <p-inputNumber formControlName="credits" [min]="1" [max]="20" [useGrouping]="false" styleClass="w-full" class="w-full"></p-inputNumber>
-      </div></div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label class="font-semibold text-sm text-slate-700">Créditos</label>
+          <p-inputNumber formControlName="credits" [min]="1" [max]="20" [showButtons]="true" styleClass="w-full"></p-inputNumber>
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-4">
+          <label class="font-semibold text-sm text-slate-700">Horas</label>
+          <p-inputNumber formControlName="hours" [min]="0" [max]="500" [showButtons]="true" styleClass="w-full"></p-inputNumber>
+        </div>
+      </div>
       <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
         <label class="font-semibold text-sm text-slate-700">Semestre</label>
         <p-select formControlName="semester" [options]="subjectSemesters" placeholder="Seleccione el semestre" [showClear]="true" styleClass="w-full">
@@ -279,10 +384,7 @@
           <ng-template let-sem pTemplate="selectedItem">{{ sem ? 'Semestre ' + sem : 'Seleccione el semestre' }}</ng-template>
         </p-select>
       </div></div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Modalidades</label>
-        <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
-      </div></div>
+
       <div class="col-12"><div class="flex flex-column gap-2 mb-4">
         <label class="font-semibold text-sm text-slate-700">Descripción (Opcional)</label>
         <textarea pTextarea formControlName="description" rows="2" class="w-full"></textarea>
@@ -299,17 +401,26 @@
 <p-dialog [(visible)]="displayBulkDialog" header="Carga Masiva de Materias" [modal]="true" [style]="{ width: '500px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
   <div class="flex flex-column gap-3 mt-3">
     <div class="surface-100 p-3 border-round text-sm text-slate-700">
-      <p class="m-0"><i class="pi pi-info-circle mr-2 text-blue-500"></i>Sube un archivo Excel con las materias. Se vincularán automáticamente al pensum "{{ selectedCurriculum?.name }}".</p>
+      <p class="m-0"><i class="pi pi-info-circle mr-2 text-blue-500"></i>Sube un archivo Excel con las materias. Se vincularán automáticamente a la malla "{{ selectedCurriculum?.name }}".</p>
     </div>
     <p-button label="Descargar Plantilla Excel" icon="pi pi-download" severity="success" (onClick)="downloadTemplate()" styleClass="w-full"></p-button>
-    <div class="flex flex-column gap-2">
-      <label class="font-semibold text-sm text-slate-700">Seleccionar archivo Excel (.xlsx)</label>
-      <input type="file" accept=".xlsx" (change)="onBulkFileSelected($event)" class="w-full p-2 border-1 surface-border border-round" />
-      <small class="text-slate-500">Columnas: Código, Nombre, Créditos, Semestre, Modalidades</small>
-    </div>
-    <div class="flex justify-content-end gap-2 mt-2">
-      <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayBulkDialog = false" [disabled]="bulkUploading"></p-button>
-      <p-button label="Importar" icon="pi pi-upload" severity="success" (onClick)="processBulkUpload()" [disabled]="!selectedBulkFile || bulkUploading" [loading]="bulkUploading"></p-button>
-    </div>
+    
+    @if(bulkUploading) {
+      <div class="flex flex-column align-items-center justify-content-center py-5">
+        <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="4" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+        <p class="mt-4 mb-0 text-slate-700 font-medium text-lg">Procesando archivo...</p>
+        <span class="text-slate-500 text-sm mt-1">Guardando materias en la base de datos</span>
+      </div>
+    } @else {
+      <div class="flex flex-column gap-2 mt-2">
+        <label class="font-semibold text-sm text-slate-700">Seleccionar archivo Excel (.xlsx)</label>
+        <input type="file" accept=".xlsx" (change)="onBulkFileSelected($event)" class="w-full p-2 border-1 surface-border border-round" />
+        <small class="text-slate-500"><i class="pi pi-table mr-1"></i>Columnas necesarias: Código, Nombre, Créditos, Horas, Semestre</small>
+      </div>
+      <div class="flex justify-content-end gap-2 mt-3">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayBulkDialog = false" [disabled]="bulkUploading"></p-button>
+        <p-button label="Importar Materias" icon="pi pi-upload" severity="success" (onClick)="processBulkUpload()" [disabled]="!selectedBulkFile"></p-button>
+      </div>
+    }
   </div>
 </p-dialog>

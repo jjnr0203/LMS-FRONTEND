@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -14,13 +14,16 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { BadgeModule } from 'primeng/badge';
+import { TagModule } from 'primeng/tag';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { AccordionModule } from 'primeng/accordion';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { PopoverModule } from 'primeng/popover';
 import * as XLSX from 'xlsx';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { UserService } from '../../../../../core/services/user.service';
-import { Career, Modality, Subject, User, Curriculum, Faculty } from '../../../../../core/models';
+import { Career, Modality, Jornada, Faculty, User, Curriculum, Subject } from '../../../../../core/models';
 
 @Component({
   selector: 'app-careers',
@@ -41,11 +44,16 @@ import { Career, Modality, Subject, User, Curriculum, Faculty } from '../../../.
     ToastModule,
     ConfirmDialogModule,
     BadgeModule,
+    TagModule,
     IconFieldModule,
     InputIconModule,
     AccordionModule,
+    ProgressSpinnerModule,
+    PopoverModule,
+    SelectModule
   ],
   templateUrl: './careers.html',
+  styleUrls: ['./careers.scss'],
 })
 export class Careers implements OnInit {
   private academicService = inject(AcademicService);
@@ -57,6 +65,7 @@ export class Careers implements OnInit {
 
   careers: Career[] = [];
   modalities: Modality[] = [];
+  jornadas: Jornada[] = [];
   coordinators: User[] = [];
   faculties: Faculty[] = [];
 
@@ -74,16 +83,77 @@ export class Careers implements OnInit {
   selectedCurriculum: Curriculum | null = null;
   subjects: Subject[] = [];
 
-  get groupedSubjects(): { semester: number; subjects: Subject[] }[] {
+  searchQuery = signal<string>('');
+  selectedSemesters = signal<number[]>([]);
+  
+  predefinedColors = [
+    { name: 'Índigo', value: '#312e81' },
+    { name: 'Azul Cobalto', value: '#1d4ed8' },
+    { name: 'Azul Cielo', value: '#0ea5e9' },
+    { name: 'Verde Esmeralda', value: '#059669' },
+    { name: 'Verde Bosque', value: '#166534' },
+    { name: 'Verde Oliva', value: '#65a30d' },
+    { name: 'Amarillo Mostaza', value: '#ca8a04' },
+    { name: 'Naranja Quemado', value: '#ea580c' },
+    { name: 'Rojo Ladrillo', value: '#b91c1c' },
+    { name: 'Rosa Carmín', value: '#be123c' },
+    { name: 'Violeta', value: '#7e22ce' },
+    { name: 'Púrpura Oscuro', value: '#4c1d95' },
+    { name: 'Gris Pizarra', value: '#475569' },
+    { name: 'Gris Carbón', value: '#334155' },
+    { name: 'Marrón Tierra', value: '#78350f' }
+  ];
+
+  get availableSemesters() {
+    const semSet = new Set<number>();
+    this.subjects.forEach(s => semSet.add(s.semester || 0));
+    return Array.from(semSet).sort((a, b) => a - b).map(s => ({ label: `Semestre ${s}`, value: s }));
+  }
+
+  get groupedSubjects(): { semester: number; subjects: Subject[]; totalCredits: number; totalHours: number }[] {
+    const normalizeString = (str: string) => {
+      if (!str) return '';
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    };
+    
+    const query = normalizeString(this.searchQuery());
+    const selSems = this.selectedSemesters();
+    
     const map = new Map<number, Subject[]>();
     for (const s of this.subjects) {
       const sem = s.semester || 0;
+      
+      if (selSems.length > 0 && !selSems.includes(sem)) continue;
+      
+      if (query) {
+        const matchName = normalizeString(s.name).includes(query);
+        const matchCode = normalizeString(s.code).includes(query);
+        if (!matchName && !matchCode) continue;
+      }
+      
       if (!map.has(sem)) map.set(sem, []);
       map.get(sem)!.push(s);
     }
     return Array.from(map.entries())
-      .map(([semester, subjects]) => ({ semester, subjects }))
+      .map(([semester, subjects]) => {
+        const totalCredits = subjects.reduce((acc, s) => acc + (s.credits || 0), 0);
+        const totalHours = subjects.reduce((acc, s) => acc + (s.hours || 0), 0);
+        return { semester, subjects, totalCredits, totalHours };
+      })
       .sort((a, b) => a.semester - b.semester);
+  }
+
+  updateSemesterColor(semester: number, color: string) {
+    const current = this.academicService.semesterColors();
+    const idx = current.findIndex(c => c.semester === semester);
+    const newColors = [...current];
+    if (idx >= 0) {
+      newColors[idx] = { ...newColors[idx], color };
+    } else {
+      newColors.push({ semester, color });
+    }
+    this.academicService.semesterColors.set(newColors);
+    localStorage.setItem('lms_semester_colors', JSON.stringify(newColors));
   }
 
   // --- Curriculum CRUD dialogs ---
@@ -103,6 +173,7 @@ export class Careers implements OnInit {
   displayBulkDialog = false;
   selectedBulkFile: File | null = null;
   bulkUploading = false;
+  deletingAllSubjects: boolean = false;
 
   // --- Wizard: career → curriculum → subjects ---
   pendingWizardCurriculumId: string | null = null;
@@ -111,6 +182,7 @@ export class Careers implements OnInit {
   ngOnInit() {
     this.initForms();
     this.loadCareers();
+    this.loadJornadas();
   }
 
   initForms() {
@@ -119,6 +191,7 @@ export class Careers implements OnInit {
       code: ['', Validators.required],
       durationSemesters: [1, [Validators.required, Validators.min(1)]],
       modalityIds: [[]],
+      jornadaIds: [[]],
       coordinatorId: [null],
       facultyId: [null],
       isActive: [true],
@@ -134,13 +207,23 @@ export class Careers implements OnInit {
       code: ['', Validators.required],
       name: ['', Validators.required],
       credits: [1, [Validators.required, Validators.min(1)]],
-      semester: [null, Validators.required],
-      modalityIds: [[]],
+      hours: [0, [Validators.required, Validators.min(0)]],
+      semester: [1, [Validators.required, Validators.min(1)]],
       description: [''],
     });
   }
 
   // ──────────── DATA LOADING ────────────
+
+  loadJornadas() {
+    this.academicService.getJornadas().subscribe({
+      next: (data) => {
+        this.jornadas = data.filter((j) => j.isActive);
+        this.cdr.detectChanges();
+      },
+      error: () => console.error('Error al cargar jornadas'),
+    });
+  }
 
   loadCareers() {
     this.academicService.getCareers().subscribe((data) => {
@@ -207,6 +290,15 @@ export class Careers implements OnInit {
     this.isEditCareer = false;
     this.editCareerId = null;
     this.careerForm.reset({ isActive: true, durationSemesters: 1 });
+    this.loadJornadas();
+    this.academicService.getModalities().subscribe((data) => {
+      this.modalities = data.filter(m => m.isActive);
+      this.cdr.detectChanges();
+    });
+    this.academicService.getFaculties().subscribe((data) => {
+      this.faculties = data.filter(f => f.isActive);
+      this.cdr.detectChanges();
+    });
     this.displayCareerDialog = true;
   }
 
@@ -214,6 +306,15 @@ export class Careers implements OnInit {
     this.isEditCareer = true;
     this.editCareerId = c.id;
     this.careerForm.patchValue(c);
+    this.loadJornadas();
+    this.academicService.getModalities().subscribe((data) => {
+      this.modalities = data.filter(m => m.isActive);
+      this.cdr.detectChanges();
+    });
+    this.academicService.getFaculties().subscribe((data) => {
+      this.faculties = data.filter(f => f.isActive);
+      this.cdr.detectChanges();
+    });
     this.displayCareerDialog = true;
   }
 
@@ -293,29 +394,29 @@ export class Careers implements OnInit {
     if (this.isEditCurriculum && this.editCurriculumId) {
       this.academicService.updateCurriculum(this.editCurriculumId, data).subscribe({
         next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Pensum actualizado' });
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Malla actualizada' });
           this.loadCurriculums(this.selectedCareer!.id);
           this.displayCurriculumDialog = false;
         },
-        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el pensum' }),
+        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar la malla' }),
       });
     } else {
       this.academicService.createCurriculum(this.selectedCareer.id, data).subscribe({
         next: (created) => {
-          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Pensum creado' });
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Malla creada' });
           this.loadCurriculums(this.selectedCareer!.id);
           this.displayCurriculumDialog = false;
           this.pendingWizardCurriculumId = created.id;
           setTimeout(() => this.promptAddSubjects(), 300);
         },
-        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear el pensum' }),
+        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear la malla' }),
       });
     }
   }
 
   deleteCurriculum(id: string) {
     this.confirmationService.confirm({
-      message: '¿Está seguro de eliminar este pensum?',
+      message: '¿Está seguro de eliminar esta malla?',
       header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, Eliminar',
@@ -324,11 +425,11 @@ export class Careers implements OnInit {
       accept: () => {
         this.academicService.deleteCurriculum(id).subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Pensum eliminado' });
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Malla eliminada' });
             if (this.selectedCareer) this.loadCurriculums(this.selectedCareer.id);
             if (this.selectedCurriculum?.id === id) this.backToCurriculums();
           },
-          error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudo eliminar el pensum' }),
+          error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudo eliminar la malla' }),
         });
       }
     });
@@ -341,7 +442,7 @@ export class Careers implements OnInit {
     this.isEditSubject = false;
     this.editSubjectId = null;
     this.subjectSemesters = Array.from({ length: this.selectedCareer.durationSemesters }, (_, i) => i + 1);
-    this.subjectForm.reset({ credits: 1 });
+    this.subjectForm.reset({ credits: 1, hours: 0, semester: 1 });
     this.displaySubjectDialog = true;
   }
 
@@ -362,10 +463,10 @@ export class Careers implements OnInit {
       code: raw.code,
       name: raw.name,
       credits: raw.credits,
+      hours: raw.hours || 0,
       careerId: this.selectedCareer.id,
       curriculumId: this.selectedCurriculum.id,
       semester: raw.semester,
-      modalityIds: raw.modalityIds || [],
       description: raw.description || '',
     };
 
@@ -413,14 +514,19 @@ export class Careers implements OnInit {
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
+        this.deletingAllSubjects = true;
         this.academicService.deleteAllSubjects().subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Todas las materias fueron eliminadas' });
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Todas las materias han sido eliminadas' });
             this.subjects = [];
+            this.deletingAllSubjects = false;
             this.loadCurriculums(this.selectedCareer!.id);
             this.cdr.detectChanges();
           },
-          error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudieron eliminar las materias' }),
+          error: (err) => {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudieron eliminar las materias' });
+            this.deletingAllSubjects = false;
+          }
         });
       }
     });
@@ -450,8 +556,8 @@ export class Careers implements OnInit {
 
   promptCreateCurriculum() {
     this.confirmationService.confirm({
-      message: `¿Deseas crear un pensum para "${this.selectedCareer?.name}"?`,
-      header: 'Crear Pensum',
+      message: `¿Deseas crear una malla académica para "${this.selectedCareer?.name}"?`,
+      header: 'Crear Malla',
       icon: 'pi pi-question-circle',
       acceptLabel: 'Sí, Crear',
       rejectLabel: 'Ahora no',
@@ -464,7 +570,7 @@ export class Careers implements OnInit {
 
   promptAddSubjects() {
     this.confirmationService.confirm({
-      message: `¿Deseas agregar materias al pensum de "${this.selectedCareer?.name}"?`,
+      message: `¿Deseas agregar materias a la malla de "${this.selectedCareer?.name}"?`,
       header: 'Agregar Materias',
       icon: 'pi pi-question-circle',
       acceptLabel: 'Sí, Agregar',
@@ -479,8 +585,8 @@ export class Careers implements OnInit {
 
   downloadTemplate() {
     const data = [
-      { 'Código': 'MAT-101', 'Nombre': 'Cálculo I', 'Créditos': 4, 'Semestre': 1, 'Modalidades': 'Presencial, En Línea' },
-      { 'Código': 'FIS-101', 'Nombre': 'Física I', 'Créditos': 4, 'Semestre': 1, 'Modalidades': 'Presencial' }
+      { 'Código': 'MAT-101', 'Nombre': 'Cálculo I', 'Créditos': 4, 'Horas': 64, 'Semestre': 1 },
+      { 'Código': 'FIS-101', 'Nombre': 'Física I', 'Créditos': 4, 'Horas': 64, 'Semestre': 1 }
     ];
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
@@ -515,13 +621,7 @@ export class Careers implements OnInit {
       const payload: any[] = [];
       for (const row of data as any[]) {
         if (row['Código'] && row['Nombre'] && row['Créditos'] && row['Semestre']) {
-          let modalityIds: string[] = [];
-          if (row['Modalidades']) {
-            const modNames = row['Modalidades'].toString().split(',').map((s: string) => s.trim().toLowerCase());
-            modalityIds = modNames
-              .map((n: string) => this.modalities.find(m => m.name.toLowerCase() === n)?.id)
-              .filter((id: string | undefined) => !!id) as string[];
-          }
+
 
           payload.push({
             curriculumId,
@@ -529,7 +629,7 @@ export class Careers implements OnInit {
             name: row['Nombre'].toString().trim(),
             credits: parseInt(row['Créditos'], 10) || 0,
             semester: parseInt(row['Semestre'], 10) || 1,
-            modalityIds,
+            hours: parseInt(row['Horas'], 10) || 0,
           });
         }
       }
@@ -596,6 +696,10 @@ export class Careers implements OnInit {
 
   getModalityName(id: string): string {
     return this.modalities.find(m => m.id === id)?.name || id;
+  }
+
+  getJornadaName(id: string): string {
+    return this.jornadas.find(j => j.id === id)?.name || id;
   }
 
   getFacultyName(id: string | undefined): string {

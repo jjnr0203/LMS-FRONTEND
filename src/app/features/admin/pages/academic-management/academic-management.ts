@@ -7,6 +7,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { AcademicTerms } from './academic-terms/academic-terms';
 import { Modalities } from './modalities/modalities';
+import { Jornadas } from './jornadas/jornadas';
 import { Careers } from './careers/careers';
 import { Faculties } from './faculties/faculties';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -20,6 +21,7 @@ import { OnInit, inject } from '@angular/core';
     TabsModule,
     AcademicTerms,
     Modalities,
+    Jornadas,
     Careers,
     Faculties,
     ToastModule,
@@ -39,10 +41,11 @@ export class AcademicManagement implements OnInit {
       if (params['tab']) {
         switch (params['tab']) {
           case 'terms': this.activeTab = '0'; break;
-          case 'modalities': this.activeTab = '1'; break;
-          case 'careers': this.activeTab = '2'; break;
-          case 'subjects': this.activeTab = '2'; break;
-          case 'faculties': this.activeTab = '3'; break;
+          case 'faculties': this.activeTab = '1'; break;
+          case 'modalities': this.activeTab = '2'; break;
+          case 'jornadas': this.activeTab = '3'; break;
+          case 'careers': this.activeTab = '4'; break;
+          case 'subjects': this.activeTab = '4'; break;
         }
       }
     });
@@ -53,9 +56,10 @@ export class AcademicManagement implements OnInit {
     let tabStr = 'terms';
     switch (value.toString()) {
       case '0': tabStr = 'terms'; break;
-      case '1': tabStr = 'modalities'; break;
-      case '2': tabStr = 'careers'; break;
-      case '3': tabStr = 'faculties'; break;
+      case '1': tabStr = 'faculties'; break;
+      case '2': tabStr = 'modalities'; break;
+      case '3': tabStr = 'jornadas'; break;
+      case '4': tabStr = 'careers'; break;
     }
     this.router.navigate([], {
       relativeTo: this.route,

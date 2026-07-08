@@ -1,0 +1,73 @@
+  <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div class="flex align-items-center gap-3">
+      <h3 class="m-0 text-xl font-medium text-800">Jornadas</h3>
+      <p-button label="Nueva Jornada" icon="pi pi-plus" (onClick)="openNew()" severity="success" size="small"></p-button>
+    </div>
+  </div>
+
+  <p-table [value]="jornadas" [paginator]="true" [rows]="10" styleClass="p-datatable-sm" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Estado</th>
+        <th>Descripción</th>
+        <th style="width: 120px">Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-jor>
+      <tr>
+        <td>
+          <p-tag [value]="jor.name" severity="success" [style]="{'white-space': 'nowrap'}"></p-tag>
+        </td>
+        <td>
+          <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                [class.bg-emerald-100]="jor.isActive" [class.text-emerald-800]="jor.isActive"
+                [class.bg-slate-100]="!jor.isActive" [class.text-slate-600]="!jor.isActive">
+            {{ jor.isActive ? 'Activa' : 'Inactiva' }}
+          </span>
+        </td>
+        <td class="text-sm text-slate-500 max-w-xs truncate" [title]="jor.description">{{ jor.description }}</td>
+        <td>
+          <div class="flex gap-2">
+            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (onClick)="editJornada(jor)" size="small" ></p-button>
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteJornada(jor.id)" size="small" ></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="4" class="text-center py-4 text-slate-500">No se encontraron jornadas.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-dialog [(visible)]="displayDialog" [header]="isEdit ? 'Editar Jornada' : 'Nueva Jornada'" [modal]="true" [style]="{ width: '800px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
+    <form [formGroup]="form" (ngSubmit)="saveJornada()" class="mt-3">
+      <div class="grid">
+        <div class="col-12 md:col-12">
+          <div class="flex flex-column gap-2 mb-4">
+            <label for="name" class="font-semibold text-sm text-slate-700">Nombre (Ej: Matutina, Vespertina) *</label>
+            <input pInputText id="name" formControlName="name" placeholder="Ingrese el nombre" class="w-full" />
+          </div>
+        </div>
+        <div class="col-12 md:col-12">
+          <div class="flex flex-column gap-2 mb-4">
+            <label for="description" class="font-semibold text-sm text-slate-700">Descripción (Opcional)</label>
+            <textarea pTextarea id="description" formControlName="description" rows="3" placeholder="Descripción de la jornada" class="w-full"></textarea>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="flex align-items-center gap-2 mt-2">
+            <p-checkbox formControlName="isActive" [binary]="true" inputId="isActiveJor"></p-checkbox>
+            <label for="isActiveJor" class="font-semibold text-sm text-slate-700 cursor-pointer">Activa</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-content-end gap-2 mt-4">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayDialog = false"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" type="submit" [disabled]="form.invalid" severity="success"></p-button>
+      </div>
+    </form>
+  </p-dialog>

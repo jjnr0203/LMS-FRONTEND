@@ -1,0 +1,89 @@
+/* Nested Accordion (Semesters) - Toast Style */
+::ng-deep .nested-accordion.p-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; 
+  margin-top: 1.5rem; 
+}
+
+::ng-deep .nested-accordion .p-accordion-panel {
+  margin-bottom: 0.25rem !important; 
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+  overflow: hidden;
+}
+
+::ng-deep .nested-accordion .p-accordionheader,
+::ng-deep .nested-accordion .p-accordion-header-link,
+::ng-deep .nested-accordion .p-accordion-header-action {
+  background-color: #ffffff !important;
+  border: none !important; 
+  border-radius: 4px !important;
+  padding: 0.6rem 1rem !important;
+}
+
+::ng-deep .nested-accordion .p-accordion-content,
+::ng-deep .nested-accordion .p-toggleable-content,
+::ng-deep .nested-accordion .p-accordioncontent,
+::ng-deep .nested-accordion .p-accordioncontent-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+::ng-deep .nested-accordion p-table,
+::ng-deep .nested-accordion .p-datatable,
+::ng-deep .nested-accordion .p-datatable-wrapper,
+::ng-deep .nested-accordion table {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+::ng-deep .nested-accordion .p-accordionheader > svg,
+::ng-deep .nested-accordion .p-accordionheader svg,
+::ng-deep .nested-accordion .p-accordion-header-link > svg,
+::ng-deep .nested-accordion .p-accordion-toggle-icon,
+::ng-deep .nested-accordion .p-icon {
+  display: inline-block !important;
+  color: #64748b !important;
+  fill: #64748b !important;
+  stroke: #64748b !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  opacity: 1 !important;
+  position: static !important;
+  pointer-events: auto !important;
+}
+
+/* Table Alignments */
+::ng-deep .text-center-table {
+  .p-datatable-thead > tr > th.text-center {
+    text-align: center !important;
+  }
+  .p-datatable-tbody > tr > td.text-center {
+    text-align: center !important;
+  }
+}
+
+.hover-clickable-text {
+  transition: color 0.2s;
+}
+tr:hover .hover-clickable-text {
+  color: var(--primary-color) !important;
+}
+
+::ng-deep .fixed-layout-table table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+/* 4. Table Row Hover Effect */
+::ng-deep .interactive-table .p-datatable-tbody > tr {
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+::ng-deep .interactive-table .p-datatable-tbody > tr:hover {
+  background-color: #f1f5f9 !important; /* Very subtle slate-100 */
+}

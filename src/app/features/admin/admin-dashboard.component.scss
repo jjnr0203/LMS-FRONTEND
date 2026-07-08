@@ -87,8 +87,8 @@
 .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  border-color: #047857;
+  background: #064e3b;
+  border-color: #064e3b;
 }
 
 .stat-card:hover .stat-info h3,
@@ -155,24 +155,35 @@
   transform: translateX(0);
 }
 
-/* Academic Breakdown Section */
-.academic-section {
+.academic-wrapper {
   width: 100%;
 }
 
-.section-header {
-  margin-bottom: 2rem;
+.breakdown-header {
+  background: #064e3b;
+  color: #ffffff;
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.section-header h2 {
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.section-title h2 {
   font-size: 1.5rem;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
   margin: 0 0 0.25rem 0;
+  color: #ffffff;
 }
 
-.section-header p {
-  color: #64748b;
+.section-title p {
+  color: #a7f3d0;
   margin: 0;
   font-size: 0.95rem;
 }
@@ -197,9 +208,30 @@
 }
 
 .career-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  border-color: #10b981;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px -5px rgba(6, 78, 59, 0.4);
+  background: #064e3b;
+  border-color: #064e3b;
+}
+
+.career-card:hover .career-card-title,
+.career-card:hover .career-card-title i,
+.career-card:hover .detail-label,
+.career-card:hover .detail-value,
+.career-card:hover .career-card-body p,
+.career-card:hover .view-detail {
+  color: #ffffff !important;
+}
+
+.career-card:hover .modality-chip,
+.career-card:hover .malla-chip {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.career-card:hover .career-card-footer {
+  border-top-color: rgba(255, 255, 255, 0.2);
 }
 
 .career-card-header {

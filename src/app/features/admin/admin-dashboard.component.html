@@ -177,84 +177,124 @@
       </div>
 
       <!-- Academic Breakdown Section -->
-      <div class="academic-section" id="academic-section">
-        <div class="section-header">
-          <h2>Desglose Académico</h2>
-          <p>Carreras, modalidades y mallas curriculares</p>
+      <div class="academic-wrapper mt-5">
+        <div class="breakdown-header mb-3" style="background: none; padding: 0; color: #1e293b;">
+          <div class="section-title">
+            <div>
+              <h2 style="color: #1e293b; font-size: 1.5rem; font-weight: 600;">Desglose Académico</h2>
+              <p style="color: #64748b;">Carreras, modalidades y mallas curriculares</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Filters Bar -->
-        <div class="filters-bar flex gap-3 mb-4 p-3 bg-white border-round-xl shadow-1 w-full m-0 align-items-center">
-          <div class="flex-1">
-            <p-iconField iconPosition="left" styleClass="w-full">
-              <p-inputIcon styleClass="pi pi-search" />
-              <input type="text" pInputText placeholder="Buscar carrera..." [ngModel]="filterCareer()" (ngModelChange)="filterCareer.set($event)" class="w-full" />
-            </p-iconField>
+        @if (selectedFacultyId()) {
+          <!-- Filters Bar -->
+          <div class="filters-bar flex gap-3 mb-4 align-items-center">
+            <div class="flex-1">
+              <p-iconField iconPosition="left" styleClass="w-full">
+                <p-inputIcon styleClass="pi pi-search" />
+                <input type="text" pInputText placeholder="Buscar carrera..." [ngModel]="filterCareer()" (ngModelChange)="filterCareer.set($event)" class="w-full" />
+              </p-iconField>
+            </div>
+            <div class="flex-1">
+              <p-select [options]="availableModalities()" [ngModel]="filterModality()" (ngModelChange)="filterModality.set($event)" placeholder="Filtrar por modalidad" [showClear]="true" styleClass="w-full"></p-select>
+            </div>
           </div>
-          <div class="flex-1">
-            <p-select [options]="availableModalities()" [ngModel]="filterModality()" (ngModelChange)="filterModality.set($event)" placeholder="Filtrar por modalidad" [showClear]="true" styleClass="w-full"></p-select>
-          </div>
-        </div>
+        }
 
         @if (stats()) {
-          @if (filteredCareers().length > 0) {
+          @if (!selectedFacultyId()) {
+            <!-- Nivel 1: Facultades -->
             <div class="career-grid">
-              @for (career of filteredCareers(); track career.id) {
-                <div class="career-card" (click)="goToCareerBreakdown(career.id)">
+              @for (fac of stats()!.academic.faculties; track fac.id) {
+                <div class="career-card" (click)="selectFaculty(fac.id)">
                   <div class="career-card-header">
                     <div class="career-card-title">
-                      <i class="pi pi-graduation-cap"></i>
-                      <span>{{ career.name }}</span>
+                      <i class="pi pi-building text-primary"></i>
+                      <span>{{ fac.name }}</span>
                     </div>
-                    <p-badge [value]="career.code" severity="contrast"></p-badge>
+                    <p-badge [value]="fac.code" severity="secondary"></p-badge>
                   </div>
-
-                  <div class="career-card-body">
-                    <div class="career-detail-row">
-                      <span class="detail-label">Duración:</span>
-                      <span class="detail-value">{{ career.durationSemesters }} semestres</span>
-                    </div>
-
-                    <div class="career-detail-row">
-                      <span class="detail-label">Coordinador:</span>
-                      <span class="detail-value">{{ career.coordinatorName || 'Sin asignar' }}</span>
-                    </div>
-
-                    <div class="career-detail-row">
-                      <span class="detail-label">Modalidades:</span>
-                      <div class="detail-chips">
-                        @for (mod of career.modalityNames; track mod) {
-                          <span class="modality-chip">{{ mod }}</span>
-                        }
-                        @if (career.modalityNames.length === 0) {
-                          <span class="text-400">Sin modalidades</span>
-                        }
-                      </div>
-                    </div>
-
-                    @if (career.activeCurriculums.length > 0) {
-                      <div class="career-detail-row">
-                        <span class="detail-label">Mallas activas:</span>
-                        <div class="detail-chips">
-                          @for (malla of career.activeCurriculums; track malla.id) {
-                            <span class="malla-chip">{{ malla.name }}</span>
-                          }
-                        </div>
-                      </div>
-                    }
+                  <div class="career-card-body pb-0">
+                    <p class="text-500 m-0 text-sm">Haz clic para ver las carreras de esta facultad.</p>
                   </div>
-
-                  <div class="career-card-footer">
-                    <span class="view-detail">Ver desglose completo <i class="pi pi-arrow-right"></i></span>
+                  <div class="career-card-footer mt-3">
+                    <span class="view-detail">Ver carreras <i class="pi pi-arrow-right"></i></span>
                   </div>
                 </div>
               }
             </div>
+            @if (stats()!.academic.faculties.length === 0) {
+              <div class="empty-state">
+                <i class="pi pi-folder-open"></i>
+                <p>No se encontraron facultades registradas.</p>
+              </div>
+            }
           } @else {
-            <div class="empty-state">
-              <i class="pi pi-folder-open"></i>
-              <p>No se encontraron carreras con los filtros aplicados.</p>
+            <!-- Nivel 2: Carreras -->
+            <div class="mb-4">
+              <p-button label="Volver a Facultades" icon="pi pi-arrow-left" (onClick)="clearFaculty()" [text]="true" size="small"></p-button>
             </div>
+
+            @if (filteredCareers().length > 0) {
+              <div class="career-grid">
+                @for (career of filteredCareers(); track career.id) {
+                  <div class="career-card" (click)="goToCareerBreakdown(career.id)">
+                    <div class="career-card-header">
+                      <div class="career-card-title">
+                        <i class="pi pi-graduation-cap"></i>
+                        <span>{{ career.name }}</span>
+                      </div>
+                      <p-badge [value]="career.code" severity="contrast"></p-badge>
+                    </div>
+
+                    <div class="career-card-body">
+                      <div class="career-detail-row">
+                        <span class="detail-label">Duración:</span>
+                        <span class="detail-value">{{ career.durationSemesters }} semestres</span>
+                      </div>
+
+                      <div class="career-detail-row">
+                        <span class="detail-label">Coordinador:</span>
+                        <span class="detail-value">{{ career.coordinatorName || 'Sin asignar' }}</span>
+                      </div>
+
+                      <div class="career-detail-row">
+                        <span class="detail-label">Modalidades:</span>
+                        <div class="detail-chips">
+                          @for (mod of career.modalityNames; track mod) {
+                            <span class="modality-chip">{{ mod }}</span>
+                          }
+                          @if (career.modalityNames.length === 0) {
+                            <span class="text-400">Sin modalidades</span>
+                          }
+                        </div>
+                      </div>
+
+                      @if (career.activeCurriculums.length > 0) {
+                        <div class="career-detail-row">
+                          <span class="detail-label">Mallas activas:</span>
+                          <div class="detail-chips">
+                            @for (malla of career.activeCurriculums; track malla.id) {
+                              <span class="malla-chip">{{ malla.name }}</span>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                    <div class="career-card-footer">
+                      <span class="view-detail">Ver desglose completo <i class="pi pi-arrow-right"></i></span>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-state">
+                <i class="pi pi-folder-open"></i>
+                <p>No se encontraron carreras en esta facultad o con los filtros actuales.</p>
+              </div>
+            }
           }
         } @else {
           <div class="loading-state">
@@ -263,7 +303,6 @@
           </div>
         }
       </div>
-
     </div>
   </div>
 </div>

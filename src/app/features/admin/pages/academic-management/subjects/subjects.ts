@@ -75,6 +75,7 @@ export class Subjects implements OnInit {
       name: ['', Validators.required],
       code: ['', Validators.required],
       credits: [1, [Validators.required, Validators.min(1)]],
+      hours: [0, [Validators.required, Validators.min(0)]],
       teacherId: [null],
       careerId: [null],
       curriculumId: [{ value: null, disabled: true }],
@@ -178,7 +179,7 @@ export class Subjects implements OnInit {
     this.loadData();
     this.isEdit = false;
     this.currentId = null;
-    this.form.reset({ credits: 1 });
+    this.form.reset({ credits: 1, hours: 0 });
     this.form.get('careerId')?.enable();
     this.displayDialog = true;
   }
@@ -211,6 +212,7 @@ export class Subjects implements OnInit {
       code: raw.code,
       name: raw.name,
       credits: raw.credits,
+      hours: raw.hours || 0,
       teacherId: raw.teacherId,
       description: raw.description,
       modalityIds: raw.modalityIds,

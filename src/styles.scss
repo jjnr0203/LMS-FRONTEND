@@ -71,3 +71,23 @@ body {
   background-color: #064e3b !important;
   color: #ffffff !important;
 }
+
+/* Force table alignment in nested accordion */
+.nested-accordion .p-accordion-content,
+.nested-accordion .p-accordioncontent,
+.nested-accordion .p-toggleable-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.nested-accordion .p-accordion-header-link {
+  padding: 0.4rem 1rem !important; /* Reduce semester height */
+}
+
+/* Ensure table has no border radius or margin causing gaps */
+.nested-accordion p-table,
+.nested-accordion .p-datatable {
+  width: 100% !important;
+  margin: 0 !important;
+}

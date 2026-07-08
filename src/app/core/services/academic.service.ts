@@ -1,8 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AcademicTerm, Modality, Career, Subject, SemesterColor, Curriculum, Faculty, Permission } from '../models';
+import { AcademicTerm, Modality, Career, Subject, SemesterColor, Curriculum, Faculty, Permission, Jornada } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class AcademicService {
@@ -58,8 +58,25 @@ export class AcademicService {
     return this.http.put<Modality>(`${this.apiUrl}/modalities/${id}`, data);
   }
 
-  deleteModality(id: string): Observable<{ success: boolean }> {
-    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/modalities/${id}`);
+  deleteModality(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/modalities/${id}`);
+  }
+
+  // --- JORNADAS ---
+  getJornadas(): Observable<Jornada[]> {
+    return this.http.get<Jornada[]>(`${this.apiUrl}/jornadas`);
+  }
+
+  createJornada(data: Partial<Jornada>): Observable<Jornada> {
+    return this.http.post<Jornada>(`${this.apiUrl}/jornadas`, data);
+  }
+
+  updateJornada(id: string, data: Partial<Jornada>): Observable<Jornada> {
+    return this.http.put<Jornada>(`${this.apiUrl}/jornadas/${id}`, data);
+  }
+
+  deleteJornada(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/jornadas/${id}`);
   }
 
   // --- CAREERS ---
@@ -114,7 +131,9 @@ export class AcademicService {
 
   // --- CURRICULUMS ---
   getCurriculumsByCareer(careerId: string): Observable<Curriculum[]> {
-    return this.http.get<Curriculum[]>(`${this.apiUrl}/careers/${careerId}/curriculums`);
+    return this.http.get<any>(`${this.apiUrl}/careers/${careerId}/curriculums`).pipe(
+      map(res => res.data || res)
+    );
   }
 
   createCurriculum(careerId: string, data: Partial<Curriculum>): Observable<Curriculum> {
@@ -129,8 +148,10 @@ export class AcademicService {
     return this.http.delete<{ success: boolean }>(`${this.apiUrl}/curriculums/${id}`);
   }
 
-  getCurriculumSubjects(curriculumId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/curriculums/${curriculumId}/subjects`);
+  getCurriculumSubjects(curriculumId: string): Observable<Subject[]> {
+    return this.http.get<any>(`${this.apiUrl}/curriculums/${curriculumId}/subjects`).pipe(
+      map(res => (res as any).data || res)
+    );
   }
 
   // --- CAREER BREAKDOWN ---

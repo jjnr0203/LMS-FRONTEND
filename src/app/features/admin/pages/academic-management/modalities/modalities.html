@@ -17,7 +17,7 @@
     <ng-template pTemplate="body" let-mod>
       <tr>
         <td>
-          <p-badge [value]="mod.name" severity="success"></p-badge>
+          <p-tag [value]="mod.name" severity="success" [style]="{'white-space': 'nowrap'}"></p-tag>
         </td>
         <td>
           <span class="px-2 py-1 text-xs font-semibold rounded-full"
@@ -29,8 +29,8 @@
         <td class="text-sm text-slate-500 max-w-xs truncate" [title]="mod.description">{{ mod.description }}</td>
         <td>
           <div class="flex gap-2">
-            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (onClick)="editModality(mod)"></p-button>
-            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteModality(mod.id)"></p-button>
+            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (onClick)="editModality(mod)" size="small" ></p-button>
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteModality(mod.id)" size="small" ></p-button>
           </div>
         </td>
       </tr>

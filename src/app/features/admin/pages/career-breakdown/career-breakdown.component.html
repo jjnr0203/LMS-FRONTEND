@@ -1,46 +1,50 @@
-<div class="breakdown-page">
+<div class="page-container">
   <!-- Header -->
-  <div class="breakdown-header">
-    <button class="back-btn" (click)="goBack()">
-      <i class="pi pi-arrow-left"></i> Volver al panel
-    </button>
+  <div class="page-header">
+    <div class="header-content">
+      <button class="back-btn" (click)="goBack()" style="color: #a7f3d0;">
+        <i class="pi pi-arrow-left"></i> Volver al panel
+      </button>
 
-    @if (breakdown(); as data) {
-      <div class="career-info">
-        <div class="career-title-row">
-          <h1>{{ data.career.name }}</h1>
-          <p-badge [value]="data.career.code" severity="contrast"></p-badge>
-        </div>
-        <div class="career-meta">
-          <span class="meta-item">
-            <i class="pi pi-calendar"></i> {{ data.career.durationSemesters }} semestres
-          </span>
-          @if (data.career.coordinatorName) {
-            <span class="meta-item">
-              <i class="pi pi-user"></i> Coordinador: {{ data.career.coordinatorName }}
+      @if (breakdown(); as data) {
+        <div class="career-info mt-3">
+          <div class="career-title-row">
+            <h1 style="color: white; margin: 0; font-size: 1.6rem;">{{ data.career.name }}</h1>
+            <p-badge [value]="data.career.code" severity="contrast"></p-badge>
+          </div>
+          <div class="career-meta mt-2 flex gap-4 text-sm text-green-100">
+            <span class="meta-item flex align-items-center gap-2">
+              <i class="pi pi-calendar"></i> {{ data.career.durationSemesters }} semestres
             </span>
-          }
-          <span class="meta-item">
-            <i class="pi pi-tags"></i>
-            @for (mod of data.career.modalityNames; track mod) {
-              <span class="modality-tag">{{ mod }}</span>
+            @if (data.career.coordinatorName) {
+              <span class="meta-item flex align-items-center gap-2">
+                <i class="pi pi-user"></i> Coordinador: {{ data.career.coordinatorName }}
+              </span>
             }
-            @if (data.career.modalityNames.length === 0) {
-              <span class="text-500">Sin modalidades</span>
-            }
-          </span>
+            <span class="meta-item flex align-items-center gap-2">
+              <i class="pi pi-tags"></i>
+              @for (mod of data.career.modalityNames; track mod) {
+                <span class="modality-tag bg-white text-green-800 px-2 py-1 border-round-xl text-xs font-bold">{{ mod }}</span>
+              }
+              @if (data.career.modalityNames.length === 0) {
+                <span class="text-500">Sin modalidades</span>
+              }
+            </span>
+          </div>
         </div>
-      </div>
-    } @else if (loading()) {
-      <div class="skeleton-header">
-        <p-skeleton width="60%" height="2rem" />
-        <p-skeleton width="40%" height="1rem" styleClass="mt-2" />
-      </div>
-    }
+      } @else if (loading()) {
+        <div class="skeleton-header mt-3">
+          <p-skeleton width="60%" height="2rem" styleClass="bg-green-700" />
+          <p-skeleton width="40%" height="1rem" styleClass="mt-2 bg-green-700" />
+        </div>
+      }
+    </div>
   </div>
 
   <!-- Content -->
-  <div class="breakdown-content">
+  <div class="content-wrapper">
+    <div class="data-card p-4">
+      <div class="breakdown-content">
     @if (loading()) {
       <div class="loading-state">
         <i class="pi pi-spin pi-spinner"></i>
@@ -52,7 +56,7 @@
         <p>{{ err }}</p>
         <button pButton label="Reintentar" (click)="reload()"></button>
       </div>
-    } @else if (breakdown(); as data) {
+    } @else if (filteredBreakdown(); as data) {
       @if (data.curriculums.length === 0) {
         <div class="empty-state">
           <i class="pi pi-file"></i>
@@ -60,76 +64,159 @@
         </div>
       }
 
-      <p-accordion #accordion (onOpen)="scrollToPanel()">
-        @for (cur of data.curriculums; track cur.id) {
-          <p-accordion-panel [value]="cur.id">
-            <p-accordion-header>
-              <div class="flex align-items-center gap-2">
-                <i class="pi pi-sitemap text-green-600"></i>
-                <span class="font-semibold">{{ cur.name }}</span>
-                @if (cur.isActive) {
-                  <p-badge value="Activa" severity="success"></p-badge>
-                } @else {
-                  <p-badge value="Inactiva" severity="warn"></p-badge>
+      <div class="mb-2 flex flex-column md:flex-row gap-3">
+        <p-iconField iconPosition="left" styleClass="flex-1">
+          <p-inputIcon styleClass="pi pi-search" />
+          <input pInputText type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Buscar materia por código o nombre..." class="w-full" />
+        </p-iconField>
+        
+        <div class="flex gap-2">
+          <p-multiSelect 
+            [options]="availableSemesters()" 
+            [ngModel]="selectedSemesters()" 
+            (ngModelChange)="selectedSemesters.set($event)" 
+            placeholder="Semestre"
+            defaultLabel="Semestre" 
+            optionLabel="label" 
+            optionValue="value" 
+            styleClass="w-full md:w-20rem"
+            [filter]="false"
+            display="chip">
+          </p-multiSelect>
+
+          <p-button icon="pi pi-palette" label="Colores" styleClass="p-button-outlined" (onClick)="colorMenu.toggle($event)"></p-button>
+          
+          <!-- Global Color Overlay -->
+          <p-popover #colorMenu [style]="{width: '350px'}">
+            <div class="p-2">
+              <h3 class="m-0 mb-3 text-lg font-bold text-700">Colores por Semestre</h3>
+              <div class="flex flex-column gap-2">
+                @for (sem of availableSemesters(); track sem.value) {
+                  <div class="flex align-items-center justify-content-between gap-3">
+                    <span class="font-medium text-sm white-space-nowrap m-0">{{ sem.label }}</span>
+                    <p-select [options]="predefinedColors" 
+                                [ngModel]="getSemesterColor(sem.value)" 
+                                (ngModelChange)="updateSemesterColor(sem.value, $event)" 
+                                optionLabel="name" 
+                                optionValue="value" 
+                                appendTo="body"
+                                styleClass="w-12rem">
+                      <ng-template pTemplate="selectedItem" let-selectedOption>
+                        <div class="flex align-items-center gap-2">
+                          <div class="w-1rem h-1rem border-round shadow-1 flex-shrink-0" [style.backgroundColor]="selectedOption?.value || getSemesterColor(sem.value)"></div>
+                          <span class="text-sm white-space-nowrap overflow-hidden text-overflow-ellipsis">{{ selectedOption?.name || 'Personalizado' }}</span>
+                        </div>
+                      </ng-template>
+                      <ng-template pTemplate="item" let-color>
+                        <div class="flex align-items-center gap-2">
+                          <div class="w-1rem h-1rem border-round shadow-1 flex-shrink-0" [style.backgroundColor]="color.value"></div>
+                          <span class="text-sm white-space-nowrap">{{ color.name }}</span>
+                        </div>
+                      </ng-template>
+                    </p-select>
+                  </div>
                 }
+              </div>
+            </div>
+          </p-popover>
+        </div>
+      </div>
+
+      <p-accordion [multiple]="true" styleClass="outer-accordion" [value]="expandedCurriculums()" (valueChange)="onCurriculumsChange($event)">
+        @for (cur of data.curriculums; track cur.id) {
+          <p-accordion-panel [value]="cur.id" class="malla-panel">
+            <p-accordion-header [ngClass]="{'malla-active': expandedCurriculums().includes(cur.id)}">
+              <div class="flex align-items-center flex-wrap gap-3 w-full">
+                <i class="pi pi-sitemap text-xl icon-malla"></i>
+                <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
+                <span class="text-sm flex align-items-center gap-2 subtitle-malla">
+                  <span><i class="pi pi-book"></i> {{ cur.totalSubjects }} materias</span> &nbsp;|&nbsp; 
+                  <span><i class="pi pi-calendar"></i> {{ cur.totalSemesters }} semestres</span> &nbsp;|&nbsp; 
+                  <span><i class="pi pi-star"></i> {{ cur.totalCredits }} créditos</span>
+                </span>
+                <div class="ml-auto mr-4">
+                  @if (cur.isActive) {
+                    <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
+                  } @else {
+                    <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
+                  }
+                </div>
               </div>
             </p-accordion-header>
             <p-accordion-content>
               @if (cur.description) {
-                <p class="text-600 text-sm mb-3">{{ cur.description }}</p>
+                <p class="text-600 text-sm mb-4">{{ cur.description }}</p>
               }
 
-              @let subjects = allSubjects(cur);
-              @if (subjects.length > 0) {
-                <p-table [value]="subjects" styleClass="p-datatable-sm" [rowHover]="true">
-                  <ng-template pTemplate="header">
-                    <tr>
-                      <th>Semestre</th>
-                      <th>Código</th>
-                      <th>Nombre</th>
-                      <th>Créditos</th>
-                      <th>Modalidad</th>
-                      <th>Docente</th>
-                    </tr>
-                  </ng-template>
-                  <ng-template pTemplate="body" let-subject>
-                    <tr>
-                      <td>
-                        <span [style]="{ 'background-color': getSemesterColor(subject.semester) }" class="inline-flex align-items-center justify-content-center border-circle text-white font-bold" style="width: 1.8rem; height: 1.8rem; font-size: 0.75rem">{{ subject.semester }}</span>
-                      </td>
-                      <td class="font-mono text-600">{{ subject.code }}</td>
-                      <td class="font-medium">{{ subject.name }}</td>
-                      <td>
-                        <p-badge [value]="subject.credits" severity="info"></p-badge>
-                      </td>
-                      <td>
-                        @if (subject.modalityNames.length > 0) {
-                          <div class="subject-modalities">
-                            @for (mod of subject.modalityNames; track mod) {
-                              <span class="subject-mod-tag">{{ mod }}</span>
-                            }
+              @if (cur.semesters.length > 0) {
+                <p-accordion [multiple]="true" styleClass="nested-accordion" [value]="expandedSemesters()" (valueChange)="onSemestersChange($event)">
+                  @for (sem of cur.semesters; track sem.semester) {
+                    <p-accordion-panel [value]="sem.semester">
+                      <p-accordion-header>
+                        <div class="flex align-items-center gap-3">
+                          
+                          <!-- Badge for Semestre -->
+                          <div class="flex align-items-center justify-content-center" 
+                               [ngStyle]="{'background-color': getSemesterColor(sem.semester)}"
+                               style="padding: 0.35rem 0.8rem; border-radius: 4px;">
+                            <span class="font-bold text-sm text-white m-0">Semestre {{ sem.semester }}</span>
                           </div>
-                        } @else {
-                          <span class="text-400">General</span>
-                        }
-                      </td>
-                      <td>
-                        @if (subject.teacherName) {
-                          <span class="text-600"><i class="pi pi-user mr-1 text-sm"></i> {{ subject.teacherName }}</span>
-                        } @else {
-                          <span class="text-400 font-italic">Sin asignar</span>
-                        }
-                      </td>
-                    </tr>
-                  </ng-template>
-                </p-table>
+                          
+                          <!-- Info Text (Dark) -->
+                          <span class="text-700 text-sm font-medium">
+                            {{ sem.subjects.length }} materias &nbsp;|&nbsp; {{ sem.totalCredits }} créditos &nbsp;|&nbsp; <i class="pi pi-clock mx-1"></i> {{ sem.totalHours }} horas
+                          </span>
+                          
+                        </div>
+                      </p-accordion-header>
+                      <p-accordion-content>
+                        <p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full" responsiveLayout="scroll">
+                          <ng-template pTemplate="header">
+                            <tr>
+                              <th class="text-center" style="width: 12%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Código</th>
+                              <th style="width: 43%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Nombre</th>
+                              <th class="text-center" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
+                              <th class="text-center" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
+                              <th class="text-center" style="width: 25%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Docente</th>
+                            </tr>
+                          </ng-template>
+                          <ng-template pTemplate="body" let-s>
+                            <tr>
+                              <td class="font-mono text-600 text-center">{{ s.code }}</td>
+                              <td class="font-medium text-left">{{ s.name }}</td>
+                              <td class="text-center">
+                                <span class="font-semibold text-600">{{ s.credits }}</span>
+                              </td>
+                              <td class="text-center">
+                                @if (s.hours) {
+                                  <span class="font-semibold text-600">{{ s.hours }}h</span>
+                                } @else {
+                                  <span class="text-400">-</span>
+                                }
+                              </td>
+                              <td class="text-center" style="white-space: nowrap;">
+                                @if (s.teacherName) {
+                                  <span class="text-600">{{ s.teacherName }}</span>
+                                } @else {
+                                  <span class="text-400 font-italic">Sin asignar</span>
+                                }
+                              </td>
+                            </tr>
+                          </ng-template>
+                        </p-table>
+                      </p-accordion-content>
+                    </p-accordion-panel>
+                  }
+                </p-accordion>
               } @else {
-                <p class="text-400 text-center py-3">Esta malla no tiene materias asignadas.</p>
+                <p class="text-400 text-center py-3">No hay materias que coincidan con la búsqueda.</p>
               }
             </p-accordion-content>
           </p-accordion-panel>
         }
       </p-accordion>
     }
+      </div>
+    </div>
   </div>
 </div>

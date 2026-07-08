@@ -3,7 +3,7 @@
   [class.collapsed]="isCollapsed()"
   [style.width]="isCollapsed() ? '70px' : '260px'" style="height: 100vh; transition: width 0.3s ease"
 >
-  <div class="flex align-items-center justify-content-between p-4">
+  <div class="flex align-items-center" [class.justify-content-between]="!isCollapsed()" [class.justify-content-center]="isCollapsed()" [class.p-4]="!isCollapsed()" [class.p-3]="isCollapsed()" [class.flex-column]="isCollapsed()" [class.gap-3]="isCollapsed()">
     <div class="flex align-items-center gap-3 overflow-hidden">
       <i class="pi pi-box text-3xl flex-shrink-0" style="color: #064e3b"></i>
       @if (!isCollapsed()) {
@@ -69,9 +69,9 @@
       [title]="isCollapsed() ? 'Ver Perfil' : ''"
     >
       @if (user()?.avatarUrl) {
-        <img [src]="user()?.avatarUrl" alt="Avatar" class="flex-shrink-0 border-1 border-white-alpha-20" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover" />
+        <img [src]="user()?.avatarUrl" alt="Avatar" class="flex-shrink-0 border-1 border-white-alpha-20" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; border-radius: 6px; object-fit: cover" />
       } @else {
-        <div class="flex align-items-center justify-content-center text-white border-2 border-solid border-white flex-shrink-0" style="width: 40px; height: 40px; border-radius: 6px; background: #064e3b">
+        <div class="flex align-items-center justify-content-center text-white border-2 border-solid border-white flex-shrink-0" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; border-radius: 6px; background: #064e3b">
           <i class="pi pi-user"></i>
         </div>
       }

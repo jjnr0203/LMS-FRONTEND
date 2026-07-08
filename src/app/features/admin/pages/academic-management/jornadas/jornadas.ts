@@ -9,15 +9,14 @@ import { BadgeModule } from 'primeng/badge';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast';
 import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TagModule } from 'primeng/tag';
-import { ConfirmationService, MessageService } from 'primeng/api';
 import { AcademicService } from '../../../../../core/services/academic.service';
-import { Faculty } from '../../../../../core/models';
+import { Jornada } from '../../../../../core/models';
 
 @Component({
-  selector: 'app-faculties',
+  selector: 'app-jornadas',
   standalone: true,
   imports: [
     CommonModule,
@@ -30,20 +29,19 @@ import { Faculty } from '../../../../../core/models';
     ToastModule,
     TextareaModule,
     BadgeModule,
-    SelectModule,
     ConfirmDialogModule,
-    TagModule
+    TagModule,
   ],
-  templateUrl: './faculties.html',
+  templateUrl: './jornadas.html',
 })
-export class Faculties implements OnInit {
+export class Jornadas implements OnInit {
   private academicService = inject(AcademicService);
   private formBuilder = inject(FormBuilder);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private cdr = inject(ChangeDetectorRef);
 
-  faculties: Faculty[] = [];
+  jornadas: Jornada[] = [];
   displayDialog = false;
   form!: FormGroup;
   isEdit = false;
@@ -51,69 +49,69 @@ export class Faculties implements OnInit {
 
   ngOnInit() {
     this.initForm();
-    this.loadFaculties();
+    this.loadJornadas();
   }
 
   initForm() {
     this.form = this.formBuilder.group({
       name: ['', Validators.required],
-      code: ['', Validators.required],
       description: [''],
       isActive: [true],
     });
   }
 
-  loadFaculties() {
-    this.academicService.getFaculties().subscribe({
+  loadJornadas() {
+    this.academicService.getJornadas().subscribe({
       next: (data) => {
-        this.faculties = data;
+        this.jornadas = data;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las facultades' });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las jornadas' });
         this.cdr.detectChanges();
       }
     });
   }
 
   openNew() {
+    this.loadJornadas();
     this.isEdit = false;
     this.currentId = null;
     this.form.reset({ isActive: true });
     this.displayDialog = true;
   }
 
-  editFaculty(f: Faculty) {
+  editJornada(jor: Jornada) {
+    this.loadJornadas();
     this.isEdit = true;
-    this.currentId = f.id;
+    this.currentId = jor.id;
     this.form.patchValue({
-      name: f.name,
-      code: f.code,
-      description: f.description || '',
-      isActive: f.isActive,
+      name: jor.name,
+      description: jor.description || '',
+      isActive: jor.isActive,
     });
     this.displayDialog = true;
   }
 
-  saveFaculty() {
+  saveJornada() {
     if (this.form.invalid) return;
 
     const data = this.form.value;
 
     if (this.isEdit && this.currentId) {
-      this.academicService.updateFaculty(this.currentId, data).subscribe({
+      this.academicService.updateJornada(this.currentId, data).subscribe({
         next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Facultad actualizada' });
-          this.loadFaculties();
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Jornada actualizada' });
+          this.loadJornadas();
           this.displayDialog = false;
         },
         error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar' }),
       });
     } else {
-      this.academicService.createFaculty(data).subscribe({
+      this.academicService.createJornada(data).subscribe({
         next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Facultad creada' });
-          this.loadFaculties();
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Jornada creada' });
+          this.loadJornadas();
           this.displayDialog = false;
         },
         error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear' }),
@@ -121,19 +119,19 @@ export class Faculties implements OnInit {
     }
   }
 
-  deleteFaculty(id: string) {
+  deleteJornada(id: string) {
     this.confirmationService.confirm({
-      message: '¿Está seguro de eliminar esta facultad?',
+      message: '¿Está seguro de eliminar esta jornada?',
       header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, Eliminar',
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.academicService.deleteFaculty(id).subscribe({
+        this.academicService.deleteJornada(id).subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Facultad eliminada' });
-            this.loadFaculties();
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Jornada eliminada' });
+            this.loadJornadas();
           },
           error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' }),
         });

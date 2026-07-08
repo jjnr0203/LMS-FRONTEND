@@ -22,6 +22,7 @@ interface CareerDetail {
   durationSemesters: number;
   isActive: boolean;
   activeCurriculums: { id: string; name: string }[];
+  facultyId: string | null;
 }
 
 interface DashboardStats {
@@ -36,6 +37,7 @@ interface DashboardStats {
     totalCareers: number;
     totalSubjects: number;
     totalFaculties: number;
+    faculties: { id: string; code: string; name: string }[];
     careers: CareerDetail[];
   };
 }
@@ -54,6 +56,7 @@ export class AdminDashboardComponent implements OnInit {
 
   user = this.authService.user;
   stats = signal<DashboardStats | null>(null);
+  selectedFacultyId = signal<string | null>(null);
 
   filterCareer = signal<string>('');
   filterModality = signal<string>('');
@@ -72,7 +75,12 @@ export class AdminDashboardComponent implements OnInit {
     const s = this.stats();
     if (!s) return [];
 
+    const facId = this.selectedFacultyId();
     let careers = s.academic.careers;
+
+    if (facId) {
+      careers = careers.filter(c => c.facultyId === facId);
+    }
 
     const fCareer = this.filterCareer().toLowerCase().trim();
     if (fCareer) {
@@ -112,6 +120,16 @@ export class AdminDashboardComponent implements OnInit {
 
   goToAcademic(tab: string) {
     this.router.navigate(['/admin/academic'], { queryParams: { tab } });
+  }
+
+  selectFaculty(facultyId: string) {
+    this.selectedFacultyId.set(facultyId);
+    this.filterCareer.set('');
+    this.filterModality.set('');
+  }
+
+  clearFaculty() {
+    this.selectedFacultyId.set(null);
   }
 
   goToCareerBreakdown(careerId: string) {

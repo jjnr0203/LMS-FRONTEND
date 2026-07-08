@@ -38,6 +38,7 @@ export interface Subject {
   code: string;
   name: string;
   credits: number;
+  hours: number;
   teacherId?: string;
   description?: string;
   careerId?: string;
@@ -55,12 +56,16 @@ export interface Enrollment {
 export interface Assignment {
   id: string;
   title: string;
-  description: string;
+  facultyId?: string;
+  modalityIds?: string[];
+  jornadaIds?: string[];
+  description?: string;
   subjectId: string;
   teacherId: string;
   dueDate: string;
   maxScore: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Submission {
@@ -107,9 +112,18 @@ export interface AcademicTerm {
   startDate: Date | string;
   endDate: Date | string;
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Modality {
+  id: string;
+  name: string;
+  isActive: boolean;
+  description?: string;
+}
+
+export interface Jornada {
   id: string;
   name: string;
   isActive: boolean;

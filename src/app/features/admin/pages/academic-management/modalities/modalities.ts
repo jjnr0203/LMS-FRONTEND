@@ -8,7 +8,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { BadgeModule } from 'primeng/badge';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TextareaModule } from 'primeng/textarea';
+import { TagModule } from 'primeng/tag';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { Modality } from '../../../../../core/models';
@@ -25,8 +27,10 @@ import { Modality } from '../../../../../core/models';
     InputTextModule,
     CheckboxModule,
     ToastModule,
+    ConfirmDialogModule,
     TextareaModule,
     BadgeModule,
+    TagModule,
   ],
   templateUrl: './modalities.html',
 })
