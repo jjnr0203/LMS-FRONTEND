@@ -7,6 +7,8 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { AcademicService } from '../../../core/services/academic.service';
 
 @Component({
   selector: 'app-register-teacher',
@@ -17,6 +19,7 @@ import { CardModule } from 'primeng/card';
     ButtonModule,
     ToastModule,
     CardModule,
+    MultiSelectModule,
   ],
   providers: [MessageService],
   templateUrl: './register-teacher.component.html',
@@ -26,8 +29,10 @@ export class RegisterTeacherComponent {
   private formBuilder = inject(FormBuilder);
   private coordinatorService = inject(CoordinatorService);
   private messageService = inject(MessageService);
+  private academicService = inject(AcademicService);
 
   loading = signal(false);
+  faculties = signal<any[]>([]);
 
   form = this.formBuilder.group({
     id: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
@@ -37,7 +42,15 @@ export class RegisterTeacherComponent {
     password: ['', [Validators.required, Validators.minLength(6)]],
     birthDate: [''],
     phone: [''],
+    facultyIds: [[] as string[]],
   });
+
+  constructor() {
+    this.academicService.getFaculties().subscribe({
+      next: (data) => this.faculties.set(data),
+      error: (err) => console.error('Failed to load faculties', err),
+    });
+  }
 
   get id() { return this.form.controls.id; }
   get firstName() { return this.form.controls.firstName; }
@@ -46,6 +59,7 @@ export class RegisterTeacherComponent {
   get password() { return this.form.controls.password; }
   get birthDate() { return this.form.controls.birthDate; }
   get phone() { return this.form.controls.phone; }
+  get facultyIds() { return this.form.controls.facultyIds; }
 
   onSubmit() {
     if (this.form.invalid) {

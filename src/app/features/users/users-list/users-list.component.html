@@ -133,6 +133,22 @@
         <label for="birthDate" class="font-semibold text-sm">Fecha de Nacimiento</label>
         <input pInputText id="birthDate" type="date" formControlName="birthDate" />
       </div>
+      @if (selectedUserRoleName === 'teacher') {
+        <div class="flex flex-column gap-1">
+          <label for="facultyIds" class="font-semibold text-sm">Facultades asignadas</label>
+          <p-multiSelect
+            id="facultyIds"
+            formControlName="facultyIds"
+            [options]="faculties()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Seleccione facultades"
+            styleClass="w-full"
+            display="chip"
+            appendTo="body"
+          />
+        </div>
+      }
       <div class="flex justify-content-end mt-3 gap-2">
         <p-button
           label="Cancelar"

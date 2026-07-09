@@ -21,7 +21,6 @@
         <th style="width: 12%;">Jornadas</th>
         <th style="width: 14%;">Coordinador</th>
         <th style="width: 8%;">Semestres</th>
-        <th style="width: 8%;">Estado</th>
         <th style="width: 12%;">Acciones</th>
       </tr>
     </ng-template>
@@ -73,13 +72,6 @@
           </div>
         </td>
         <td><p-tag [value]="c.durationSemesters + ' Semestres'" severity="info" styleClass="text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag></td>
-        <td>
-          <span class="px-2 py-1 text-xs font-semibold rounded-full"
-                [class.bg-emerald-100]="c.isActive" [class.text-emerald-800]="c.isActive"
-                [class.bg-slate-100]="!c.isActive" [class.text-slate-600]="!c.isActive">
-            {{ c.isActive ? 'Activa' : 'Inactiva' }}
-          </span>
-        </td>
         <td>
           <div class="flex gap-2">
             <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="success" size="small" pTooltip="Ver Mallas" (click)="selectCareer(c); $event.stopPropagation()"></p-button>

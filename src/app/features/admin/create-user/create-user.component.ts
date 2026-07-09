@@ -8,6 +8,8 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { AcademicService } from '../../../core/services/academic.service';
 
 @Component({
   selector: 'app-create-user',
@@ -19,6 +21,7 @@ import { CardModule } from 'primeng/card';
     ButtonModule,
     ToastModule,
     CardModule,
+    MultiSelectModule,
   ],
   providers: [MessageService],
   templateUrl: 'create-user.component.html',
@@ -28,11 +31,13 @@ export class CreateUserComponent {
   private formBuilder = inject(FormBuilder);
   private adminService = inject(AdminService);
   private messageService = inject(MessageService);
+  private academicService = inject(AcademicService);
 
   isModal = input<boolean>(false);
   userCreated = output<void>();
 
   loading = signal(false);
+  faculties = signal<any[]>([]);
 
   roles = [
     { label: 'Coordinador', value: 'coordinator' },
@@ -49,7 +54,15 @@ export class CreateUserComponent {
     birthDate: [''],
     phone: [''],
     roleName: ['', Validators.required],
+    facultyIds: [[] as string[]],
   });
+
+  constructor() {
+    this.academicService.getFaculties().subscribe({
+      next: (data) => this.faculties.set(data),
+      error: (err) => console.error('Failed to load faculties', err),
+    });
+  }
 
   get id() { return this.form.controls.id; }
   get firstName() { return this.form.controls.firstName; }
@@ -59,6 +72,7 @@ export class CreateUserComponent {
   get roleName() { return this.form.controls.roleName; }
   get birthDate() { return this.form.controls.birthDate; }
   get phone() { return this.form.controls.phone; }
+  get facultyIds() { return this.form.controls.facultyIds; }
 
   onSubmit() {
     if (this.form.invalid) {

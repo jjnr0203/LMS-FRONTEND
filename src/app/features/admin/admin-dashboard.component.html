@@ -213,7 +213,9 @@
                       <i class="pi pi-building text-primary"></i>
                       <span>{{ fac.name }}</span>
                     </div>
-                    <p-badge [value]="fac.code" severity="secondary"></p-badge>
+                    <div style="flex-shrink: 0; white-space: nowrap;">
+                      <p-badge [value]="fac.code" severity="secondary"></p-badge>
+                    </div>
                   </div>
                   <div class="career-card-body pb-0">
                     <p class="text-500 m-0 text-sm">Haz clic para ver las carreras de esta facultad.</p>
@@ -245,7 +247,9 @@
                         <i class="pi pi-graduation-cap"></i>
                         <span>{{ career.name }}</span>
                       </div>
-                      <p-badge [value]="career.code" severity="contrast"></p-badge>
+                      <div style="flex-shrink: 0; white-space: nowrap;">
+                        <p-badge [value]="career.code" severity="contrast"></p-badge>
+                      </div>
                     </div>
 
                     <div class="career-card-body">

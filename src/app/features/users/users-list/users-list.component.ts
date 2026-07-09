@@ -18,6 +18,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { CardModule } from 'primeng/card';
 import { CreateUserComponent } from '../../admin/create-user/create-user.component';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { AcademicService } from '../../../core/services/academic.service';
 
 @Component({
   selector: 'app-users-list',
@@ -36,6 +38,7 @@ import { CreateUserComponent } from '../../admin/create-user/create-user.compone
     InputIconModule,
     CardModule,
     CreateUserComponent,
+    MultiSelectModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './users-list.component.html',
@@ -47,10 +50,12 @@ export class UsersListComponent implements OnInit, OnDestroy {
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private formBuilder = inject(FormBuilder);
+  private academicService = inject(AcademicService);
 
   users = signal<User[]>([]);
   totalRecords = signal(0);
   loading = signal(false);
+  faculties = signal<any[]>([]);
 
   roleFilter: string = '';
   isStudentList = false;
@@ -71,6 +76,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
   createDialogVisible = false;
   editDialogVisible = false;
   selectedUserId: string | null = null;
+  selectedUserRoleName: string | null = null;
 
   editForm = this.formBuilder.group({
     id: [{ value: '', disabled: true }],
@@ -79,9 +85,14 @@ export class UsersListComponent implements OnInit, OnDestroy {
     email: ['', [Validators.required, Validators.email]],
     phone: [''],
     birthDate: [''],
+    facultyIds: [[] as string[]],
   });
 
   ngOnInit() {
+    this.academicService.getFaculties().subscribe({
+      next: (data) => this.faculties.set(data),
+      error: (err) => console.error('Error loading faculties', err),
+    });
     this.roleFilter = this.route.snapshot.data['roleFilter'] || '';
     this.isStudentList = this.roleFilter === 'student';
 
@@ -142,6 +153,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   onUserCreated() {
     this.createDialogVisible = false;
+    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado correctamente' });
     this.loadUsers(1, 10);
   }
 
@@ -177,6 +189,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   openEditDialog(user: User) {
     this.selectedUserId = user.id;
+    this.selectedUserRoleName = user.roleName || null;
     this.editForm.patchValue({
       id: user.id,
       firstName: user.firstName,
@@ -184,6 +197,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
       email: user.email,
       phone: user.phone || '',
       birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split('T')[0] : '',
+      facultyIds: user.faculties ? user.faculties.map((f: any) => f.id) : [],
     });
     this.editDialogVisible = true;
   }

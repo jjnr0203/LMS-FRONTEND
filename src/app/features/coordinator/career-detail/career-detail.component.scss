@@ -299,10 +299,150 @@
 }
 
 /* Hide native details marker for teacher assignments */
-details.teacher-details summary::-webkit-details-marker {
+details.teacher-details sum.hide-marker::-webkit-details-marker {
   display: none;
 }
+
+/* Calendar Visual Styles */
+.calendar-container {
+  display: flex;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.time-axis {
+  width: 80px;
+  border-right: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.time-header {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f1f5f9;
+  text-transform: uppercase;
+}
+
+.time-slot {
+  height: 60px; /* 1 hour = 60px */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  padding-top: 4px;
+  box-sizing: border-box;
+}
+
+.days-grid {
+  display: flex;
+  flex-grow: 1;
+  overflow-x: auto;
+}
+
+.day-col {
+  flex: 1;
+  min-width: 150px;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.day-col:last-child {
+  border-right: none;
+}
+
+.day-header {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #334155;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f1f5f9;
+}
+
+.day-content {
+  flex-grow: 1;
+  position: relative;
+  /* (22 - 7) = 15 hours * 60px = 900px */
+  height: 900px;
+}
+
+.grid-line {
+  height: 60px;
+  border-bottom: 1px dashed #e2e8f0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.grid-line:last-child {
+  border-bottom: none;
+}
+
+.cal-event {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 4px;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  z-index: 10;
+}
+
+.ev-title {
+  font-weight: 700;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  white-space: normal;
+  word-break: break-word;
+  overflow: hidden;
+}
+
+.ev-time {
+  font-size: 0.65rem;
+  color: #475569;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.ev-teacher {
+  font-size: 0.65rem;
+  color: #64748b;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: normal;
+  word-break: break-word;
+  overflow: hidden;
+}
+
 details.teacher-details summary {
   list-style: none;
 }
-

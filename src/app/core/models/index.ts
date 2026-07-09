@@ -10,6 +10,7 @@ export interface User {
 
   phone?: string;
   avatarUrl?: string;
+  faculties?: any[];
   createdAt: string;
   updatedAt?: string;
 }

@@ -10,10 +10,23 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  getUsers(page = 1, limit = 10, role?: string, search?: string): Observable<PaginatedResponse<User>> {
-    let params = new HttpParams().set('page', page).set('limit', limit);
-    if (role) params = params.set('role', role);
-    if (search) params = params.set('search', search);
+  getUsers(page: number, limit: number, role?: string, search?: string, facultyIds?: string[]): Observable<PaginatedResponse<User>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (role) {
+      params = params.set('role', role);
+    }
+    if (search) {
+      params = params.set('search', search);
+    }
+    if (facultyIds && facultyIds.length > 0) {
+      facultyIds.forEach(id => {
+        params = params.append('facultyIds', id);
+      });
+    }
+
     return this.http.get<PaginatedResponse<User>>(this.apiUrl, { params });
   }
 

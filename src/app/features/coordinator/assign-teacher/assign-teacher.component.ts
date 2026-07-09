@@ -43,10 +43,22 @@ export class AssignTeacherComponent {
   }
 
   loadData() {
-    // Load Teachers
-    this.userService.getUsers(1, 1000, 'teacher').subscribe((res) => {
-      const mapped = res.data.map((u) => ({ ...u, fullName: `${u.firstName} ${u.lastName} (${u.id})` }));
-      this.teachers.set(mapped);
+    // Load coordinator's faculties and filter teachers
+    this.coordinatorService.getDashboard().subscribe((dashboard) => {
+      const facultiesSet = new Set<string>();
+      if (dashboard.careers) {
+        dashboard.careers.forEach((c: any) => {
+          if (c.facultyId) {
+            facultiesSet.add(c.facultyId);
+          }
+        });
+      }
+      const facultyIds = Array.from(facultiesSet);
+      
+      this.userService.getUsers(1, 1000, 'teacher', undefined, facultyIds).subscribe((res) => {
+        const mapped = res.data.map((u) => ({ ...u, fullName: `${u.firstName} ${u.lastName} (${u.id})` }));
+        this.teachers.set(mapped);
+      });
     });
 
     // Load Subjects

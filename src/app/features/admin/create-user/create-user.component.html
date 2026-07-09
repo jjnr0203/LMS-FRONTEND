@@ -44,6 +44,24 @@
                 }
               </div>
             </div>
+            @if (roleName.value === 'teacher') {
+              <div class="col-12 md:col-6">
+                <div class="flex flex-column gap-2 mb-4">
+                  <label for="facultyIds" class="font-semibold text-sm text-700">Facultades asignadas</label>
+                  <p-multiSelect
+                    id="facultyIds"
+                    formControlName="facultyIds"
+                    [options]="faculties()"
+                    optionLabel="name"
+                    optionValue="id"
+                    placeholder="Seleccione facultades"
+                    styleClass="w-full"
+                    display="chip"
+                    appendTo="body"
+                  />
+                </div>
+              </div>
+            }
             <div class="col-12 md:col-6">
               <div class="flex flex-column gap-2 mb-4">
                 <label for="lastName" class="font-semibold text-sm text-700">Apellidos</label>
@@ -142,6 +160,24 @@
           }
         </div>
       </div>
+      @if (roleName.value === 'teacher') {
+        <div class="col-12 md:col-6">
+          <div class="flex flex-column gap-2 mb-4">
+            <label for="facultyIds" class="font-semibold text-sm text-700">Facultades asignadas</label>
+            <p-multiSelect
+              id="facultyIds"
+              formControlName="facultyIds"
+              [options]="faculties()"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Seleccione facultades"
+              styleClass="w-full"
+              display="chip"
+              appendTo="body"
+            />
+          </div>
+        </div>
+      }
       <div class="col-12 md:col-6">
         <div class="flex flex-column gap-2 mb-4">
           <label for="lastName" class="font-semibold text-sm text-700">Apellidos</label>
