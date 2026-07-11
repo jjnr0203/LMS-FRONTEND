@@ -77,6 +77,14 @@ export class CoordinatorService {
     return this.http.get<any>(`${this.apiUrl}/dashboard`);
   }
 
+  getSubjectColors(): Observable<{ subjectId: string; color: string }[]> {
+    return this.http.get<{ subjectId: string; color: string }[]>(`${this.apiUrl}/subject-colors`);
+  }
+
+  saveSubjectColor(subjectId: string, color: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/subject-colors`, { subjectId, color });
+  }
+
   getCareerDetail(id: string): Observable<{ career: any; curriculums: any[] }> {
     return this.http.get<any>(`${this.apiUrl}/carrera/${id}`);
   }

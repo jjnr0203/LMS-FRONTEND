@@ -22,6 +22,9 @@ import { AccordionModule } from 'primeng/accordion';
 import { BadgeModule } from 'primeng/badge';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
+import { ColorPickerModule } from 'primeng/colorpicker';
+import { PopoverModule } from 'primeng/popover';
+import { TooltipModule } from 'primeng/tooltip';
 
 export interface TeacherAssignmentConfig {
   teacherId: string;
@@ -48,7 +51,10 @@ export interface TeacherAssignmentConfig {
     IconFieldModule,
     InputIconModule,
     InputTextModule,
-    TabsModule
+    TabsModule,
+    ColorPickerModule,
+    PopoverModule,
+    TooltipModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './career-detail.component.html',
@@ -129,8 +135,11 @@ export class CareerDetailComponent implements OnInit {
     subject: any;
     teacherId: string;
     teacherName: string;
+    semester?: number;
     assignments: any[]; // The specific assignments for this teacher in this subject
   } | null>(null);
+  
+  scheduleCollisionError = signal<string | null>(null);
   
   assigning = signal(false);
   filterTeacher = signal('');
@@ -138,8 +147,28 @@ export class CareerDetailComponent implements OnInit {
   filterSemester = signal('');
   filterModality = signal('');
   filterJornada = signal('');
+
+  calendarSelectedPair = signal<string>('');
+  calendarSearchQuery = signal<string>('');
+  filterSemesterCalendar = signal<number | null>(null);
+  
   removingSubjectId = signal<string | null>(null);
   removingTeacherId = signal<string | null>(null);
+  subjectColorsMap = signal<Map<string, string>>(new Map());
+  tempColor = '#ffffff';
+
+  predefinedColors = [
+    // Reds & Pinks
+    '#ef4444', '#f43f5e', '#ec4899', '#d946ef', '#b91c1c', '#be185d',
+    // Oranges & Yellows
+    '#f97316', '#f59e0b', '#eab308', '#ea580c', '#b45309', '#ca8a04',
+    // Greens
+    '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#15803d', '#0f766e',
+    // Blues
+    '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#0369a1', '#1d4ed8',
+    // Purples & Grays & Black
+    '#8b5cf6', '#a855f7', '#6d28d9', '#64748b', '#78716c', '#000000'
+  ];
   
   bulkOfferForm = {
     semester: 0,
@@ -169,7 +198,7 @@ export class CareerDetailComponent implements OnInit {
             const load = loads.get(assign.teacherId)!;
             const pair = `${assign.modalityName || 'Sin Modalidad'} - ${assign.jornadaName || 'Sin Jornada'}`;
             const key = `${sub.name}|${pair}|${sem.semester}`;
-            load.subjectsMap.set(key, { name: sub.name, pair: pair, semester: sem.semester });
+            load.subjectsMap.set(key, { name: sub.name, pair: pair, semester: sem.semester, id: sub.id, subjectId: sub.subjectId });
             
             for (const sched of assign.schedules || []) {
               const start = sched.startTime;
@@ -276,48 +305,110 @@ export class CareerDetailComponent implements OnInit {
     return Array.from(jors).sort().map(v => ({ label: v, value: v.toLowerCase() }));
   });
 
-  calendarDays = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
-  calendarHours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
+  calendarAvailablePairs = computed(() => {
+    const pairs = new Set<string>();
+    for (const cur of this.filteredCurriculums()) {
+      for (const sem of cur.semesters || []) {
+        for (const sub of sem.subjects || []) {
+          for (const assign of sub.assignments || []) {
+            if (assign.schedules && assign.schedules.length > 0) {
+              const pair = `${assign.modalityName || 'Sin Modalidad'} - ${assign.jornadaName || 'Sin Jornada'}`;
+              pairs.add(pair);
+            }
+          }
+        }
+      }
+    }
+    const arr = Array.from(pairs).sort();
+    
+    // Auto-select the first pair if none is selected and pairs exist
+    // Using an effect or untracked is better, but since computed shouldn't cause side effects,
+    // we just use the first pair as a fallback inside calendarData if calendarSelectedPair is empty.
+    
+    return arr;
+  });
 
-  calendarEvents = computed(() => {
-    const events: any[] = [];
+  calendarAvailableSemesters = computed(() => {
+     const sems = new Set<number>();
+     for (const cur of this.filteredCurriculums()) {
+       for (const sem of cur.semesters || []) {
+          sems.add(sem.semester);
+       }
+     }
+     return Array.from(sems).sort((a, b) => a - b);
+  });
+
+  calendarDays = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
+  
+  calendarDataBySemester = computed(() => {
+    const results: { semester: number, semesterName: string, events: any[], hours: number[] }[] = [];
     const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#14b8a6'];
     let colorIndex = 0;
-    const subjectColors = new Map<string, string>();
+    const fallbackColors = new Map<string, string>();
+    const customColors = this.subjectColorsMap();
+
+    const availablePairs = this.calendarAvailablePairs();
+    let selectedPair = this.calendarSelectedPair();
+    const query = this.calendarSearchQuery().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    if (!selectedPair && availablePairs.length > 0) {
+      selectedPair = availablePairs[0];
+    }
+
+    const semesterDataMap = new Map<number, { minHour: number, maxHour: number, rawEvents: any[] }>();
 
     for (const cur of this.filteredCurriculums()) {
       for (const sem of cur.semesters || []) {
         for (const sub of sem.subjects || []) {
           for (const assign of sub.assignments || []) {
+            const pair = `${assign.modalityName || 'Sin Modalidad'} - ${assign.jornadaName || 'Sin Jornada'}`;
+            if (selectedPair && pair !== selectedPair) continue;
+
             for (const sched of assign.schedules || []) {
               if (sched.dayOfWeek && sched.startTime && sched.endTime) {
-                if (!subjectColors.has(sub.name)) {
-                   subjectColors.set(sub.name, colors[colorIndex % colors.length]);
-                   colorIndex++;
+                if (!semesterDataMap.has(sem.semester)) {
+                   semesterDataMap.set(sem.semester, { minHour: 24, maxHour: 0, rawEvents: [] });
+                }
+                const semData = semesterDataMap.get(sem.semester)!;
+
+                const subId = sub.subjectId || sub.id;
+                let evColor = customColors.get(subId);
+                
+                if (!evColor) {
+                  if (!fallbackColors.has(sub.name)) {
+                     fallbackColors.set(sub.name, colors[colorIndex % colors.length]);
+                     colorIndex++;
+                  }
+                  evColor = fallbackColors.get(sub.name);
+                }
+
+                const normalizedSubName = sub.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                if (query && !normalizedSubName.includes(query)) {
+                  continue; // Skip if it doesn't match search query
                 }
 
                 const sSplit = sched.startTime.split(':');
                 const eSplit = sched.endTime.split(':');
+                const startHour = parseInt(sSplit[0]);
+                const endHour = parseInt(eSplit[0]);
+                
+                if (startHour < semData.minHour) semData.minHour = startHour;
+                if (endHour > semData.maxHour) semData.maxHour = (parseInt(eSplit[1]) > 0) ? endHour + 1 : endHour;
+
                 const startMins = parseInt(sSplit[0]) * 60 + parseInt(sSplit[1]);
                 const endMins = parseInt(eSplit[0]) * 60 + parseInt(eSplit[1]);
-                
-                const dayStartMins = 7 * 60; // 07:00
-                const dayEndMins = 22 * 60; // 22:00
-                const totalDayMins = dayEndMins - dayStartMins;
 
-                const topPercent = ((startMins - dayStartMins) / totalDayMins) * 100;
-                const heightPercent = ((endMins - startMins) / totalDayMins) * 100;
+                const formatTime = (t: string) => t ? t.substring(0, 5) : '';
 
-                events.push({
-                  id: sched.id || Math.random().toString(),
-                  dayOfWeek: sched.dayOfWeek,
-                  subjectName: sub.name,
-                  teacherName: assign.teacherName,
-                  startTime: sched.startTime,
-                  endTime: sched.endTime,
-                  top: topPercent + '%',
-                  height: heightPercent + '%',
-                  color: subjectColors.get(sub.name)
+                semData.rawEvents.push({
+                   id: sched.id || Math.random().toString(),
+                   dayOfWeek: sched.dayOfWeek,
+                   subjectName: sub.name,
+                   teacherName: assign.teacherName,
+                   startTime: formatTime(sched.startTime),
+                   endTime: formatTime(sched.endTime),
+                   startMins,
+                   endMins,
+                   color: evColor
                 });
               }
             }
@@ -325,14 +416,100 @@ export class CareerDetailComponent implements OnInit {
         }
       }
     }
-    return events;
+
+    const selectedSem = this.filterSemesterCalendar();
+    const sortedSemesters = Array.from(semesterDataMap.keys()).sort((a, b) => a - b);
+    for (const sem of sortedSemesters) {
+       if (selectedSem !== null && sem !== selectedSem) continue;
+
+       const data = semesterDataMap.get(sem)!;
+       
+       let minH = data.minHour;
+       let maxH = data.maxHour;
+       if (minH === 24) minH = 7;
+       if (maxH === 0) maxH = 14;
+       if (maxH - minH < 4) maxH = minH + 4;
+
+       const dayStartMins = minH * 60;
+       const totalDayMins = (maxH - minH + 1) * 60;
+
+       const hours: number[] = [];
+       for (let i = minH; i <= maxH; i++) {
+         hours.push(i);
+       }
+
+       const events: any[] = [];
+       for (const ev of data.rawEvents) {
+          const topPercent = ((ev.startMins - dayStartMins) / totalDayMins) * 100;
+          const heightPercent = ((ev.endMins - ev.startMins) / totalDayMins) * 100;
+          events.push({
+            ...ev,
+            top: topPercent + '%',
+            height: heightPercent + '%'
+          });
+       }
+
+       if (events.length > 0) {
+         results.push({
+           semester: sem,
+           semesterName: `Semestre ${sem}`,
+           events,
+           hours
+         });
+       }
+    }
+
+    return results;
   });
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadData(id);
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.loadData(id);
+      }
+    });
+    this.loadSubjectColors();
+  }
+
+  loadSubjectColors() {
+    this.coordinatorService.getSubjectColors().subscribe({
+      next: (colors) => {
+        const map = new Map<string, string>();
+        for (const c of colors) {
+          map.set(c.subjectId, c.color);
+        }
+        this.subjectColorsMap.set(map);
+      },
+      error: (err) => console.error('Error loading subject colors', err)
+    });
+  }
+
+  getSubjectColorFallback(subId: string, subName: string): string {
+    const custom = this.subjectColorsMap().get(subId);
+    if (custom) return custom;
+    // Simple hash for stable color if no custom color exists
+    let hash = 0;
+    for (let i = 0; i < subName.length; i++) {
+      hash = subName.charCodeAt(i) + ((hash << 5) - hash);
     }
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#14b8a6'];
+    return colors[Math.abs(hash) % colors.length];
+  }
+
+  onSaveSubjectColor(subjectId: string, color: string) {
+    // Check if color is hex and add # if missing
+    if (color && !color.startsWith('#')) {
+      color = '#' + color;
+    }
+    this.coordinatorService.saveSubjectColor(subjectId, color).subscribe({
+      next: () => {
+        const newMap = new Map(this.subjectColorsMap());
+        newMap.set(subjectId, color);
+        this.subjectColorsMap.set(newMap);
+      },
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el color' })
+    });
   }
 
   loadData(careerId: string) {
@@ -512,27 +689,27 @@ export class CareerDetailComponent implements OnInit {
   getAvailableModalitiesForSubject(subjectId: string, currentConfig: TeacherAssignmentConfig) {
     const configs = this.bulkOfferForm.subjectConfigs[subjectId] || [];
     
-    const usedModalityIds = new Set<string>();
+    const usedModalityIdsWithSameJornada = new Set<string>();
     for (const c of configs) {
-      if (c !== currentConfig && c.modalityId) {
-        usedModalityIds.add(c.modalityId);
+      if (c !== currentConfig && c.modalityId && c.jornadaId && currentConfig.jornadaId === c.jornadaId) {
+        usedModalityIdsWithSameJornada.add(c.modalityId);
       }
     }
     
-    return this.modalities().filter(m => !usedModalityIds.has(m.id));
+    return this.modalities().filter(m => !usedModalityIdsWithSameJornada.has(m.id));
   }
 
   getAvailableJornadasForSubject(subjectId: string, currentConfig: TeacherAssignmentConfig) {
     const configs = this.bulkOfferForm.subjectConfigs[subjectId] || [];
     
-    const usedJornadaIds = new Set<string>();
+    const usedJornadaIdsWithSameModality = new Set<string>();
     for (const c of configs) {
-      if (c !== currentConfig && c.jornadaId) {
-        usedJornadaIds.add(c.jornadaId);
+      if (c !== currentConfig && c.jornadaId && c.modalityId && currentConfig.modalityId === c.modalityId) {
+        usedJornadaIdsWithSameModality.add(c.jornadaId);
       }
     }
     
-    return this.jornadas().filter(j => !usedJornadaIds.has(j.id));
+    return this.jornadas().filter(j => !usedJornadaIdsWithSameModality.has(j.id));
   }
 
   closeOfferModal() {
@@ -709,7 +886,7 @@ export class CareerDetailComponent implements OnInit {
   }
 
   // ---- SCHEDULES LOGIC ----
-  openScheduleModal(subject: any, teacherId: string) {
+  openScheduleModal(subject: any, teacherId: string, semester?: number) {
     // Find the specific grouped assignment for this teacher
     const grouped = subject.groupedAssignments?.find((g: any) => g.teacherId === teacherId);
     if (!grouped) return;
@@ -728,6 +905,7 @@ export class CareerDetailComponent implements OnInit {
       subject,
       teacherId,
       teacherName: grouped.teacherName,
+      semester,
       assignments: assignmentsWithSchedules
     });
 
@@ -751,9 +929,11 @@ export class CareerDetailComponent implements OnInit {
   closeScheduleModal() {
     this.displayScheduleModal.set(false);
     this.scheduleModalData.set(null);
+    this.scheduleCollisionError.set(null);
   }
 
   addScheduleLine(assignmentIndex: number) {
+    this.scheduleCollisionError.set(null);
     this.scheduleModalData.update(data => {
       if (!data) return data;
       const updatedAssignments = [...data.assignments];
@@ -764,6 +944,7 @@ export class CareerDetailComponent implements OnInit {
   }
 
   removeScheduleLine(assignmentIndex: number, scheduleIndex: number) {
+    this.scheduleCollisionError.set(null);
     this.scheduleModalData.update(data => {
       if (!data) return data;
       const updatedAssignments = [...data.assignments];
@@ -775,9 +956,112 @@ export class CareerDetailComponent implements OnInit {
     });
   }
 
+  timeToMinutes(time: string): number {
+    if (!time) return 0;
+    const parts = time.split(':');
+    return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+  }
+
   saveSchedules() {
     const data = this.scheduleModalData();
     if (!data) return;
+
+    // VALIDATION: Check for schedule collisions
+    // We run this even if data.semester is undefined, just checking all semesters if needed.
+    let collisionMsg = '';
+    
+    const getPair = (a: any) => {
+      const m = a.modalityName || a.modality?.name || 'Sin Modalidad';
+      const j = a.jornadaName || a.jornada?.name || 'Sin Jornada';
+      return `${m} - ${j}`.trim().toLowerCase();
+    };
+
+    const normalizeStr = (s: string) => (s || '').trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    
+    const existingSchedules: any[] = [];
+    for (const cur of this.filteredCurriculums()) {
+      for (const sem of cur.semesters || []) {
+        // If data.semester is provided, only check that semester
+        if (data.semester !== undefined && String(sem.semester) !== String(data.semester)) {
+          continue;
+        }
+
+        for (const sub of sem.subjects || []) {
+          // Skip the exact same subject by comparing name (foolproof)
+          if (normalizeStr(sub.name) === normalizeStr(data.subject.name)) continue;
+          
+          for (const assign of sub.assignments || []) {
+            const pair = getPair(assign);
+            for (const sch of assign.schedules || []) {
+               existingSchedules.push({
+                 subjectName: sub.name,
+                 pair,
+                 dayOfWeek: normalizeStr(sch.dayOfWeek),
+                 startTime: sch.startTime,
+                 endTime: sch.endTime
+               });
+            }
+          }
+        }
+      }
+    }
+
+    // 1. Check self collisions
+    for (const assign of data.assignments) {
+      const pair = getPair(assign);
+      for (let i = 0; i < assign.schedules.length; i++) {
+         for (let j = i + 1; j < assign.schedules.length; j++) {
+            const sch1 = assign.schedules[i];
+            const sch2 = assign.schedules[j];
+            if (sch1.dayOfWeek && sch2.dayOfWeek && normalizeStr(sch1.dayOfWeek) === normalizeStr(sch2.dayOfWeek)) {
+               const s1 = this.timeToMinutes(sch1.startTime);
+               const e1 = this.timeToMinutes(sch1.endTime);
+               const s2 = this.timeToMinutes(sch2.startTime);
+               const e2 = this.timeToMinutes(sch2.endTime);
+               if (Math.max(s1, s2) < Math.min(e1, e2)) {
+                 collisionMsg = `Cruce de horarios interno. El bloque ${sch1.startTime}-${sch1.endTime} choca con ${sch2.startTime}-${sch2.endTime} (${sch1.dayOfWeek}).`;
+                 break;
+               }
+            }
+         }
+         if (collisionMsg) break;
+      }
+      if (collisionMsg) break;
+    }
+
+    // 2. Check collisions with other subjects
+    if (!collisionMsg) {
+      for (const assign of data.assignments) {
+        const pair = getPair(assign);
+        
+        for (const newSch of assign.schedules) {
+           const start1 = this.timeToMinutes(newSch.startTime);
+           const end1 = this.timeToMinutes(newSch.endTime);
+           const newDay = normalizeStr(newSch.dayOfWeek);
+
+           for (const ext of existingSchedules) {
+             if (ext.pair === pair && ext.dayOfWeek === newDay) {
+               const start2 = this.timeToMinutes(ext.startTime);
+               const end2 = this.timeToMinutes(ext.endTime);
+
+               if (Math.max(start1, start2) < Math.min(end1, end2)) {
+                 collisionMsg = `Cruce de horarios en la misma modalidad y jornada. El bloque de ${newSch.startTime}-${newSch.endTime} (${newSch.dayOfWeek}) choca con la materia "${ext.subjectName}" (${ext.startTime} a ${ext.endTime}).`;
+                 break;
+               }
+             }
+           }
+           if (collisionMsg) break;
+        }
+        if (collisionMsg) break;
+      }
+    }
+
+    if (collisionMsg) {
+       this.scheduleCollisionError.set(collisionMsg);
+       return; // Cancel save
+    } else {
+       this.scheduleCollisionError.set(null);
+    }
 
     let totalSaved = 0;
     const totalToSave = data.assignments.length;
@@ -794,6 +1078,8 @@ export class CareerDetailComponent implements OnInit {
               detail: 'Horarios guardados correctamente'
             });
             this.closeScheduleModal();
+            const careerId = this.route.snapshot.paramMap.get('id');
+            if (careerId) this.loadData(careerId);
           }
         },
         error: () => {

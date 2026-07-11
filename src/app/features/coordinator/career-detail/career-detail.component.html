@@ -150,7 +150,9 @@
                             </ng-template>
                             <ng-template pTemplate="body" let-sub>
                               <tr>
-                                <td class="font-mono font-bold text-700 text-center">{{ sub.code }}</td>
+                                <td class="font-mono font-bold text-center">
+                                  <span [ngStyle]="{'color': subjectColorsMap().get(sub.subjectId || sub.id) || 'var(--text-color)'}">{{ sub.code }}</span>
+                                </td>
                                 <td class="font-medium text-left">{{ sub.name }}</td>
                                 <td class="text-center"><span class="font-semibold text-600">{{ sub.credits }}</span></td>
                                 <td class="text-center"><span class="font-semibold text-600">{{ sub.credits * 48 }}h</span></td>
@@ -171,9 +173,8 @@
                                             severity="info"
                                             [text]="true"
                                             [rounded]="true"
-                                            size="small"
-                                            [style]="{ width: '1.5rem', height: '1.5rem', padding: '0' }"
-                                            (click)="openScheduleModal(sub, sub.groupedAssignments[0].teacherId)"
+                                            [style]="{ width: '1.75rem', height: '1.75rem', padding: '0' }"
+                                            (click)="openScheduleModal(sub, sub.groupedAssignments[0].teacherId, sem.semester)"
                                             pTooltip="Configurar Horario"
                                             tooltipPosition="top"
                                           />
@@ -182,8 +183,7 @@
                                             severity="danger"
                                             [text]="true"
                                             [rounded]="true"
-                                            size="small"
-                                            [style]="{ width: '1.5rem', height: '1.5rem', padding: '0' }"
+                                            [style]="{ width: '1.75rem', height: '1.75rem', padding: '0' }"
                                             (click)="removeTeacher(sub.id, cur.id, sub.groupedAssignments[0].assignmentIds, sub.groupedAssignments[0].teacherId)"
                                             pTooltip="Eliminar esta asignación"
                                             tooltipPosition="top"
@@ -212,9 +212,8 @@
                                                     severity="info"
                                                     [text]="true"
                                                     [rounded]="true"
-                                                    size="small"
-                                                    [style]="{ width: '1.5rem', height: '1.5rem', padding: '0' }"
-                                                    (click)="openScheduleModal(sub, assign.teacherId)"
+                                                    [style]="{ width: '1.75rem', height: '1.75rem', padding: '0' }"
+                                                    (click)="openScheduleModal(sub, assign.teacherId, sem.semester)"
                                                     pTooltip="Configurar Horario"
                                                     tooltipPosition="top"
                                                   />
@@ -223,8 +222,7 @@
                                                     severity="danger"
                                                     [text]="true"
                                                     [rounded]="true"
-                                                    size="small"
-                                                    [style]="{ width: '1.5rem', height: '1.5rem', padding: '0' }"
+                                                    [style]="{ width: '1.75rem', height: '1.75rem', padding: '0' }"
                                                     (click)="removeTeacher(sub.id, cur.id, assign.assignmentIds, assign.teacherId)"
                                                     pTooltip="Eliminar esta asignación"
                                                     tooltipPosition="top"
@@ -242,18 +240,42 @@
                                   }
                                 </td>
                                 <td class="text-center">
-                                  @if (sub.assignments && sub.assignments.length > 0) {
-                                    <p-button
-                                      icon="pi pi-trash"
-                                      severity="danger"
-                                      [rounded]="true"
-                                      [style]="{ width: '2.5rem', height: '2.5rem', padding: '0' }"
-                                      pTooltip="Limpiar todas las asignaciones"
-                                      tooltipPosition="top"
-                                      (click)="removeTeacher(sub.id, cur.id)"
-                                      [loading]="removingSubjectId() === sub.id"
-                                    />
-                                  }
+                                  <div class="flex justify-content-center gap-1">
+                                    <button type="button" 
+                                            class="border-circle cursor-pointer border-none flex align-items-center justify-content-center transition-duration-200 hover:shadow-2" 
+                                            [style.background-color]="subjectColorsMap().get(sub.subjectId || sub.id) || '#64748b'" 
+                                            style="width: 2.5rem; height: 2.5rem; color: white; padding: 0;" 
+                                            (click)="colorPanel.toggle($event)" 
+                                            pTooltip="Personalizar Color" 
+                                            tooltipPosition="top">
+                                      <i class="pi pi-palette"></i>
+                                    </button>
+                                    <p-popover #colorPanel>
+                                      <div class="flex flex-column gap-2 p-2" style="width: 220px;">
+                                        <span class="font-bold text-sm mb-1 text-center">Elegir Color</span>
+                                        <div class="flex flex-wrap gap-2 justify-content-center">
+                                          @for (color of predefinedColors; track color) {
+                                            <div class="border-circle cursor-pointer hover:shadow-2 transition-duration-150" 
+                                                 [ngStyle]="{'background-color': color, 'width': '24px', 'height': '24px'}"
+                                                 (click)="onSaveSubjectColor(sub.subjectId || sub.id, color); colorPanel.hide()">
+                                            </div>
+                                          }
+                                        </div>
+                                      </div>
+                                    </p-popover>
+                                    @if (sub.assignments && sub.assignments.length > 0) {
+                                      <p-button
+                                        icon="pi pi-trash"
+                                        severity="danger"
+                                        [rounded]="true"
+                                        [style]="{ width: '2.5rem', height: '2.5rem', padding: '0' }"
+                                        (click)="removeTeacher(sub.id, cur.id)"
+                                        pTooltip="Limpiar todas las asignaciones"
+                                        tooltipPosition="top"
+                                        [loading]="removingSubjectId() === sub.id"
+                                      />
+                                    }
+                                  </div>
                                 </td>
                               </tr>
                             </ng-template>
@@ -335,41 +357,41 @@
             <p-table [value]="filteredTeacherLoads()" styleClass="p-datatable-sm" responsiveLayout="scroll">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Docente</th>
-                  <th>Materias Asignadas</th>
-                  <th class="text-center">Total Materias</th>
-                  <th class="text-center">Total Horas Semanales</th>
+                  <th style="width: 16%; min-width: 150px;">Docente</th>
+                  <th style="width: 75%;">Materias Asignadas</th>
+                  <th class="text-center" style="width: 7%; min-width: 80px;">Total<br>Materias</th>
+                  <th class="text-center" style="width: 8%; min-width: 90px;">Total Horas<br>Semanales</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-load>
-                  <tr style="border-bottom: 2px solid #dee2e6;">
+                  <tr style="border-bottom: 3px solid #64748b;">
                     <td class="font-medium text-900">{{ load.teacherName }}</td>
                     <td>
                       <div class="flex flex-wrap gap-2">
-                        @for (sub of load.subjectsList.slice(0, 2); track sub.name + sub.pair) {
-                          <div class="flex flex-column text-left p-2 border-round" [ngClass]="getSubjectColorClasses(sub.name).bg">
-                            <span class="font-medium text-xs" [ngClass]="getSubjectColorClasses(sub.name).text">
+                        @for (sub of load.subjectsList.slice(0, 3); track sub.name + sub.pair) {
+                          <div class="flex flex-column text-left p-2 border-round" [ngStyle]="{'background-color': getSubjectColorFallback(sub.subjectId || sub.id, sub.name) + '1A', 'border-left': '4px solid ' + getSubjectColorFallback(sub.subjectId || sub.id, sub.name)}">
+                            <span class="font-medium text-xs text-900">
                               {{ sub.name }}
                             </span>
-                            <span style="font-size: 0.65rem" [ngClass]="getSubjectColorClasses(sub.name).subtext">
+                            <span style="font-size: 0.65rem" class="text-900 font-normal">
                               {{ sub.pair }} | Sem. {{ sub.semester }}
                             </span>
                           </div>
                         }
                       </div>
                       
-                      @if (load.subjectsList.length > 2) {
+                      @if (load.subjectsList.length > 3) {
                         <details class="w-full mt-2">
                           <summary class="text-xs text-500 hover:text-700 cursor-pointer p-0 m-0 select-none hide-marker font-semibold">
-                            Ver {{ load.subjectsList.length - 2 }} más...
+                            Ver {{ load.subjectsList.length - 3 }} más...
                           </summary>
                           <div class="flex flex-wrap gap-2 mt-2">
-                            @for (sub of load.subjectsList.slice(2); track sub.name + sub.pair) {
-                              <div class="flex flex-column text-left p-2 border-round" [ngClass]="getSubjectColorClasses(sub.name).bg">
-                                <span class="font-medium text-xs" [ngClass]="getSubjectColorClasses(sub.name).text">
+                            @for (sub of load.subjectsList.slice(3); track sub.name + sub.pair) {
+                              <div class="flex flex-column text-left p-2 border-round" [ngStyle]="{'background-color': getSubjectColorFallback(sub.subjectId || sub.id, sub.name) + '1A', 'border-left': '4px solid ' + getSubjectColorFallback(sub.subjectId || sub.id, sub.name)}">
+                                <span class="font-medium text-xs text-900">
                                   {{ sub.name }}
                                 </span>
-                                <span style="font-size: 0.65rem" [ngClass]="getSubjectColorClasses(sub.name).subtext">
+                                <span style="font-size: 0.65rem" class="text-900 font-normal">
                                   {{ sub.pair }} | Sem. {{ sub.semester }}
                                 </span>
                               </div>
@@ -400,50 +422,118 @@
           <!-- Pestaña 3: Calendario Visual -->
           <p-tabpanel value="2">
             <div class="mt-3 flex flex-column gap-3">
-            <div class="surface-100 p-3 border-round text-500 text-sm flex align-items-center gap-2 mt-4">
-            <i class="pi pi-info-circle"></i>
-            <span>Puedes asignar un mismo docente a diferentes combinaciones de Modalidad y Jornada agregando una nueva fila.</span>
-          </div>
             
-            <div class="calendar-container">
-              <!-- Horas Eje Y -->
-              <div class="time-axis">
-                <div class="time-header">Hora</div>
-                @for (hour of calendarHours; track hour) {
-                  <div class="time-slot">{{ hour }}:00</div>
+            <div class="flex flex-wrap align-items-center justify-content-between gap-3 mb-3 mt-1">
+              <div class="flex flex-wrap gap-2">
+                @for (pair of calendarAvailablePairs(); track pair) {
+                  <button pButton 
+                          [label]="pair" 
+                          class="p-button-sm border-round-xl" 
+                          [ngClass]="(calendarSelectedPair() || calendarAvailablePairs()[0]) === pair ? 'p-button-primary' : 'p-button-outlined p-button-secondary'"
+                          (click)="calendarSelectedPair.set(pair)">
+                  </button>
+                }
+                @if (calendarAvailablePairs().length === 0) {
+                  <span class="text-500 text-sm">No hay horarios configurados en la oferta académica.</span>
                 }
               </div>
+              @if (calendarAvailablePairs().length > 0) {
+                <div class="flex align-items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+                  <p-select 
+                    [options]="calendarAvailableSemesters()" 
+                    [ngModel]="filterSemesterCalendar()" 
+                    (ngModelChange)="filterSemesterCalendar.set($event)" 
+                    placeholder="Semestre" 
+                    [showClear]="true"
+                    styleClass="w-full md:w-10rem">
+                    <ng-template pTemplate="selectedItem" let-item>
+                      <div *ngIf="item" class="flex align-items-center">
+                        Sem. {{ item }}
+                      </div>
+                    </ng-template>
+                    <ng-template pTemplate="item" let-item>
+                      Semestre {{ item }}
+                    </ng-template>
+                  </p-select>
 
-              <!-- Días Eje X -->
-              <div class="days-grid">
-                @for (day of calendarDays; track day) {
-                  <div class="day-col">
-                    <div class="day-header">{{ day }}</div>
-                    <div class="day-content">
-                      <!-- Grid Lines -->
-                      @for (hour of calendarHours; track hour) {
-                        <div class="grid-line"></div>
-                      }
-                      
-                      <!-- Events -->
-                      @for (ev of calendarEvents(); track ev.id) {
-                        @if (ev.dayOfWeek === day) {
-                          <div class="cal-event"
-                               [style.top]="ev.top"
-                               [style.height]="ev.height"
-                               [style.background-color]="ev.color + '1A'"
-                               [style.border-left]="'4px solid ' + ev.color">
-                            <div class="ev-title" [style.color]="ev.color">{{ ev.subjectName }}</div>
-                            <div class="ev-time"><i class="pi pi-clock"></i> {{ ev.startTime }} - {{ ev.endTime }}</div>
-                            <div class="ev-teacher"><i class="pi pi-user"></i> {{ ev.teacherName }}</div>
-                          </div>
-                        }
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
+                  <p-iconField iconPosition="left" class="flex align-items-center">
+                    <p-inputIcon styleClass="pi pi-search" />
+                    <input type="text" pInputText placeholder="Buscar materia..." [ngModel]="calendarSearchQuery()" (ngModelChange)="calendarSearchQuery.set($event)" class="w-full md:w-15rem" />
+                  </p-iconField>
+                </div>
+              }
             </div>
+            
+            @if (calendarDataBySemester().length > 0) {
+              <p-accordion [multiple]="true" class="nested-accordion">
+                @for (semData of calendarDataBySemester(); track semData.semester) {
+                  <p-accordion-panel [value]="semData.semesterName">
+                    <p-accordion-header>
+                      <div class="flex align-items-center gap-3 w-full pr-3">
+                        <div class="flex align-items-center justify-content-center" 
+                             [ngStyle]="{'background-color': getSemesterColor(semData.semester)}"
+                             style="padding: 0.35rem 0.8rem; border-radius: 4px;">
+                          <span class="font-bold text-sm text-white m-0">{{ semData.semesterName }}</span>
+                        </div>
+                        <span class="text-700 text-sm font-medium ml-2">
+                          <i class="pi pi-calendar mr-1"></i> {{ semData.events.length }} eventos programados
+                        </span>
+                      </div>
+                    </p-accordion-header>
+                    <p-accordion-content>
+                      <div class="calendar-container">
+                        <!-- Horas Eje Y -->
+                        <div class="time-axis">
+                          <div class="time-header" style="border: none; background: transparent;"></div>
+                          @for (hour of semData.hours; track hour) {
+                            <div class="time-slot"><span>{{ hour }}:00</span></div>
+                          }
+                        </div>
+
+                        <!-- Días Eje X -->
+                        <div class="days-grid">
+                          @for (day of calendarDays; track day) {
+                            <div class="day-col">
+                              <div class="day-header">{{ day }}</div>
+                              <div class="day-content">
+                                <!-- Grid Lines -->
+                                @for (hour of semData.hours; track hour) {
+                                  <div class="grid-line"></div>
+                                }
+                                
+                                <!-- Events -->
+                                @for (ev of semData.events; track ev.id) {
+                                  @if (ev.dayOfWeek === day) {
+                                    <div class="cal-event"
+                                         [class.short-event]="(ev.endMins - ev.startMins) <= 60"
+                                         [style.top]="ev.top"
+                                         [style.height]="ev.height"
+                                         [style.background-color]="ev.color + '1A'"
+                                         [style.border-left]="'4px solid ' + ev.color"
+                                         [pTooltip]="(ev.endMins - ev.startMins) <= 60 ? (ev.subjectName + ' | ' + ev.teacherName) : ''"
+                                         tooltipPosition="top">
+                                      <div class="cal-event-inner">
+                                        <div class="ev-title" [style.color]="ev.color">{{ ev.subjectName }}</div>
+                                        <div class="ev-time">{{ ev.startTime }} - {{ ev.endTime }}</div>
+                                        <div class="ev-teacher">{{ ev.teacherName }}</div>
+                                      </div>
+                                    </div>
+                                  }
+                                }
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </p-accordion-content>
+                  </p-accordion-panel>
+                }
+              </p-accordion>
+            } @else if (calendarAvailablePairs().length > 0) {
+              <div class="text-center p-4">
+                <span class="text-500">No hay eventos para la modalidad/jornada seleccionada.</span>
+              </div>
+            }
             </div>
           </p-tabpanel>
         </p-tabpanels>
@@ -680,6 +770,12 @@
           </div>
         }
       </div>
+      @if (scheduleCollisionError()) {
+        <div class="bg-red-50 text-red-700 p-3 border-round border-1 border-red-200 flex align-items-center gap-2 mt-2 shadow-1">
+          <i class="pi pi-exclamation-triangle text-xl"></i>
+          <span class="text-sm font-medium">{{ scheduleCollisionError() }}</span>
+        </div>
+      }
     </div>
   }
 

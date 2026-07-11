@@ -307,16 +307,16 @@ details.teacher-details sum.hide-marker::-webkit-details-marker {
 .calendar-container {
   display: flex;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #f1f5f9;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
 }
 
 .time-axis {
-  width: 80px;
-  border-right: 1px solid #e2e8f0;
-  background: #f8fafc;
+  width: 55px;
+  border-right: none;
+  background: #ffffff;
   flex-shrink: 0;
 }
 
@@ -328,8 +328,8 @@ details.teacher-details sum.hide-marker::-webkit-details-marker {
   font-size: 0.75rem;
   font-weight: 700;
   color: #64748b;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f1f5f9;
+  border-bottom: 2px solid #f1f5f9;
+  background: #ffffff;
   text-transform: uppercase;
 }
 
@@ -337,12 +337,18 @@ details.teacher-details sum.hide-marker::-webkit-details-marker {
   height: 60px; /* 1 hour = 60px */
   display: flex;
   align-items: flex-start;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #94a3b8;
-  padding-top: 4px;
+  justify-content: flex-end;
+  padding: 0 0.5rem 0 0;
   box-sizing: border-box;
+
+  span {
+    position: relative;
+    top: -0.6rem; /* Aligns precisely over the dashed line */
+    background: #ffffff;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
 }
 
 .days-grid {
@@ -354,7 +360,7 @@ details.teacher-details sum.hide-marker::-webkit-details-marker {
 .day-col {
   flex: 1;
   min-width: 150px;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid #f8fafc;
   display: flex;
   flex-direction: column;
 }
@@ -368,79 +374,91 @@ details.teacher-details sum.hide-marker::-webkit-details-marker {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #334155;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f1f5f9;
+  color: #475569;
+  border-bottom: 2px solid #f1f5f9;
+  background: #ffffff;
 }
 
 .day-content {
   flex-grow: 1;
   position: relative;
-  /* (22 - 7) = 15 hours * 60px = 900px */
-  height: 900px;
 }
 
 .grid-line {
   height: 60px;
-  border-bottom: 1px dashed #e2e8f0;
+  border-top: 1px dashed #e2e8f0;
   box-sizing: border-box;
   width: 100%;
 }
 
 .grid-line:last-child {
-  border-bottom: none;
+  border-top: 1px dashed #e2e8f0;
 }
 
 .cal-event {
   position: absolute;
   left: 4px;
   right: 4px;
-  border-radius: 4px;
-  padding: 8px;
+  border-radius: 6px;
+  padding: 4px 8px;
   box-sizing: border-box;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 12px;
+  align-items: flex-start;
+  justify-content: center; /* Centered for normal (large) blocks */
+  text-align: left;
+  gap: 2px;
   z-index: 10;
+  transition: box-shadow 0.2s, z-index 0.2s;
+  
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 20;
+  }
+}
+
+/* Specific styling for 1-hour events to prevent data loss */
+.cal-event.short-event {
+  justify-content: flex-start; /* Start from top so it fits */
+
+  .cal-event-inner {
+    -webkit-line-clamp: 3; /* Intelligent truncation: 3 dots at exactly the 3rd line of the entire block */
+  }
+}
+
+.cal-event-inner {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  width: 100%;
 }
 
 .ev-title {
   font-weight: 700;
   font-size: 0.75rem;
-  line-height: 1.2;
-  white-space: normal;
+  line-height: 1.1;
   word-break: break-word;
-  overflow: hidden;
+  margin-bottom: 2px; /* Replaces flex gap */
 }
 
 .ev-time {
   font-size: 0.65rem;
   color: #475569;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  line-height: 1.1;
+  margin-bottom: 2px; /* Replaces flex gap */
 }
 
 .ev-teacher {
-  font-size: 0.65rem;
-  color: #64748b;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  white-space: normal;
+  font-size: 0.7rem;
+  color: #334155;
+  font-weight: 700;
+  line-height: 1.1;
   word-break: break-word;
-  overflow: hidden;
 }
 
 details.teacher-details summary {
