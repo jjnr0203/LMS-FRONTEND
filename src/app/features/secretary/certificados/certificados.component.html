@@ -1,0 +1,37 @@
+<p-toast />
+
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Certificados</h1>
+      <p class="description">Genera certificados de matrícula, estudios, notas y egreso.</p>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="data-card">
+      <h3 class="section-title">Generar Certificado</h3>
+      <form [formGroup]="form" (ngSubmit)="generate()">
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <label class="font-semibold text-sm text-700 block mb-2">Cédula del Estudiante</label>
+            <input pInputText formControlName="studentId" placeholder="10 dígitos" class="w-full" />
+            @if (studentId.invalid && studentId.touched) {
+              <small class="p-error">Cédula requerida (10 dígitos).</small>
+            }
+          </div>
+          <div class="col-12 md:col-6">
+            <label class="font-semibold text-sm text-700 block mb-2">Tipo de Certificado</label>
+            <p-select formControlName="type" [options]="certificateTypes" optionLabel="label" optionValue="value" placeholder="Seleccione tipo" styleClass="w-full" />
+            @if (type.invalid && type.touched) {
+              <small class="p-error">Tipo requerido.</small>
+            }
+          </div>
+        </div>
+        <div class="flex justify-content-end mt-3">
+          <p-button label="Generar" icon="pi pi-file-pdf" type="submit" [loading]="loading()" severity="success" />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

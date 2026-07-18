@@ -1,0 +1,54 @@
+<p-toast />
+
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Matrícula</h1>
+      <p class="description">Selecciona período, carrera, semestre y materias para generar la matrícula.</p>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="data-card">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <label class="font-semibold text-sm text-700 block mb-2">Cédula del Estudiante</label>
+            <input pInputText formControlName="studentId" placeholder="10 dígitos" class="w-full" />
+            @if (studentId.invalid && studentId.touched) {
+              <small class="p-error">Cédula requerida (10 dígitos).</small>
+            }
+          </div>
+          <div class="col-12 md:col-6">
+            <label class="font-semibold text-sm text-700 block mb-2">Período Académico</label>
+            <p-select formControlName="academicTermId" [options]="terms()" optionLabel="name" optionValue="id" placeholder="Seleccione período" styleClass="w-full" />
+            @if (academicTermId.invalid && academicTermId.touched) {
+              <small class="p-error">Período requerido.</small>
+            }
+          </div>
+          <div class="col-12 md:col-6">
+            <label class="font-semibold text-sm text-700 block mb-2">Carrera</label>
+            <p-select formControlName="careerId" [options]="careers()" optionLabel="name" optionValue="id" placeholder="Seleccione carrera" styleClass="w-full" (onChange)="onCareerChange($event.value)" />
+            @if (careerId.invalid && careerId.touched) {
+              <small class="p-error">Carrera requerida.</small>
+            }
+          </div>
+          <div class="col-12 md:col-6">
+            <label class="font-semibold text-sm text-700 block mb-2">Semestre</label>
+            <p-select formControlName="semester" [options]="semesters()" optionLabel="label" optionValue="value" placeholder="Seleccione semestre" styleClass="w-full" (onChange)="onSemesterChange($event.value)" />
+            @if (semester.invalid && semester.touched) {
+              <small class="p-error">Semestre requerido.</small>
+            }
+          </div>
+          <div class="col-12">
+            <label class="font-semibold text-sm text-700 block mb-2">Materias del Semestre</label>
+            <p-multiSelect formControlName="subjectIds" [options]="subjects()" optionLabel="name" optionValue="id" placeholder="Seleccione materias" styleClass="w-full" display="chip" [loading]="loadingSubjects()" />
+          </div>
+        </div>
+        <div class="flex justify-content-end mt-3">
+          <p-button label="Generar Matrícula" icon="pi pi-check" type="submit" [loading]="loading()" severity="success" />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

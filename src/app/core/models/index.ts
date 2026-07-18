@@ -105,7 +105,7 @@ export interface AuthState {
   isLoggedIn: boolean;
 }
 
-export type AppRole = 'admin' | 'coordinator' | 'treasury' | 'teacher' | 'student';
+export type AppRole = 'admin' | 'coordinator' | 'treasury' | 'teacher' | 'student' | 'secretary';
 
 export interface AcademicTerm {
   id: string;
@@ -166,5 +166,60 @@ export interface Curriculum {
   name: string;
   description: string | null;
   isActive: boolean;
+  createdAt: string;
+}
+
+export interface Inscription {
+  id: string;
+  studentId: string;
+  careerId: string;
+  status: 'pending' | 'approved' | 'rejected';
+  documentUrl?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface EnrollmentDetail {
+  id: string;
+  studentId: string;
+  academicTermId: string;
+  careerId: string;
+  level: number;
+  status: 'active' | 'completed' | 'cancelled';
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface EnrollmentSubject {
+  id: string;
+  enrollmentDetailId: string;
+  subjectId: string;
+  status: 'enrolled' | 'approved' | 'failed';
+  grade?: number;
+  createdAt: string;
+}
+
+export interface AcademicRecord {
+  subjectName: string;
+  grade: number;
+  credits: number;
+  term: string;
+}
+
+export interface AcademicHistory {
+  studentId: string;
+  approved: AcademicRecord[];
+  failed: AcademicRecord[];
+  average: number;
+  totalCredits: number;
+}
+
+export interface Certificate {
+  id: string;
+  studentId: string;
+  type: 'matricula' | 'estudios' | 'notas' | 'egreso';
+  pdfUrl?: string;
+  generatedAt: string;
   createdAt: string;
 }

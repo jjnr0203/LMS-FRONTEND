@@ -66,7 +66,8 @@ export class UsersListComponent implements OnInit, OnDestroy {
     { label: 'Coordinador', value: 'coordinator' },
     { label: 'Docente', value: 'teacher' },
     { label: 'Estudiante', value: 'student' },
-    { label: 'Tesorería', value: 'treasury' }
+    { label: 'Tesorería', value: 'treasury' },
+    { label: 'Secretaría', value: 'secretary' },
   ];
 
   searchQuery = '';
@@ -170,6 +171,8 @@ export class UsersListComponent implements OnInit, OnDestroy {
         return 'success';
       case 'treasury':
         return 'secondary';
+      case 'secretary':
+        return 'secondary';
       default:
         return 'secondary';
     }
@@ -183,6 +186,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
       case 'teacher': return 'Docente';
       case 'student': return 'Estudiante';
       case 'treasury': return 'Tesorería';
+      case 'secretary': return 'Secretaría';
       default: return roleName;
     }
   }

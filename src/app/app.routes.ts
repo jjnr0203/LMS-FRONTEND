@@ -40,6 +40,14 @@ export const routes: Routes = [
     loadChildren: () => import('./features/teacher/pages/teacher.routes'),
   },
   {
+    path: 'secretary',
+    loadComponent: () =>
+      import('./layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['secretary'] },
+    loadChildren: () => import('./features/secretary/pages/secretary.routes'),
+  },
+  {
     path: 'perfil',
     loadComponent: () =>
       import('./layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),

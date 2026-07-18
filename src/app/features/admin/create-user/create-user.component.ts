@@ -43,6 +43,7 @@ export class CreateUserComponent {
     { label: 'Coordinador', value: 'coordinator' },
     { label: 'Tesorería', value: 'treasury' },
     { label: 'Docente', value: 'teacher' },
+    { label: 'Secretaría', value: 'secretary' },
   ];
 
   form = this.formBuilder.group({

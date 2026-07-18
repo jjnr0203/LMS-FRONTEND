@@ -1,0 +1,95 @@
+<p-toast />
+
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Historial Académico</h1>
+      <p class="description">Consulta materias aprobadas, reprobadas, promedio y créditos.</p>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="data-card">
+      <form [formGroup]="form" (ngSubmit)="search()" class="flex align-items-end gap-3 mb-4">
+        <div class="flex-1">
+          <label class="font-semibold text-sm text-700 block mb-2">Cédula del Estudiante</label>
+          <input pInputText formControlName="studentId" placeholder="10 dígitos" class="w-full" />
+        </div>
+        <p-button label="Buscar" icon="pi pi-search" type="submit" [loading]="loading()" severity="info" />
+      </form>
+
+      @if (history()) {
+        <div class="stats-summary grid mb-4">
+          <div class="col-6 md:col-3">
+            <div class="stat-box">
+              <span class="stat-label">Promedio</span>
+              <span class="stat-value">{{ history()!.average.toFixed(2) }}</span>
+            </div>
+          </div>
+          <div class="col-6 md:col-3">
+            <div class="stat-box">
+              <span class="stat-label">Créditos</span>
+              <span class="stat-value">{{ history()!.totalCredits }}</span>
+            </div>
+          </div>
+          <div class="col-6 md:col-3">
+            <div class="stat-box">
+              <span class="stat-label">Aprobadas</span>
+              <span class="stat-value approved">{{ history()!.approved.length }}</span>
+            </div>
+          </div>
+          <div class="col-6 md:col-3">
+            <div class="stat-box">
+              <span class="stat-label">Reprobadas</span>
+              <span class="stat-value failed">{{ history()!.failed.length }}</span>
+            </div>
+          </div>
+        </div>
+
+        @if (history()!.approved.length > 0) {
+          <h3 class="section-title" style="color: #059669;">Materias Aprobadas</h3>
+          <p-table [value]="history()!.approved" [paginator]="true" [rows]="5" styleClass="p-datatable-sm mb-4">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Materia</th>
+                <th>Nota</th>
+                <th>Créditos</th>
+                <th>Período</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+              <tr>
+                <td>{{ item.subjectName }}</td>
+                <td>{{ item.grade }}</td>
+                <td>{{ item.credits }}</td>
+                <td>{{ item.term }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        }
+
+        @if (history()!.failed.length > 0) {
+          <h3 class="section-title" style="color: #dc2626;">Materias Reprobadas</h3>
+          <p-table [value]="history()!.failed" [paginator]="true" [rows]="5" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Materia</th>
+                <th>Nota</th>
+                <th>Créditos</th>
+                <th>Período</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+              <tr>
+                <td>{{ item.subjectName }}</td>
+                <td>{{ item.grade }}</td>
+                <td>{{ item.credits }}</td>
+                <td>{{ item.term }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        }
+      }
+    </div>
+  </div>
+</div>

@@ -103,6 +103,36 @@ export class SidebarComponent {
         { label: 'Crear Tarea', icon: '', route: '/teacher/tareas', roles: ['teacher'] },
         { label: 'Calificar Tarea', icon: '', route: '/teacher/calificar', roles: ['teacher'] },
       ]
+    },
+    {
+      label: 'Panel',
+      icon: 'pi pi-home',
+      route: '/secretary',
+      roles: ['secretary'],
+    },
+    {
+      label: 'Inscripciones',
+      icon: 'pi pi-file-edit',
+      route: '/secretary/inscripciones',
+      roles: ['secretary'],
+    },
+    {
+      label: 'Matrícula',
+      icon: 'pi pi-calendar',
+      route: '/secretary/matricula',
+      roles: ['secretary'],
+    },
+    {
+      label: 'Historial Académico',
+      icon: 'pi pi-chart-bar',
+      route: '/secretary/historial',
+      roles: ['secretary'],
+    },
+    {
+      label: 'Certificados',
+      icon: 'pi pi-verified',
+      route: '/secretary/certificados',
+      roles: ['secretary'],
     }
   ]);
 
@@ -148,6 +178,7 @@ export class SidebarComponent {
       teacher: 'Docente',
       student: 'Estudiante',
       treasury: 'Tesorería',
+      secretary: 'Secretaría',
     };
     return map[roleName.toLowerCase()] || roleName;
   }
