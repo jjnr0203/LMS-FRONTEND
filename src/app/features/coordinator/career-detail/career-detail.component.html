@@ -1,4 +1,5 @@
 <p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
 <div class="page-container">
   <div class="page-header">
@@ -160,7 +161,8 @@
                                   @if (sub.groupedAssignments && sub.groupedAssignments.length > 0) {
                                     <div class="flex flex-column gap-1 align-items-start">
                                       <!-- Docente Principal -->
-                                      <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" style="width: 100%;">
+                                      <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" 
+                                           style="width: 100%; border-left: 4px solid #10b981;">
                                         <div class="flex flex-column text-left">
                                           <span class="text-900 font-medium text-xs">{{ sub.groupedAssignments[0].teacherName }}</span>
                                           <span class="text-600" style="font-size: 0.65rem">
@@ -168,27 +170,21 @@
                                           </span>
                                         </div>
                                         <div class="flex gap-1">
-                                          <p-button
-                                            icon="pi pi-clock"
-                                            severity="info"
-                                            [text]="true"
-                                            [rounded]="true"
-                                            [style]="{ width: '1.75rem', height: '1.75rem', padding: '0' }"
-                                            (click)="openScheduleModal(sub, sub.groupedAssignments[0].teacherId, sem.semester)"
-                                            pTooltip="Configurar Horario"
-                                            tooltipPosition="top"
-                                          />
-                                          <p-button
-                                            icon="pi pi-times"
-                                            severity="danger"
-                                            [text]="true"
-                                            [rounded]="true"
-                                            [style]="{ width: '1.75rem', height: '1.75rem', padding: '0' }"
-                                            (click)="removeTeacher(sub.id, cur.id, sub.groupedAssignments[0].assignmentIds, sub.groupedAssignments[0].teacherId)"
-                                            pTooltip="Eliminar esta asignación"
-                                            tooltipPosition="top"
-                                            [loading]="removingTeacherId() === sub.groupedAssignments[0].teacherId"
-                                          />
+                                          <button type="button" class="border-none surface-300 text-700 border-round flex align-items-center justify-content-center cursor-pointer hover:surface-400 transition-duration-200 outline-none focus:shadow-none" style="width: 1.75rem; height: 1.75rem;" (click)="teacherMenuPrimary.toggle($event)">
+                                            <i class="pi pi-ellipsis-v"></i>
+                                          </button>
+                                          <p-popover #teacherMenuPrimary>
+                                            <div class="flex flex-column">
+                                              <button type="button" class="flex align-items-center gap-3 px-3 py-2 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-duration-200 outline-none" (click)="openScheduleModal(sub, sub.groupedAssignments[0].teacherId, sem.semester); teacherMenuPrimary.hide()">
+                                                <i class="pi pi-calendar-clock text-700 text-lg"></i>
+                                                <span class="white-space-nowrap font-medium text-700 text-sm">Crear Horario</span>
+                                              </button>
+                                              <button type="button" class="flex align-items-center gap-3 px-3 py-2 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-duration-200 outline-none" (click)="removeTeacher(sub.id, cur.id, sub.groupedAssignments[0].assignmentIds, sub.groupedAssignments[0].teacherId); teacherMenuPrimary.hide()" [disabled]="removingTeacherId() === sub.groupedAssignments[0].teacherId">
+                                                <i class="pi pi-times text-red-500 text-lg" [class.pi-spin]="removingTeacherId() === sub.groupedAssignments[0].teacherId" [class.pi-spinner]="removingTeacherId() === sub.groupedAssignments[0].teacherId"></i>
+                                                <span class="white-space-nowrap font-medium text-red-500 text-sm">Eliminar Docente</span>
+                                              </button>
+                                            </div>
+                                          </p-popover>
                                         </div>
                                       </div>
 
@@ -199,7 +195,8 @@
                                           </summary>
                                           <div class="flex flex-column gap-1 mt-1">
                                             @for (assign of sub.groupedAssignments.slice(1); track assign.teacherId) {
-                                              <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" style="width: 100%;">
+                                              <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" 
+                                                   style="width: 100%; border-left: 4px solid #10b981;">
                                                 <div class="flex flex-column text-left">
                                                   <span class="text-900 font-medium text-xs">{{ assign.teacherName }}</span>
                                                   <span class="text-600" style="font-size: 0.65rem">
@@ -207,27 +204,21 @@
                                                   </span>
                                                 </div>
                                                 <div class="flex gap-1">
-                                                  <p-button
-                                                    icon="pi pi-clock"
-                                                    severity="info"
-                                                    [text]="true"
-                                                    [rounded]="true"
-                                                    [style]="{ width: '1.75rem', height: '1.75rem', padding: '0' }"
-                                                    (click)="openScheduleModal(sub, assign.teacherId, sem.semester)"
-                                                    pTooltip="Configurar Horario"
-                                                    tooltipPosition="top"
-                                                  />
-                                                  <p-button
-                                                    icon="pi pi-times"
-                                                    severity="danger"
-                                                    [text]="true"
-                                                    [rounded]="true"
-                                                    [style]="{ width: '1.75rem', height: '1.75rem', padding: '0' }"
-                                                    (click)="removeTeacher(sub.id, cur.id, assign.assignmentIds, assign.teacherId)"
-                                                    pTooltip="Eliminar esta asignación"
-                                                    tooltipPosition="top"
-                                                    [loading]="removingTeacherId() === assign.teacherId"
-                                                  />
+                                                  <button type="button" class="border-none surface-300 text-700 border-round flex align-items-center justify-content-center cursor-pointer hover:surface-400 transition-duration-200 outline-none focus:shadow-none" style="width: 1.75rem; height: 1.75rem;" (click)="teacherMenuSecondary.toggle($event)">
+                                                    <i class="pi pi-ellipsis-v"></i>
+                                                  </button>
+                                                  <p-popover #teacherMenuSecondary>
+                                                    <div class="flex flex-column">
+                                                      <button type="button" class="flex align-items-center gap-3 px-3 py-2 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-duration-200 outline-none" (click)="openScheduleModal(sub, assign.teacherId, sem.semester); teacherMenuSecondary.hide()">
+                                                        <i class="pi pi-calendar-clock text-700 text-lg"></i>
+                                                        <span class="white-space-nowrap font-medium text-700 text-sm">Crear Horario</span>
+                                                      </button>
+                                                      <button type="button" class="flex align-items-center gap-3 px-3 py-2 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-duration-200 outline-none" (click)="removeTeacher(sub.id, cur.id, assign.assignmentIds, assign.teacherId); teacherMenuSecondary.hide()" [disabled]="removingTeacherId() === assign.teacherId">
+                                                        <i class="pi pi-times text-red-500 text-lg" [class.pi-spin]="removingTeacherId() === assign.teacherId" [class.pi-spinner]="removingTeacherId() === assign.teacherId"></i>
+                                                        <span class="white-space-nowrap font-medium text-red-500 text-sm">Eliminar Docente</span>
+                                                      </button>
+                                                    </div>
+                                                  </p-popover>
                                                 </div>
                                               </div>
                                             }
@@ -242,13 +233,13 @@
                                 <td class="text-center">
                                   <div class="flex justify-content-center gap-1">
                                     <button type="button" 
-                                            class="border-circle cursor-pointer border-none flex align-items-center justify-content-center transition-duration-200 hover:shadow-2" 
-                                            [style.background-color]="subjectColorsMap().get(sub.subjectId || sub.id) || '#64748b'" 
-                                            style="width: 2.5rem; height: 2.5rem; color: white; padding: 0;" 
+                                            class="border-round cursor-pointer border-none flex align-items-center justify-content-center transition-duration-200 hover:shadow-2" 
+                                            [ngStyle]="{'background-color': (subjectColorsMap().get(sub.subjectId || sub.id) || '#64748b') + '1A', 'color': subjectColorsMap().get(sub.subjectId || sub.id) || '#64748b'}" 
+                                            style="width: 2.5rem; height: 2.5rem; padding: 0;" 
                                             (click)="colorPanel.toggle($event)" 
                                             pTooltip="Personalizar Color" 
                                             tooltipPosition="top">
-                                      <i class="pi pi-palette"></i>
+                                      <i class="pi pi-palette text-xl"></i>
                                     </button>
                                     <p-popover #colorPanel>
                                       <div class="flex flex-column gap-2 p-2" style="width: 220px;">

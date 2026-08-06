@@ -6,3 +6,15 @@
     </main>
   </div>
 </div>
+
+<p-dialog
+  [visible]="authService.requiresPasswordChange()"
+  [modal]="true"
+  [closable]="false"
+  [closeOnEscape]="false"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-0 border-round-2xl overflow-hidden"
+  maskStyleClass="backdrop-blur-sm bg-black-alpha-60">
+  <app-first-login />
+</p-dialog>

@@ -115,6 +115,26 @@
           </div>
         </div>
 
+        <!-- Recursos Humanos -->
+        <div class="stat-card clickable" (click)="goToUsers('human_resources')">
+          <div class="stat-icon hr-icon" style="background: #e0f2fe; color: #0284c7;">
+            <i class="pi pi-briefcase"></i>
+          </div>
+          <div class="stat-info">
+            <h3>
+              @if (stats()) {
+                <span translate="no">{{ stats()!.users.human_resources || 0 }}</span>
+              } @else {
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #cbd5e1;"></i>
+              }
+            </h3>
+            <p>Recursos Humanos</p>
+          </div>
+          <div class="action-arrow">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+        </div>
+
         <!-- Careers -->
         <div class="stat-card clickable" (click)="goToAcademic('careers')">
           <div class="stat-icon career-icon">

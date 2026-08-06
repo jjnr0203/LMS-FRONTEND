@@ -13,6 +13,7 @@ export interface User {
   faculties?: any[];
   createdAt: string;
   updatedAt?: string;
+  requiresPasswordChange?: boolean;
 }
 
 export interface Tuition {
@@ -102,10 +103,11 @@ export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   role: string | null;
+  requiresPasswordChange: boolean;
   isLoggedIn: boolean;
 }
 
-export type AppRole = 'admin' | 'coordinator' | 'treasury' | 'teacher' | 'student' | 'secretary';
+export type AppRole = 'admin' | 'coordinator' | 'treasury' | 'teacher' | 'student' | 'secretary' | 'human_resources';
 
 export interface AcademicTerm {
   id: string;

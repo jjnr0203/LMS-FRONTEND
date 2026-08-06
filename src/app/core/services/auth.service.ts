@@ -13,6 +13,7 @@ export class AuthService {
     accessToken: localStorage.getItem('accessToken'),
     refreshToken: localStorage.getItem('refreshToken'),
     role: this.decodeRole(localStorage.getItem('accessToken')),
+    requiresPasswordChange: this.decodeRequiresPasswordChange(localStorage.getItem('accessToken')),
     isLoggedIn: !!localStorage.getItem('accessToken'),
   });
 
@@ -20,6 +21,7 @@ export class AuthService {
   readonly accessToken = computed(() => this.state().accessToken);
   readonly refreshTokenVal = computed(() => this.state().refreshToken);
   readonly role = computed(() => this.state().role);
+  readonly requiresPasswordChange = computed(() => this.state().requiresPasswordChange);
   readonly isLoggedIn = computed(() => this.state().isLoggedIn);
 
   constructor(private http: HttpClient) {}
@@ -54,6 +56,7 @@ export class AuthService {
             accessToken: res.accessToken,
             refreshToken: res.refreshToken,
             role: this.decodeRole(res.accessToken),
+            requiresPasswordChange: this.decodeRequiresPasswordChange(res.accessToken),
           }));
         }),
       );
@@ -82,6 +85,7 @@ export class AuthService {
       accessToken: res.accessToken,
       refreshToken: res.refreshToken,
       role: this.decodeRole(res.accessToken),
+      requiresPasswordChange: this.decodeRequiresPasswordChange(res.accessToken),
       isLoggedIn: true,
     });
   }
@@ -94,6 +98,7 @@ export class AuthService {
       accessToken: null,
       refreshToken: null,
       role: null,
+      requiresPasswordChange: false,
       isLoggedIn: false,
     });
   }
@@ -105,6 +110,16 @@ export class AuthService {
       return payload.role ?? null;
     } catch {
       return null;
+    }
+  }
+
+  private decodeRequiresPasswordChange(token: string | null): boolean {
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.requiresPasswordChange ?? false;
+    } catch {
+      return false;
     }
   }
 }

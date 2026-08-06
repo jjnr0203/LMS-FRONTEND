@@ -48,6 +48,14 @@ export const routes: Routes = [
     loadChildren: () => import('./features/secretary/pages/secretary.routes'),
   },
   {
+    path: 'human-resources',
+    loadComponent: () =>
+      import('./layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['human_resources'] },
+    loadChildren: () => import('./features/human-resources/pages/human-resources.routes'),
+  },
+  {
     path: 'perfil',
     loadComponent: () =>
       import('./layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),

@@ -1,9 +1,9 @@
 <p-toast />
 @if (!isModal()) {
   <div class="surface-ground min-h-screen">
-    <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
-      <h1 class="text-3xl font-semibold m-0 mb-2">Crear Nuevo Usuario</h1>
-      <p class="text-green-100 m-0">Completa el siguiente formulario para registrar un nuevo usuario (Docente, Coordinador o Tesorería) en la plataforma.</p>
+    <div class="bg-blue-800 text-white p-5 mb-5 border-round-xl">
+      <h1 class="text-3xl font-semibold m-0 mb-2">Crear Personal Administrativo</h1>
+      <p class="text-blue-100 m-0">Completa el siguiente formulario para registrar nuevo personal (Coordinador, Secretaría, Tesorería o Docente) en la plataforma.</p>
     </div>
     <div class="flex justify-content-center">
       <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
@@ -96,7 +96,7 @@
           <div class="mt-4 flex justify-content-end">
             <p-button
               type="submit"
-              label="Registrar Usuario"
+              label="Registrar Personal"
               icon="pi pi-check"
               [loading]="loading()"
               [disabled]="form.invalid"
@@ -196,7 +196,7 @@
     <div class="mt-4 flex justify-content-end">
       <p-button
         type="submit"
-        label="Registrar Usuario"
+        label="Registrar Personal"
         icon="pi pi-check"
         [loading]="loading()"
         [disabled]="form.invalid"

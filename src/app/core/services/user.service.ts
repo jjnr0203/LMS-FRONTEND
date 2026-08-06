@@ -15,11 +15,18 @@ export class UserService {
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    if (role) {
-      params = params.set('role', role);
-    }
     if (search) {
       params = params.set('search', search);
+    }
+
+    if (role === 'teacher') {
+      return this.http.get<PaginatedResponse<User>>(`${environment.apiUrl}/teachers`, { params });
+    } else if (role === 'student') {
+      return this.http.get<PaginatedResponse<User>>(`${environment.apiUrl}/students`, { params });
+    }
+
+    if (role) {
+      params = params.set('role', role);
     }
     if (facultyIds && facultyIds.length > 0) {
       facultyIds.forEach(id => {
@@ -34,11 +41,15 @@ export class UserService {
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 
-  updateUser(id: string, data: Partial<User>): Observable<{ user: User }> {
+  updateUser(id: string, data: Partial<User>, role?: string): Observable<{ user: User }> {
+    if (role === 'teacher' || role === 'Docente') return this.http.patch<{ user: User }>(`${environment.apiUrl}/teachers/${id}`, data);
+    if (role === 'student' || role === 'Estudiante') return this.http.patch<{ user: User }>(`${environment.apiUrl}/students/${id}`, data);
     return this.http.put<{ user: User }>(`${this.apiUrl}/${id}`, data);
   }
 
-  deleteUser(id: string): Observable<{ message: string }> {
+  deleteUser(id: string, role?: string): Observable<{ message: string }> {
+    if (role === 'teacher' || role === 'Docente') return this.http.delete<{ message: string }>(`${environment.apiUrl}/teachers/${id}`);
+    if (role === 'student' || role === 'Estudiante') return this.http.delete<{ message: string }>(`${environment.apiUrl}/students/${id}`);
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 

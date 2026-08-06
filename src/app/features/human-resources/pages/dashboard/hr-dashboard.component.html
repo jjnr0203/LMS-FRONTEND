@@ -1,0 +1,107 @@
+<div class="page-container">
+  <!-- Dark Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Panel de <span>Recursos Humanos</span></h1>
+      <p class="description">
+        Bienvenido de nuevo, {{ user()?.firstName }}. Aquí puedes ver el resumen del personal administrativo.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content Card -->
+  <div class="content-wrapper">
+    <div class="data-card">
+
+      @if (!stats()) {
+        <div class="flex justify-content-center p-6">
+          <i class="pi pi-spin pi-spinner text-4xl text-emerald-500"></i>
+        </div>
+      } @else {
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <!-- Total Personal -->
+          <div class="stat-card clickable" (click)="goToStaff()">
+            <div class="stat-icon total-icon">
+              <i class="pi pi-users"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ getTotalStaff() }}</span>
+              </h3>
+              <p>Total Personal</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+          <!-- Docentes -->
+          <div class="stat-card clickable" (click)="goToStaff('teacher')">
+            <div class="stat-icon teacher-icon">
+              <i class="pi pi-user"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ stats()?.users?.teacher || 0 }}</span>
+              </h3>
+              <p>Docentes</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+          <!-- Coordinadores -->
+          <div class="stat-card clickable" (click)="goToStaff('coordinator')">
+            <div class="stat-icon coordinator-icon">
+              <i class="pi pi-sitemap"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ stats()?.users?.coordinator || 0 }}</span>
+              </h3>
+              <p>Coordinadores</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+          <!-- Secretaría -->
+          <div class="stat-card clickable" (click)="goToStaff('secretary')">
+            <div class="stat-icon" style="background: #ffedd5; color: #f97316;">
+              <i class="pi pi-file"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ stats()?.users?.secretary || 0 }}</span>
+              </h3>
+              <p>Secretaría</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+          <!-- Tesorería -->
+          <div class="stat-card clickable" (click)="goToStaff('treasury')">
+            <div class="stat-icon treasury-icon">
+              <i class="pi pi-dollar"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ stats()?.users?.treasury || 0 }}</span>
+              </h3>
+              <p>Tesorería</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
+  </div>
+</div>

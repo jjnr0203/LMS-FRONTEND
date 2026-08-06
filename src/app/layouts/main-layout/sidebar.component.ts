@@ -53,6 +53,18 @@ export class SidebarComponent {
       roles: ['treasury'],
     },
     {
+      label: 'Panel',
+      icon: 'pi pi-home',
+      route: '/human-resources',
+      roles: ['human_resources'],
+    },
+    {
+      label: 'Personal Administrativo',
+      icon: 'pi pi-users',
+      route: '/human-resources/staff',
+      roles: ['human_resources'],
+    },
+    {
       label: 'Usuarios',
       icon: 'pi pi-users',
       route: '/admin/users-list',
@@ -174,6 +186,7 @@ export class SidebarComponent {
     if (!roleName) return '';
     const map: Record<string, string> = {
       admin: 'Administrador',
+      human_resources: 'Recursos Humanos',
       coordinator: 'Coordinador',
       teacher: 'Docente',
       student: 'Estudiante',

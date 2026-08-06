@@ -176,5 +176,9 @@
   [style]="{ width: '800px', 'max-width': '95vw' }"
   [closable]="true"
 >
-  <app-create-user [isModal]="true" (userCreated)="onUserCreated()"></app-create-user>
+  @if (mode() === 'admin') {
+    <app-create-user [isModal]="true" (userCreated)="onUserCreated()"></app-create-user>
+  } @else {
+    <app-hr-create-user [isModal]="true" (userCreated)="onUserCreated()"></app-hr-create-user>
+  }
 </p-dialog>

@@ -53,6 +53,7 @@ export class ProfileComponent implements OnInit {
     if (!role) return 'Desconocido';
     const roles: Record<string, string> = {
       admin: 'Administrador',
+      human_resources: 'Recursos Humanos',
       treasury: 'Tesorería',
       coordinator: 'Coordinador',
       teacher: 'Docente',

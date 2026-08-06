@@ -32,6 +32,8 @@ interface DashboardStats {
     coordinator: number;
     treasury: number;
     admin: number;
+    secretary: number;
+    human_resources: number;
   };
   academic: {
     totalCareers: number;
@@ -107,7 +109,7 @@ export class AdminDashboardComponent implements OnInit {
   getTotalUsers(): number {
     const s = this.stats();
     if (!s) return 0;
-    return s.users.student + s.users.teacher + s.users.coordinator + s.users.treasury + s.users.admin;
+    return s.users.student + s.users.teacher + s.users.coordinator + s.users.treasury + s.users.admin + (s.users.secretary || 0) + (s.users.human_resources || 0);
   }
 
   goToUsers(roleFilter?: string) {

@@ -18,6 +18,12 @@ export class AdminService {
     password: string;
     roleName: string;
   }): Observable<{ message: string; user: User }> {
+    if (data.roleName === 'teacher' || data.roleName === 'Docente') {
+      return this.http.post<{ message: string; user: User }>(`${environment.apiUrl}/teachers`, data);
+    }
+    if (data.roleName === 'student' || data.roleName === 'Estudiante') {
+      return this.http.post<{ message: string; user: User }>(`${environment.apiUrl}/students`, data);
+    }
     return this.http.post<{ message: string; user: User }>(`${this.apiUrl}/users`, data);
   }
 }

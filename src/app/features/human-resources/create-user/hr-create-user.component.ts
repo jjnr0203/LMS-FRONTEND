@@ -1,6 +1,6 @@
 import { Component, inject, signal, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AdminService } from '../../../core/services/admin.service';
+import { HumanResourcesService } from '../../../core/services/human-resources.service';
 import { MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -11,7 +11,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { AcademicService } from '../../../core/services/academic.service';
 
 @Component({
-  selector: 'app-create-user',
+  selector: 'app-hr-create-user',
+  standalone: true,
   imports: [
     ReactiveFormsModule,
     InputTextModule,
@@ -22,12 +23,12 @@ import { AcademicService } from '../../../core/services/academic.service';
     MultiSelectModule,
   ],
   providers: [MessageService],
-  templateUrl: 'create-user.component.html',
-  styleUrl: 'create-user.component.scss',
+  templateUrl: './hr-create-user.component.html',
+  styleUrl: './hr-create-user.component.scss',
 })
-export class CreateUserComponent {
+export class HrCreateUserComponent {
   private formBuilder = inject(FormBuilder);
-  private adminService = inject(AdminService);
+  private hrService = inject(HumanResourcesService);
   private messageService = inject(MessageService);
   private academicService = inject(AcademicService);
 
@@ -38,8 +39,10 @@ export class CreateUserComponent {
   faculties = signal<any[]>([]);
 
   roles = [
-    { label: 'Administrador', value: 'admin' },
-    { label: 'Recursos Humanos', value: 'human_resources' },
+    { label: 'Coordinador', value: 'coordinator' },
+    { label: 'Tesorería', value: 'treasury' },
+    { label: 'Docente', value: 'teacher' },
+    { label: 'Secretaría', value: 'secretary' },
   ];
 
   form = this.formBuilder.group({
@@ -86,12 +89,16 @@ export class CreateUserComponent {
       delete payload.phone;
     }
 
-    this.adminService.createUser(payload).subscribe({
+    const req = payload.roleName === 'teacher' 
+      ? this.hrService.createTeacher(payload)
+      : this.hrService.createStaff(payload);
+
+    req.subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
-          detail: 'Usuario creado correctamente',
+          detail: payload.roleName === 'teacher' ? 'Docente creado correctamente' : 'Usuario de personal creado correctamente',
         });
         this.form.reset();
         this.loading.set(false);

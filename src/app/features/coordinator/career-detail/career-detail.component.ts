@@ -782,58 +782,68 @@ export class CareerDetailComponent implements OnInit {
   }
 
   removeTeacher(subjectId: string, curriculumId?: string, assignmentIds?: string | string[], teacherId?: string) {
-    if (teacherId) {
-      this.removingTeacherId.set(teacherId);
-    } else {
-      this.removingSubjectId.set(subjectId);
-    }
-
-    if (Array.isArray(assignmentIds)) {
-      const requests = assignmentIds.map(id => this.coordinatorService.unassignTeacher(subjectId, curriculumId, id));
-      forkJoin(requests).subscribe({
-        next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Oferta retirada exitosamente' });
-          const careerId = this.route.snapshot.paramMap.get('id');
-          if (careerId) this.loadData(careerId);
-          this.removingSubjectId.set(null);
-          this.removingTeacherId.set(null);
-        },
-        error: (err) => {
-          this.removingSubjectId.set(null);
-          this.removingTeacherId.set(null);
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al retirar la oferta' });
+    this.confirmationService.confirm({
+      header: 'Confirmar eliminación',
+      message: '¿Estás seguro de que deseas eliminar esta asignación?',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, Eliminar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        if (teacherId) {
+          this.removingTeacherId.set(teacherId);
+        } else {
+          this.removingSubjectId.set(subjectId);
         }
-      });
-      return;
-    }
 
-    this.coordinatorService.unassignTeacher(
-      subjectId,
-      curriculumId,
-      assignmentIds,
-    ).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Éxito',
-          detail: 'Oferta retirada exitosamente',
-        });
-        const careerId = this.route.snapshot.paramMap.get('id');
-        if (careerId) {
-          this.loadData(careerId);
+        if (Array.isArray(assignmentIds)) {
+          const requests = assignmentIds.map(id => this.coordinatorService.unassignTeacher(subjectId, curriculumId, id));
+          forkJoin(requests).subscribe({
+            next: () => {
+              this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Oferta retirada exitosamente' });
+              const careerId = this.route.snapshot.paramMap.get('id');
+              if (careerId) this.loadData(careerId);
+              this.removingSubjectId.set(null);
+              this.removingTeacherId.set(null);
+            },
+            error: (err) => {
+              this.removingSubjectId.set(null);
+              this.removingTeacherId.set(null);
+              this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al retirar la oferta' });
+            }
+          });
+          return;
         }
-        this.removingSubjectId.set(null);
-        this.removingTeacherId.set(null);
-      },
-      error: (err) => {
-        this.removingSubjectId.set(null);
-        this.removingTeacherId.set(null);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: err.error?.message ?? 'Error al retirar la oferta',
+
+        this.coordinatorService.unassignTeacher(
+          subjectId,
+          curriculumId,
+          assignmentIds,
+        ).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Oferta retirada exitosamente',
+            });
+            const careerId = this.route.snapshot.paramMap.get('id');
+            if (careerId) {
+              this.loadData(careerId);
+            }
+            this.removingSubjectId.set(null);
+            this.removingTeacherId.set(null);
+          },
+          error: (err) => {
+            this.removingSubjectId.set(null);
+            this.removingTeacherId.set(null);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: err.error?.message ?? 'Error al retirar la oferta',
+            });
+          },
         });
-      },
+      }
     });
   }
 

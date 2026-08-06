@@ -1,8 +1,9 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, input } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
+import { HumanResourcesService } from '../../../core/services/human-resources.service';
 import { User } from '../../../core/models';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -18,6 +19,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { CardModule } from 'primeng/card';
 import { CreateUserComponent } from '../../admin/create-user/create-user.component';
+import { HrCreateUserComponent } from '../../human-resources/create-user/hr-create-user.component';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { AcademicService } from '../../../core/services/academic.service';
 
@@ -38,6 +40,7 @@ import { AcademicService } from '../../../core/services/academic.service';
     InputIconModule,
     CardModule,
     CreateUserComponent,
+    HrCreateUserComponent,
     MultiSelectModule,
   ],
   providers: [MessageService, ConfirmationService],
@@ -46,6 +49,7 @@ import { AcademicService } from '../../../core/services/academic.service';
 })
 export class UsersListComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
+  private hrService = inject(HumanResourcesService);
   private route = inject(ActivatedRoute);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
@@ -57,6 +61,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
   loading = signal(false);
   faculties = signal<any[]>([]);
 
+  mode = input<'admin' | 'hr'>('admin');
   roleFilter: string = '';
   isStudentList = false;
 
@@ -94,6 +99,26 @@ export class UsersListComponent implements OnInit, OnDestroy {
       next: (data) => this.faculties.set(data),
       error: (err) => console.error('Error loading faculties', err),
     });
+
+    if (this.mode() === 'hr') {
+      this.roleOptions = [
+        { label: 'Coordinador', value: 'coordinator' },
+        { label: 'Docente', value: 'teacher' },
+        { label: 'Tesorería', value: 'treasury' },
+        { label: 'Secretaría', value: 'secretary' },
+      ];
+    } else {
+      this.roleOptions = [
+        { label: 'Administrador', value: 'admin' },
+        { label: 'Recursos Humanos', value: 'human_resources' },
+        { label: 'Coordinador', value: 'coordinator' },
+        { label: 'Docente', value: 'teacher' },
+        { label: 'Estudiante', value: 'student' },
+        { label: 'Tesorería', value: 'treasury' },
+        { label: 'Secretaría', value: 'secretary' },
+      ];
+    }
+
     this.roleFilter = this.route.snapshot.data['roleFilter'] || '';
     this.isStudentList = this.roleFilter === 'student';
 
@@ -121,10 +146,15 @@ export class UsersListComponent implements OnInit, OnDestroy {
   loadUsers(page: number, limit: number) {
     this.loading.set(true);
     const roleToFilter = this.isStudentList ? 'student' : (this.selectedRole || '');
-    this.userService.getUsers(page, limit, roleToFilter, this.searchQuery).subscribe({
-      next: (res) => {
+    const req = this.mode() === 'hr'
+      ? this.hrService.getStaff({ page, limit, role: roleToFilter, search: this.searchQuery })
+      : this.userService.getUsers(page, limit, roleToFilter, this.searchQuery);
+
+    req.subscribe({
+      next: (res: any) => {
+        // the structures are mostly the same: res.data, res.total or res.pagination.total
         this.users.set(res.data);
-        this.totalRecords.set(res.pagination.total);
+        this.totalRecords.set(res.total ?? res.pagination?.total ?? 0);
         this.loading.set(false);
       },
       error: () => {
@@ -173,6 +203,8 @@ export class UsersListComponent implements OnInit, OnDestroy {
         return 'secondary';
       case 'secretary':
         return 'secondary';
+      case 'human_resources':
+        return 'danger';
       default:
         return 'secondary';
     }
@@ -187,6 +219,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
       case 'student': return 'Estudiante';
       case 'treasury': return 'Tesorería';
       case 'secretary': return 'Secretaría';
+      case 'human_resources': return 'Recursos Humanos';
       default: return roleName;
     }
   }
@@ -215,7 +248,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
     }
     delete payload.id;
     
-    this.userService.updateUser(this.selectedUserId, payload).subscribe({
+    this.userService.updateUser(this.selectedUserId, payload, this.selectedUserRoleName || this.selectedRole || '').subscribe({
       next: (res) => {
         this.users.update((users) =>
           users.map((u) => (u.id === this.selectedUserId ? { ...u, ...res.user } : u))
@@ -241,7 +274,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
         this.loading.set(true);
-        this.userService.deleteUser(user.id).subscribe({
+        this.userService.deleteUser(user.id, user.roleName || this.selectedRole || '').subscribe({
           next: () => {
             this.users.update((users) => users.filter((u) => u.id !== user.id));
             this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario eliminado' });

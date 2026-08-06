@@ -161,12 +161,13 @@
   }
 }
 
+
 ::ng-deep .p-datatable-sm {
   .p-datatable-thead > tr > th {
     background: #f8fafc;
-    color: #475569;
-    font-weight: 600;
-    font-size: 0.85rem;
+    color: #000000;
+    font-weight: bold;
+    font-size: 0.95rem; /* slightly larger size makes it pop more along with bold */
     padding: 0.6rem 0.75rem;
     border-bottom: 1px solid #e2e8f0;
   }
