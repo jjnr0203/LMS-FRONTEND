@@ -1,6 +1,5 @@
   <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div class="flex align-items-center gap-3">
-      <h3 class="m-0 text-xl font-medium text-800">Facultades</h3>
       <p-button label="Nueva Facultad" icon="pi pi-plus" (onClick)="openNew()" severity="success" size="small"></p-button>
     </div>
   </div>
@@ -45,24 +44,42 @@
   </p-table>
 
   <p-dialog [(visible)]="displayDialog" [header]="isEdit ? 'Editar Facultad' : 'Nueva Facultad'" [modal]="true" [style]="{ width: '800px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
-    <form [formGroup]="form" (ngSubmit)="saveFaculty()" class="mt-3">
+    <form [formGroup]="facultyForm" (ngSubmit)="saveFaculty()" class="mt-3">
       <div class="grid">
         <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-4">
-            <label for="name" class="font-semibold text-sm text-slate-700">Nombre *</label>
-            <input pInputText id="name" formControlName="name" placeholder="Ej: Facultad de Ingeniería" class="w-full" />
+          <div class="flex flex-column gap-2 mb-3">
+            <label for="name" class="font-semibold text-sm text-slate-700">Nombre <span class="text-red-500">*</span></label>
+            <input pInputText id="name" formControlName="name" placeholder="Ej: Facultad de ..." maxlength="60" (input)="filterLetters($event, facultyForm, 'name')" class="w-full" />
+            @if (facultyForm.controls['name'].invalid && submitted()) {
+              <small class="p-error text-red-500">
+                @if (facultyForm.controls['name'].errors?.['required']) { El nombre es requerido. }
+                @if (facultyForm.controls['name'].errors?.['maxlength']) { Máximo 60 caracteres. }
+                @if (facultyForm.controls['name'].errors?.['pattern']) { Solo se permiten letras. }
+              </small>
+            }
           </div>
         </div>
         <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-4">
-            <label for="code" class="font-semibold text-sm text-slate-700">Código *</label>
-            <input pInputText id="code" formControlName="code" placeholder="Ej: FI" class="w-full" />
+          <div class="flex flex-column gap-2 mb-3">
+            <label for="code" class="font-semibold text-sm text-slate-700">Código <span class="text-red-500">*</span></label>
+            <input pInputText id="code" formControlName="code" placeholder="Ej: FAD-001" maxlength="8" class="w-full" />
+            @if (facultyForm.controls['code'].invalid && submitted()) {
+              <small class="p-error text-red-500">
+                @if (facultyForm.controls['code'].errors?.['required']) { El código es requerido. }
+                @if (facultyForm.controls['code'].errors?.['maxlength']) { Máximo 8 caracteres. }
+              </small>
+            }
           </div>
         </div>
         <div class="col-12 md:col-12">
-          <div class="flex flex-column gap-2 mb-4">
-            <label for="description" class="font-semibold text-sm text-slate-700">Descripción (Opcional)</label>
-            <textarea pTextarea id="description" formControlName="description" rows="3" placeholder="Descripción de la facultad" class="w-full"></textarea>
+          <div class="flex flex-column gap-2 mb-3">
+            <label for="description" class="font-semibold text-sm text-slate-700">Descripción</label>
+            <textarea pTextarea id="description" formControlName="description" rows="3" maxlength="150" class="w-full"></textarea>
+            @if (facultyForm.controls['description'].invalid && submitted()) {
+              <small class="p-error text-red-500">
+                @if (facultyForm.controls['description'].errors?.['maxlength']) { Máximo 150 caracteres. }
+              </small>
+            }
           </div>
         </div>
         <div class="col-12">
@@ -74,8 +91,7 @@
       </div>
 
       <div class="flex justify-content-end gap-2 mt-4">
-        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayDialog = false"></p-button>
-        <p-button label="Guardar" icon="pi pi-check" type="submit" [disabled]="form.invalid" severity="success"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" type="submit" [disabled]="hasEmptyRequiredFields" severity="success"></p-button>
       </div>
     </form>
   </p-dialog>

@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, OnDestroy, signal, input } from '@angular/core';
+import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
@@ -22,6 +23,9 @@ import { CreateUserComponent } from '../../admin/create-user/create-user.compone
 import { HrCreateUserComponent } from '../../human-resources/create-user/hr-create-user.component';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { AcademicService } from '../../../core/services/academic.service';
+import { TeacherService } from '../../../core/services/teacher.service';
+import { TabsModule } from 'primeng/tabs';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-users-list',
@@ -42,6 +46,10 @@ import { AcademicService } from '../../../core/services/academic.service';
     CreateUserComponent,
     HrCreateUserComponent,
     MultiSelectModule,
+    TabsModule,
+    TooltipModule,
+    DatePipe,
+    CommonModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './users-list.component.html',
@@ -55,11 +63,18 @@ export class UsersListComponent implements OnInit, OnDestroy {
   private confirmationService = inject(ConfirmationService);
   private formBuilder = inject(FormBuilder);
   private academicService = inject(AcademicService);
+  private teacherService = inject(TeacherService);
 
   users = signal<User[]>([]);
   totalRecords = signal(0);
   loading = signal(false);
   faculties = signal<any[]>([]);
+  
+  displayProfileModal = signal(false);
+  selectedUser: any = null;
+  teacherStats = signal<{ totalHours: number; careers: any[]; subjects: any[] } | null>(null);
+  showCareersModal = signal(false);
+  showSubjectsModal = signal(false);
 
   mode = input<'admin' | 'hr'>('admin');
   roleFilter: string = '';
@@ -81,6 +96,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   createDialogVisible = false;
   editDialogVisible = false;
+  profileModalVisible = false;
   selectedUserId: string | null = null;
   selectedUserRoleName: string | null = null;
 
@@ -152,7 +168,6 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
     req.subscribe({
       next: (res: any) => {
-        // the structures are mostly the same: res.data, res.total or res.pagination.total
         this.users.set(res.data);
         this.totalRecords.set(res.total ?? res.pagination?.total ?? 0);
         this.loading.set(false);
@@ -180,6 +195,21 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   openCreateDialog() {
     this.createDialogVisible = true;
+  }
+
+  closeProfileModal() {
+    this.displayProfileModal.set(false);
+    this.profileModalVisible = false;
+    this.selectedUser = null;
+    this.teacherStats.set(null);
+  }
+
+  openCareersList() {
+    this.showCareersModal.set(true);
+  }
+
+  openSubjectsList() {
+    this.showSubjectsModal.set(true);
   }
 
   onUserCreated() {
@@ -224,7 +254,22 @@ export class UsersListComponent implements OnInit, OnDestroy {
     }
   }
 
-  openEditDialog(user: User) {
+  calculateAge(birthDate: string | Date | undefined): number | null {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birthDateObj = new Date(birthDate);
+    let age = today.getFullYear() - birthDateObj.getFullYear();
+    const m = today.getMonth() - birthDateObj.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  openEditDialog(user: User, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.selectedUserId = user.id;
     this.selectedUserRoleName = user.roleName || null;
     this.editForm.patchValue({
@@ -251,7 +296,13 @@ export class UsersListComponent implements OnInit, OnDestroy {
     this.userService.updateUser(this.selectedUserId, payload, this.selectedUserRoleName || this.selectedRole || '').subscribe({
       next: (res) => {
         this.users.update((users) =>
-          users.map((u) => (u.id === this.selectedUserId ? { ...u, ...res.user } : u))
+          users.map((u) => {
+            if (u.id === this.selectedUserId) {
+              const cleanedResUser = Object.fromEntries(Object.entries(res.user).filter(([_, v]) => v !== undefined));
+              return { ...u, ...cleanedResUser };
+            }
+            return u;
+          })
         );
         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario actualizado' });
         this.editDialogVisible = false;
@@ -264,7 +315,10 @@ export class UsersListComponent implements OnInit, OnDestroy {
     });
   }
 
-  confirmDelete(user: User) {
+  confirmDelete(user: User, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.confirmationService.confirm({
       message: `¿Estás seguro que deseas eliminar a ${user.firstName} ${user.lastName}?`,
       header: 'Confirmar Eliminación',
@@ -287,6 +341,43 @@ export class UsersListComponent implements OnInit, OnDestroy {
         });
       },
     });
+  }
+
+  openProfileModal(user: any) {
+    this.selectedUser = user;
+    this.profileModalVisible = true;
+    
+    if (user.roleName === 'teacher' || user.roleName === 'Docente') {
+      this.teacherStats.set(null);
+      this.teacherService.getTeacherStats(user.id).subscribe({
+        next: (stats) => this.teacherStats.set(stats),
+        error: (err) => console.error('Error fetching teacher stats', err)
+      });
+    }
+
+    this.userService.getUser(user.id).subscribe({
+      next: (fullUser) => {
+        if (this.selectedUser && this.selectedUser.id === fullUser.id) {
+          this.selectedUser = { ...this.selectedUser, ...fullUser };
+        }
+      }
+    });
+  }
+
+  viewCv(url: string) {
+    window.open(url, '_blank');
+  }
+
+  getFileName(url: string, index: number): string {
+    if (!url) return `Certificado ${index + 1}`;
+    try {
+      const parts = url.split('/');
+      const lastPart = parts[parts.length - 1];
+      const name = decodeURIComponent(lastPart.split('?')[0]);
+      return name || `Certificado ${index + 1}`;
+    } catch {
+      return `Certificado ${index + 1}`;
+    }
   }
 }
 

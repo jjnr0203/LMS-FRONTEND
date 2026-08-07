@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -41,6 +41,13 @@ export class AcademicTerms implements OnInit {
   termForm!: FormGroup;
   isEdit = false;
   currentTermId: string | null = null;
+  submitted = signal(false);
+
+  get hasEmptyRequiredFields() {
+    if (!this.termForm) return true;
+    const c = this.termForm.controls;
+    return !c['name'].value || !c['startDate'].value || !c['endDate'].value;
+  }
 
   ngOnInit() {
     this.initForm();
@@ -49,7 +56,7 @@ export class AcademicTerms implements OnInit {
 
   initForm() {
     this.termForm = this.formBuilder.group({
-      name: ['', Validators.required],
+      name: ['', [Validators.required, Validators.maxLength(8)]],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
       isActive: [false],
@@ -73,6 +80,7 @@ export class AcademicTerms implements OnInit {
     this.loadTerms();
     this.isEdit = false;
     this.currentTermId = null;
+    this.submitted.set(false);
     this.termForm.reset({ isActive: false });
     this.displayDialog = true;
   }
@@ -87,11 +95,17 @@ export class AcademicTerms implements OnInit {
       endDate: new Date(term.endDate).toISOString().split('T')[0],
       isActive: term.isActive,
     });
+    this.submitted.set(false);
     this.displayDialog = true;
   }
 
   saveTerm() {
-    if (this.termForm.invalid) return;
+    this.submitted.set(true);
+    if (this.termForm.invalid) {
+      this.termForm.markAllAsTouched();
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Por favor, corrija los errores en el formulario' });
+      return;
+    }
 
     const data = this.termForm.value;
     // ensure date format is correct for backend

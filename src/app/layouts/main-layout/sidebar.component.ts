@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 
@@ -26,6 +27,15 @@ export class SidebarComponent {
   role = this.authService.role;
   user = this.authService.user;
   isCollapsed = signal(false);
+  currentUrl = signal(this.router.url);
+
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.currentUrl.set(event.urlAfterRedirects);
+    });
+  }
 
   allMenu = signal<NavItem[]>([
     {
@@ -74,6 +84,12 @@ export class SidebarComponent {
       label: 'Gestión Académica',
       icon: 'pi pi-sitemap',
       route: '/admin/academic',
+      roles: ['admin'],
+    },
+    {
+      label: 'Configuración',
+      icon: 'pi pi-cog',
+      route: '/admin/institution',
       roles: ['admin'],
     },
     {
@@ -154,7 +170,20 @@ export class SidebarComponent {
   });
 
   isActive(route: string): boolean {
-    return this.router.url === route || this.router.url.startsWith(route + '/');
+    const url = this.currentUrl();
+    if (url.startsWith('/perfil')) {
+      const roleMap: Record<string, string> = {
+        'admin': '/admin',
+        'human_resources': '/human-resources',
+        'coordinator': '/coordinator',
+        'teacher': '/teacher',
+        'treasury': '/treasury',
+        'secretary': '/secretary'
+      };
+      const mainRoute = roleMap[this.role() || ''];
+      if (route === mainRoute) return true;
+    }
+    return url === route || url.startsWith(route + '/');
   }
 
   onItemClick(item: NavItem) {

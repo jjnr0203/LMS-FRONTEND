@@ -1,4 +1,8 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+
+registerLocaleData(localeEs);
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -20,7 +24,8 @@ export const appConfig: ApplicationConfig = {
         options: {
           darkModeSelector: false,
         }
-      },
+      }
     }),
+    { provide: LOCALE_ID, useValue: 'es' }
   ],
 };

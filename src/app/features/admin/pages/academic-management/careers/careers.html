@@ -1,8 +1,8 @@
+
 @if (!selectedCareer) {
   <!-- ═══════════════ CAREER LIST ═══════════════ -->
   <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div class="flex align-items-center gap-3">
-      <h3 class="m-0 text-xl font-medium text-800">Carreras</h3>
       <p-button label="Nueva Carrera" icon="pi pi-plus" (onClick)="openNewCareer()" severity="success" size="small"></p-button>
     </div>
     <p-iconField iconPosition="left" styleClass="w-20rem">
@@ -92,7 +92,7 @@
   <div class="mb-4">
     <h3 class="m-0 text-3xl font-bold text-800 mb-3">{{ selectedCareer.name }}</h3>
     <div class="flex flex-wrap align-items-center gap-2">
-      <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="backToCareers()"></p-button>
+      <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="success" (onClick)="backToCareers()"></p-button>
       <p-button label="Nueva Malla" icon="pi pi-plus" (onClick)="openNewCurriculum()" severity="success" size="small"></p-button>
     </div>
   </div>
@@ -146,7 +146,7 @@
   <div class="mb-4">
     <h3 class="m-0 text-3xl font-bold text-800 mb-3">{{ selectedCurriculum.name }}</h3>
     <div class="flex flex-wrap align-items-center gap-2">
-      <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="backToCurriculums()"></p-button>
+      <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="success" (onClick)="backToCurriculums()"></p-button>
       <p-button label="Nueva Materia" icon="pi pi-plus" (onClick)="openNewSubject()" severity="success" size="small"></p-button>
       <p-button label="Subir Excel" icon="pi pi-upload" (onClick)="displayBulkDialog = true" severity="warn" size="small"></p-button>
       <p-button label="Borrar Todas" icon="pi pi-trash" (onClick)="deleteAllSubjects()" severity="danger" size="small" [loading]="deletingAllSubjects"></p-button>
@@ -278,31 +278,44 @@
 <p-dialog [(visible)]="displayCareerDialog" [header]="isEditCareer ? 'Editar Carrera' : 'Nueva Carrera'" [modal]="true" [style]="{ width: '800px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
   <form [formGroup]="careerForm" (ngSubmit)="saveCareer()" class="mt-3">
     <div class="grid">
-      <div class="col-12"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Nombre de la Carrera</label>
-        <input pInputText formControlName="name" placeholder="Ej: Ingeniería en Software" class="w-full" />
+      <div class="col-12"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Nombre de la Carrera <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="name" placeholder="Ej: Ingeniería en Software" maxlength="40" (input)="filterLetters($event, careerForm, 'name')" class="w-full" />
+        @if (careerForm.controls['name'].invalid && submittedCareer()) {
+          <small class="p-error text-red-500">
+            @if (careerForm.controls['name'].errors?.['required']) { El nombre es requerido. }
+            @if (careerForm.controls['name'].errors?.['maxlength']) { Máximo 40 caracteres. }
+            @if (careerForm.controls['name'].errors?.['pattern']) { Solo se permiten letras. }
+          </small>
+        }
       </div></div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Código</label>
-        <input pInputText formControlName="code" placeholder="Ej: SOFT" class="w-full" />
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Código <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="code" placeholder="Ej: FAD-001" maxlength="8" class="w-full" />
+        @if (careerForm.controls['code'].invalid && submittedCareer()) {
+          <small class="p-error text-red-500">
+            @if (careerForm.controls['code'].errors?.['required']) { El código es requerido. }
+            @if (careerForm.controls['code'].errors?.['maxlength']) { Máximo 8 caracteres. }
+          </small>
+        }
       </div></div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Duración (Semestres)</label>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Duración (Semestres) <span class="text-red-500">*</span></label>
         <p-inputNumber formControlName="durationSemesters" [min]="1" [max]="9" [useGrouping]="false" styleClass="w-full" class="w-full"></p-inputNumber>
       </div></div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Facultad</label>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Facultad <span class="text-red-500">*</span></label>
         <p-select formControlName="facultyId" [options]="faculties" optionLabel="name" optionValue="id" placeholder="Seleccione una facultad" [showClear]="true" [filter]="true" styleClass="w-full"></p-select>
       </div></div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Modalidades</label>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Modalidades <span class="text-red-500">*</span></label>
         <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
       </div></div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Jornadas</label>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Jornadas <span class="text-red-500">*</span></label>
         <p-multiSelect formControlName="jornadaIds" [options]="jornadas" optionLabel="name" optionValue="id" placeholder="Seleccione jornadas" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
       </div></div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
         <label class="font-semibold text-sm text-slate-700">Coordinador</label>
         <p-select formControlName="coordinatorId" [options]="coordinators" optionLabel="firstName" optionValue="id" placeholder="Seleccione un coordinador" [filter]="true" filterBy="firstName,lastName" [showClear]="true" styleClass="w-full">
           <ng-template let-coord pTemplate="item">{{coord.firstName}} {{coord.lastName}}</ng-template>
@@ -315,8 +328,7 @@
       </div></div>
     </div>
     <div class="flex justify-content-end gap-2 mt-4">
-      <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayCareerDialog = false"></p-button>
-      <p-button label="Guardar" icon="pi pi-check" type="submit" [disabled]="careerForm.invalid" severity="success"></p-button>
+      <p-button label="Guardar" icon="pi pi-check" type="submit" [disabled]="hasEmptyRequiredCareer" severity="success"></p-button>
     </div>
   </form>
 </p-dialog>
@@ -325,13 +337,24 @@
 <p-dialog [(visible)]="displayCurriculumDialog" [header]="isEditCurriculum ? 'Editar Malla' : 'Nueva Malla'" [modal]="true" [style]="{ width: '500px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
   <form [formGroup]="curriculumForm" (ngSubmit)="saveCurriculum()" class="mt-3">
     <div class="flex flex-column gap-3">
-      <div class="flex flex-column gap-2">
-        <label class="font-semibold text-sm text-slate-700">Nombre de la Malla</label>
-        <input pInputText formControlName="name" placeholder="Ej: Malla 2024" class="w-full" />
+      <div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Nombre de la Malla <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="name" placeholder="Ej: Malla 2024" maxlength="15" class="w-full" />
+        @if (curriculumForm.controls['name'].invalid && submittedCurriculum()) {
+          <small class="p-error text-red-500">
+            @if (curriculumForm.controls['name'].errors?.['required']) { El nombre es requerido. }
+            @if (curriculumForm.controls['name'].errors?.['maxlength']) { Máximo 15 caracteres. }
+          </small>
+        }
       </div>
-      <div class="flex flex-column gap-2">
+      <div class="flex flex-column gap-2 mb-3">
         <label class="font-semibold text-sm text-slate-700">Descripción (Opcional)</label>
-        <textarea pTextarea formControlName="description" rows="3" class="w-full"></textarea>
+        <textarea pTextarea formControlName="description" rows="3" maxlength="70" class="w-full"></textarea>
+        @if (curriculumForm.controls['description'].invalid && submittedCurriculum()) {
+          <small class="p-error text-red-500">
+            @if (curriculumForm.controls['description'].errors?.['maxlength']) { Máximo 70 caracteres. }
+          </small>
+        }
       </div>
       <div class="flex align-items-center gap-2">
         <p-checkbox formControlName="isActive" [binary]="true" inputId="curIsActive"></p-checkbox>
@@ -339,8 +362,7 @@
       </div>
     </div>
     <div class="flex justify-content-end gap-2 mt-4">
-      <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayCurriculumDialog = false"></p-button>
-      <p-button label="Guardar Malla" icon="pi pi-check" type="submit" [disabled]="curriculumForm.invalid" severity="success"></p-button>
+      <p-button label="Guardar Malla" icon="pi pi-check" type="submit" [disabled]="hasEmptyRequiredCurriculum" severity="success"></p-button>
     </div>
   </form>
 </p-dialog>
@@ -349,42 +371,64 @@
 <p-dialog [(visible)]="displaySubjectDialog" [header]="isEditSubject ? 'Editar Materia' : 'Nueva Materia'" [modal]="true" [style]="{ width: '600px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
   <form [formGroup]="subjectForm" (ngSubmit)="saveSubject()" class="mt-3">
     <div class="grid">
-      <div class="col-12"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Nombre de la Materia</label>
-        <input pInputText formControlName="name" placeholder="Ej: Álgebra Lineal" class="w-full" />
+      <div class="col-12"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Nombre de la Materia <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="name" placeholder="Ej: Álgebra Lineal" maxlength="40" class="w-full" />
+        @if (subjectForm.controls['name'].invalid && submittedSubject()) {
+          <small class="p-error text-red-500">
+            @if (subjectForm.controls['name'].errors?.['required']) { El nombre es requerido. }
+            @if (subjectForm.controls['name'].errors?.['maxlength']) { Máximo 40 caracteres. }
+          </small>
+        }
       </div></div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Código</label>
-        <input pInputText formControlName="code" placeholder="Ej: ALG101" class="w-full" />
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Código <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="code" placeholder="Ej: ALG101" maxlength="7" class="w-full" />
+        @if (subjectForm.controls['code'].invalid && submittedSubject()) {
+          <small class="p-error text-red-500">
+            @if (subjectForm.controls['code'].errors?.['required']) { El código es requerido. }
+            @if (subjectForm.controls['code'].errors?.['maxlength']) { Máximo 7 caracteres. }
+          </small>
+        }
       </div></div>
       <div class="col-12 md:col-6">
-        <div class="flex flex-column gap-2 mb-4">
-          <label class="font-semibold text-sm text-slate-700">Créditos</label>
-          <p-inputNumber formControlName="credits" [min]="1" [max]="20" [showButtons]="true" styleClass="w-full"></p-inputNumber>
+        <div class="flex flex-column gap-2 mb-3">
+          <label class="font-semibold text-sm text-slate-700">Créditos <span class="text-red-500">*</span></label>
+          <input pInputText formControlName="credits" placeholder="Ej: 4" maxlength="1" (input)="filterNumbers($event, subjectForm, 'credits')" class="w-full" />
+          @if (subjectForm.controls['credits'].invalid && submittedSubject()) {
+            <small class="p-error text-red-500">
+              @if (subjectForm.controls['credits'].errors?.['required']) { Los créditos son requeridos. }
+              @if (subjectForm.controls['credits'].errors?.['max']) { Máximo 9. }
+            </small>
+          }
         </div>
       </div>
       <div class="col-12 md:col-6">
-        <div class="flex flex-column gap-2 mb-4">
+        <div class="flex flex-column gap-2 mb-3">
           <label class="font-semibold text-sm text-slate-700">Horas</label>
-          <p-inputNumber formControlName="hours" [min]="0" [max]="500" [showButtons]="true" styleClass="w-full"></p-inputNumber>
+          <input pInputText formControlName="hours" placeholder="Ej: 64" maxlength="3" (input)="filterNumbers($event, subjectForm, 'hours')" class="w-full" />
         </div>
       </div>
-      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-4">
-        <label class="font-semibold text-sm text-slate-700">Semestre</label>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Semestre <span class="text-red-500">*</span></label>
         <p-select formControlName="semester" [options]="subjectSemesters" placeholder="Seleccione el semestre" [showClear]="true" styleClass="w-full">
           <ng-template let-sem pTemplate="item">Semestre {{ sem }}</ng-template>
           <ng-template let-sem pTemplate="selectedItem">{{ sem ? 'Semestre ' + sem : 'Seleccione el semestre' }}</ng-template>
         </p-select>
       </div></div>
 
-      <div class="col-12"><div class="flex flex-column gap-2 mb-4">
+      <div class="col-12"><div class="flex flex-column gap-2 mb-3">
         <label class="font-semibold text-sm text-slate-700">Descripción (Opcional)</label>
-        <textarea pTextarea formControlName="description" rows="2" class="w-full"></textarea>
+        <textarea pTextarea formControlName="description" rows="2" maxlength="150" class="w-full"></textarea>
+        @if (subjectForm.controls['description'].invalid && submittedSubject()) {
+          <small class="p-error text-red-500">
+            @if (subjectForm.controls['description'].errors?.['maxlength']) { Máximo 150 caracteres. }
+          </small>
+        }
       </div></div>
     </div>
     <div class="flex justify-content-end gap-2 mt-4">
-      <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displaySubjectDialog = false"></p-button>
-      <p-button label="Guardar Materia" icon="pi pi-check" type="submit" [disabled]="subjectForm.invalid" severity="success"></p-button>
+      <p-button label="Guardar Materia" icon="pi pi-check" type="submit" [disabled]="hasEmptyRequiredSubject" severity="success"></p-button>
     </div>
   </form>
 </p-dialog>
@@ -406,12 +450,22 @@
     } @else {
       <div class="flex flex-column gap-2 mt-2">
         <label class="font-semibold text-sm text-slate-700">Seleccionar archivo Excel (.xlsx)</label>
-        <input type="file" accept=".xlsx" (change)="onBulkFileSelected($event)" class="w-full p-2 border-1 surface-border border-round" />
-        <small class="text-slate-500"><i class="pi pi-table mr-1"></i>Columnas necesarias: Código, Nombre, Créditos, Horas, Semestre</small>
+        <div class="relative w-full">
+          <input type="file" id="fileInput" accept=".xlsx" (change)="onBulkFileSelected($event)" class="hidden" />
+          <label for="fileInput" class="p-button p-component p-button-success w-full justify-content-center cursor-pointer">
+            <span class="p-button-icon p-button-icon-left pi pi-upload"></span>
+            <span class="p-button-label">Seleccionar Archivo</span>
+          </label>
+        </div>
+        @if (selectedBulkFile) {
+          <div class="text-sm text-emerald-600 mt-2 font-medium">
+            <i class="pi pi-check-circle mr-1"></i> Archivo seleccionado: {{ selectedBulkFile.name }}
+          </div>
+        }
+        <small class="text-slate-500 mt-1"><i class="pi pi-table mr-1"></i>Columnas necesarias: Código, Nombre, Créditos, Horas, Semestre</small>
       </div>
-      <div class="flex justify-content-end gap-2 mt-3">
-        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayBulkDialog = false" [disabled]="bulkUploading"></p-button>
-        <p-button label="Importar Materias" icon="pi pi-upload" severity="success" (onClick)="processBulkUpload()" [disabled]="!selectedBulkFile"></p-button>
+      <div class="flex justify-content-end gap-2 mt-4">
+        <p-button label="Importar Materias" icon="pi pi-save" severity="success" (onClick)="processBulkUpload()" [disabled]="!selectedBulkFile"></p-button>
       </div>
     }
   </div>

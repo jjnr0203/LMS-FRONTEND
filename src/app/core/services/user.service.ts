@@ -65,4 +65,24 @@ export class UserService {
     fd.append('file', file);
     return this.http.post<{ message: string; user: User }>(`${this.apiUrl}/me/avatar`, fd);
   }
+
+  uploadCv(file: File): Observable<{ message: string; user: User }> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<{ message: string; user: User }>(`${this.apiUrl}/me/cv`, fd);
+  }
+
+  deleteCv(): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/me/cv`);
+  }
+
+  uploadCertificate(file: File): Observable<{ message: string; certificates: string[] }> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<{ message: string; certificates: string[] }>(`${this.apiUrl}/me/certificates`, fd);
+  }
+
+  deleteCertificate(url: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/me/certificates`, { body: { url } });
+  }
 }

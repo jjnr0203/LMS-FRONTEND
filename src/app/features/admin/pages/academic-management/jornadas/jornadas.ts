@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -43,9 +43,24 @@ export class Jornadas implements OnInit {
 
   jornadas: Jornada[] = [];
   displayDialog = false;
-  form!: FormGroup;
+  jornadaForm!: FormGroup;
   isEdit = false;
   currentId: string | null = null;
+  submitted = signal(false);
+
+  get hasEmptyRequiredFields() {
+    if (!this.jornadaForm) return true;
+    const c = this.jornadaForm.controls;
+    return !c['name'].value;
+  }
+
+  filterLetters(event: any, form: FormGroup, controlName: string) {
+    const value = event.target.value;
+    const filteredValue = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, '');
+    if (value !== filteredValue) {
+      form.get(controlName)?.setValue(filteredValue);
+    }
+  }
 
   ngOnInit() {
     this.initForm();
@@ -53,10 +68,10 @@ export class Jornadas implements OnInit {
   }
 
   initForm() {
-    this.form = this.formBuilder.group({
-      name: ['', Validators.required],
-      description: [''],
-      isActive: [true],
+    this.jornadaForm = this.formBuilder.group({
+      name: ['', [Validators.required, Validators.maxLength(20), Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/)]],
+      description: ['', Validators.maxLength(150)],
+      isActive: [false],
     });
   }
 
@@ -74,29 +89,34 @@ export class Jornadas implements OnInit {
   }
 
   openNew() {
-    this.loadJornadas();
     this.isEdit = false;
     this.currentId = null;
-    this.form.reset({ isActive: true });
+    this.submitted.set(false);
+    this.jornadaForm.reset({ isActive: false });
     this.displayDialog = true;
   }
 
-  editJornada(jor: Jornada) {
-    this.loadJornadas();
+  editJornada(j: Jornada) {
     this.isEdit = true;
-    this.currentId = jor.id;
-    this.form.patchValue({
-      name: jor.name,
-      description: jor.description || '',
-      isActive: jor.isActive,
+    this.currentId = j.id;
+    this.jornadaForm.patchValue({
+      name: j.name,
+      description: j.description || '',
+      isActive: j.isActive,
     });
+    this.submitted.set(false);
     this.displayDialog = true;
   }
 
   saveJornada() {
-    if (this.form.invalid) return;
+    this.submitted.set(true);
+    if (this.jornadaForm.invalid) {
+      this.jornadaForm.markAllAsTouched();
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Por favor, corrija los errores en el formulario' });
+      return;
+    }
 
-    const data = this.form.value;
+    const data = this.jornadaForm.value;
 
     if (this.isEdit && this.currentId) {
       this.academicService.updateJornada(this.currentId, data).subscribe({

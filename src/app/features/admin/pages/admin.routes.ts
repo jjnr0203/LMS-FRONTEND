@@ -34,6 +34,13 @@ export default [
         loadComponent: () =>
           import('./career-breakdown/career-breakdown.component').then((m) => m.CareerBreakdownComponent),
       },
+      {
+        path: 'institution',
+        loadComponent: () =>
+          import('./institution-settings/institution-settings.component').then(
+            (m) => m.InstitutionSettingsComponent,
+          ),
+      },
     ],
   },
 ] as Routes;

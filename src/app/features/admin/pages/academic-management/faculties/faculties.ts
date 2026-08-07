@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -45,9 +45,24 @@ export class Faculties implements OnInit {
 
   faculties: Faculty[] = [];
   displayDialog = false;
-  form!: FormGroup;
+  facultyForm!: FormGroup;
   isEdit = false;
   currentId: string | null = null;
+  submitted = signal(false);
+
+  get hasEmptyRequiredFields() {
+    if (!this.facultyForm) return true;
+    const c = this.facultyForm.controls;
+    return !c['name'].value || !c['code'].value;
+  }
+
+  filterLetters(event: any, form: FormGroup, controlName: string) {
+    const value = event.target.value;
+    const filteredValue = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, '');
+    if (value !== filteredValue) {
+      form.get(controlName)?.setValue(filteredValue);
+    }
+  }
 
   ngOnInit() {
     this.initForm();
@@ -55,11 +70,11 @@ export class Faculties implements OnInit {
   }
 
   initForm() {
-    this.form = this.formBuilder.group({
-      name: ['', Validators.required],
-      code: ['', Validators.required],
-      description: [''],
-      isActive: [true],
+    this.facultyForm = this.formBuilder.group({
+      name: ['', [Validators.required, Validators.maxLength(60), Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/)]],
+      code: ['', [Validators.required, Validators.maxLength(8)]],
+      description: ['', Validators.maxLength(150)],
+      isActive: [false],
     });
   }
 
@@ -79,26 +94,33 @@ export class Faculties implements OnInit {
   openNew() {
     this.isEdit = false;
     this.currentId = null;
-    this.form.reset({ isActive: true });
+    this.submitted.set(false);
+    this.facultyForm.reset({ isActive: false });
     this.displayDialog = true;
   }
 
   editFaculty(f: Faculty) {
     this.isEdit = true;
     this.currentId = f.id;
-    this.form.patchValue({
+    this.facultyForm.patchValue({
       name: f.name,
       code: f.code,
       description: f.description || '',
       isActive: f.isActive,
     });
+    this.submitted.set(false);
     this.displayDialog = true;
   }
 
   saveFaculty() {
-    if (this.form.invalid) return;
+    this.submitted.set(true);
+    if (this.facultyForm.invalid) {
+      this.facultyForm.markAllAsTouched();
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Por favor, corrija los errores en el formulario' });
+      return;
+    }
 
-    const data = this.form.value;
+    const data = this.facultyForm.value;
 
     if (this.isEdit && this.currentId) {
       this.academicService.updateFaculty(this.currentId, data).subscribe({

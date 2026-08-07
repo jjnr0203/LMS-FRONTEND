@@ -34,4 +34,8 @@ export class TeacherService {
   }): Observable<{ message: string; submission: Submission }> {
     return this.http.post<any>(`${this.apiUrl}/calificar`, data);
   }
+
+  getTeacherStats(teacherId: string): Observable<{ totalHours: number; careers: any[]; subjects: any[] }> {
+    return this.http.get<any>(`${environment.apiUrl}/teachers/${teacherId}/stats`);
+  }
 }

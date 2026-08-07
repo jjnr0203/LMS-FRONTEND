@@ -12,7 +12,6 @@
     <div class="data-card">
       <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div class="flex align-items-center gap-3">
-          <h3 class="m-0 text-xl font-medium text-800">Directorio</h3>
           @if (!isStudentList) {
             <p-button label="Crear Usuario" icon="pi pi-plus" (click)="openCreateDialog()" severity="success" size="small"></p-button>
           }
@@ -47,7 +46,7 @@
         (onLazyLoad)="onPageChange($event)"
         [loading]="loading()"
         [tableStyle]="{ 'min-width': '50rem' }"
-        styleClass="p-datatable-sm"
+        styleClass="p-datatable-sm interactive-table"
       >
         <ng-template pTemplate="header">
           <tr>
@@ -60,7 +59,7 @@
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-user>
-          <tr>
+          <tr (click)="openProfileModal(user)">
             <td class="font-medium text-900">{{ user.id }}</td>
             <td>{{ user.firstName }}</td>
             <td>{{ user.lastName }}</td>
@@ -76,15 +75,25 @@
                   [text]="true"
                   severity="info"
                   size="small"
-                  (click)="openEditDialog(user)"
+                  (click)="openEditDialog(user, $event)"
                 />
+                @if (mode() === 'hr' || mode() === 'admin') {
+                  <p-button
+                    icon="pi pi-eye"
+                    [rounded]="true"
+                    styleClass="blue-action-btn"
+                    size="small"
+                    pTooltip="Ver Perfil"
+                    (click)="$event.stopPropagation(); openProfileModal(user)"
+                  />
+                }
                 <p-button
                   icon="pi pi-trash"
                   [rounded]="true"
                   [text]="true"
                   severity="danger"
                   size="small"
-                  (click)="confirmDelete(user)"
+                  (click)="confirmDelete(user, $event)"
                 />
               </div>
             </td>
@@ -151,13 +160,6 @@
       }
       <div class="flex justify-content-end mt-3 gap-2">
         <p-button
-          label="Cancelar"
-          icon="pi pi-times"
-          [text]="true"
-          severity="secondary"
-          (click)="editDialogVisible = false"
-        />
-        <p-button
           label="Guardar"
           icon="pi pi-check"
           type="submit"
@@ -180,5 +182,241 @@
     <app-create-user [isModal]="true" (userCreated)="onUserCreated()"></app-create-user>
   } @else {
     <app-hr-create-user [isModal]="true" (userCreated)="onUserCreated()"></app-hr-create-user>
+  }
+</p-dialog>
+
+<!-- Profile Modal -->
+<p-dialog
+  header=""
+  [(visible)]="profileModalVisible"
+  [modal]="true"
+  [style]="{ width: '600px', 'max-width': '95vw', 'border-radius': '6px' }"
+  [closable]="true"
+  styleClass="profile-modal"
+>
+  @if (selectedUser) {
+    <div class="relative px-2">
+      
+      <div class="flex align-items-center gap-4 mb-4">
+        @if (selectedUser.avatarUrl) {
+          <img [src]="selectedUser.avatarUrl" alt="Avatar" class="w-6rem h-6rem border-circle shadow-2 object-cover" />
+        } @else {
+          <div class="w-6rem h-6rem border-circle shadow-2 flex justify-content-center align-items-center bg-gray-50 border-1 border-gray-200">
+            <i class="pi pi-user text-4xl" style="color: #064e3b"></i>
+          </div>
+        }
+        <div>
+          <h2 class="m-0 text-xl font-bold text-900">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h2>
+          <div class="flex align-items-center gap-2 mt-2">
+            <span class="custom-badge">{{ translateRole(selectedUser.roleName) }}</span>
+            <span class="custom-badge">{{ selectedUser.isActive ? 'Activo' : 'Inactivo' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Resumen</p-tab>
+        @if (selectedUser.roleName === 'teacher' || selectedUser.roleName === 'Docente') {
+          <p-tab value="1">Contacto y Detalles</p-tab>
+          <p-tab value="2">Información Académica</p-tab>
+        } @else if (selectedUser.roleName !== 'student' && selectedUser.roleName !== 'Estudiante') {
+          <p-tab value="1">Contacto y Detalles</p-tab>
+          <p-tab value="2">Documentos</p-tab>
+        }
+      </p-tablist>
+      
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div class="flex flex-column gap-3 py-3">
+            <div class="grid">
+              <div class="col-5 font-semibold text-700">Cédula:</div>
+              <div class="col-7">{{ selectedUser.id }}</div>
+              
+              <div class="col-5 font-semibold text-700">Correo Electrónico:</div>
+              <div class="col-7">{{ selectedUser.email }}</div>
+              
+              <div class="col-5 font-semibold text-700">Ingreso a la Institución:</div>
+              <div class="col-7">{{ selectedUser.createdAt | date:'longDate' }}</div>
+              
+              <div class="col-5 font-semibold text-700">Fin de Contrato:</div>
+              <div class="col-7 text-500">No registrado</div>
+            </div>
+          </div>
+        </p-tabpanel>
+        @if (selectedUser.roleName === 'teacher' || selectedUser.roleName === 'Docente') {
+          <p-tabpanel value="1">
+            <div class="flex flex-column gap-3 py-3">
+              <div class="grid">
+                <div class="col-4 font-semibold text-700">Teléfono:</div>
+                <div class="col-8">{{ selectedUser.phone || 'No registrado' }}</div>
+                
+                <div class="col-4 font-semibold text-700">Fecha de Nacimiento:</div>
+                <div class="col-8">
+                  @if (selectedUser.birthDate) {
+                    {{ selectedUser.birthDate | date:'longDate' }} ({{ calculateAge(selectedUser.birthDate) }} años)
+                  } @else {
+                    No registrado
+                  }
+                </div>
+              </div>
+            </div>
+          </p-tabpanel>
+          <p-tabpanel value="2">
+            <div class="py-4">
+              <h3 class="m-0 mb-3 text-900">Resumen Académico</h3>
+              
+              <div class="flex flex-column gap-3">
+                <!-- Horas Asignadas -->
+                <div class="certificate-card border-round">
+                  <i class="pi pi-clock cert-icon"></i>
+                  <div class="cert-details flex-grow-1">
+                    <span class="cert-name text-lg">Horas Asignadas</span>
+                    <span class="cert-date">Total de horas clase semanales</span>
+                  </div>
+                  <div class="flex align-items-center justify-content-center bg-gray-50 border-round px-3 py-2 border-1 border-gray-200">
+                    <span class="font-bold text-xl text-900">{{ teacherStats() ? (teacherStats()!.totalHours | number:'1.0-1') : '...' }}</span>
+                  </div>
+                </div>
+
+                <!-- Carreras -->
+                <div class="certificate-card border-round">
+                  <i class="pi pi-graduation-cap cert-icon"></i>
+                  <div class="cert-details flex-grow-1">
+                    <span class="cert-name text-lg">Carreras Asignadas</span>
+                    <span class="cert-date">Programas académicos a los que pertenece</span>
+                  </div>
+                  <div class="flex align-items-center gap-3">
+                    <div class="flex align-items-center justify-content-center bg-gray-50 border-round px-3 py-2 border-1 border-gray-200">
+                      <span class="font-bold text-xl text-900">{{ teacherStats() ? teacherStats()!.careers.length : '...' }}</span>
+                    </div>
+                    <p-button icon="pi pi-eye" styleClass="cv-action-btn" [rounded]="true" [text]="true" size="small" pTooltip="Ver Carreras" (onClick)="openCareersList()"></p-button>
+                  </div>
+                </div>
+
+                <!-- Materias -->
+                <div class="certificate-card border-round">
+                  <i class="pi pi-book cert-icon"></i>
+                  <div class="cert-details flex-grow-1">
+                    <span class="cert-name text-lg">Materias Impartidas</span>
+                    <span class="cert-date">Total de asignaturas asignadas</span>
+                  </div>
+                  <div class="flex align-items-center gap-3">
+                    <div class="flex align-items-center justify-content-center bg-gray-50 border-round px-3 py-2 border-1 border-gray-200">
+                      <span class="font-bold text-xl text-900">{{ teacherStats() ? teacherStats()!.subjects.length : '...' }}</span>
+                    </div>
+                    <p-button icon="pi pi-eye" styleClass="cv-action-btn" [rounded]="true" [text]="true" size="small" pTooltip="Ver Materias" (onClick)="openSubjectsList()"></p-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </p-tabpanel>
+        } @else if (selectedUser.roleName !== 'student' && selectedUser.roleName !== 'Estudiante') {
+          <p-tabpanel value="1">
+            <div class="flex flex-column gap-3 py-3">
+              <div class="grid">
+                <div class="col-4 font-semibold text-700">Teléfono:</div>
+                <div class="col-8">{{ selectedUser.phone || 'No registrado' }}</div>
+                
+                <div class="col-4 font-semibold text-700">Fecha de Nacimiento:</div>
+                <div class="col-8">
+                  @if (selectedUser.birthDate) {
+                    {{ selectedUser.birthDate | date:'longDate' }} ({{ calculateAge(selectedUser.birthDate) }} años)
+                  } @else {
+                    No registrado
+                  }
+                </div>
+                
+                <div class="col-4 font-semibold text-700">Dirección:</div>
+                <div class="col-8">{{ $any(selectedUser)?.address || 'No registrado' }}</div>
+                
+                <div class="col-4 font-semibold text-700">LinkedIn:</div>
+                <div class="col-8">
+                  @if ($any(selectedUser)?.linkedIn) {
+                    <a [href]="$any(selectedUser).linkedIn" target="_blank" class="text-green-600 font-medium no-underline hover:underline">Ver Perfil <i class="pi pi-external-link text-xs"></i></a>
+                  } @else {
+                    <span class="text-500">No registrado</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </p-tabpanel>
+          <p-tabpanel value="2">
+            <div class="py-4">
+              <h3 class="m-0 mb-3 text-900">Hoja de Vida</h3>
+              @if ($any(selectedUser)?.cvUrl) {
+                <div class="certificate-card mb-4">
+                  <i class="pi pi-file-pdf cert-icon"></i>
+                  <div class="cert-details">
+                    <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden" [title]="getFileName($any(selectedUser).cvUrl, 0)">{{ getFileName($any(selectedUser).cvUrl, 0) }}</span>
+                    <span class="cert-date">Hoja de Vida (CV)</span>
+                  </div>
+                  <p-button icon="pi pi-eye" styleClass="cv-action-btn" [rounded]="true" [text]="true" size="small" pTooltip="Ver Documento" (onClick)="viewCv($any(selectedUser).cvUrl)"></p-button>
+                </div>
+              } @else {
+                <div class="text-center py-4 mb-4 bg-gray-50 border-round border-1 border-300">
+                  <i class="pi pi-folder-open text-300 text-4xl mb-2"></i>
+                  <p class="text-500 m-0">Este usuario aún no ha subido su hoja de vida.</p>
+                </div>
+              }
+
+              <h3 class="m-0 mb-3 text-900">Certificados Adicionales</h3>
+              @if ($any(selectedUser)?.certificates && $any(selectedUser).certificates.length > 0) {
+                <div class="grid">
+                  @for (cert of $any(selectedUser).certificates; track cert; let i = $index) {
+                    <div class="col-12 md:col-6">
+                      <div class="certificate-card h-full">
+                        <i class="pi pi-file-pdf cert-icon"></i>
+                        <div class="cert-details">
+                          <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden" [title]="getFileName(cert, i)">{{ getFileName(cert, i) }}</span>
+                          <span class="cert-date">Certificado PDF</span>
+                        </div>
+                        <p-button icon="pi pi-eye" styleClass="cv-action-btn" [rounded]="true" [text]="true" size="small" pTooltip="Ver Documento" (onClick)="viewCv(cert)"></p-button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="text-center py-4 bg-gray-50 border-round border-1 border-300">
+                  <p class="text-500 m-0">No hay certificados adicionales registrados.</p>
+                </div>
+              }
+            </div>
+          </p-tabpanel>
+        }
+      </p-tabpanels>
+    </p-tabs>
+  }
+</p-dialog>
+
+<!-- Modals for Careers and Subjects -->
+<p-dialog [(visible)]="showCareersModal" [header]="'Carreras Asignadas'" [modal]="true" [style]="{ width: '400px' }">
+  @if (teacherStats() && teacherStats()!.careers.length > 0) {
+    <ul class="list-none p-0 m-0">
+      @for (career of teacherStats()!.careers; track career.id) {
+        <li class="py-3 border-bottom-1 border-300 flex align-items-center">
+          <i class="pi pi-graduation-cap text-blue-600 mr-3 text-xl"></i>
+          <span class="text-700 font-medium">{{ career.name }}</span>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="text-500 text-center py-4">No tiene carreras asignadas.</p>
+  }
+</p-dialog>
+
+<p-dialog [(visible)]="showSubjectsModal" [header]="'Materias Impartidas'" [modal]="true" [style]="{ width: '400px' }">
+  @if (teacherStats() && teacherStats()!.subjects.length > 0) {
+    <ul class="list-none p-0 m-0">
+      @for (sub of teacherStats()!.subjects; track sub.id) {
+        <li class="py-3 border-bottom-1 border-300 flex align-items-center">
+          <i class="pi pi-book text-orange-600 mr-3 text-xl"></i>
+          <span class="text-700 font-medium">{{ sub.name }}</span>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="text-500 text-center py-4">No tiene materias impartidas.</p>
   }
 </p-dialog>

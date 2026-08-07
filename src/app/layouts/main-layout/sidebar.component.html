@@ -18,7 +18,7 @@
     </button>
   </div>
 
-  <nav class="flex-1 overflow-y-auto px-3 overflow-x-hidden">
+  <nav class="flex-1 overflow-y-auto overflow-x-hidden" [class.px-3]="!isCollapsed()" [class.px-1]="isCollapsed()">
     @if (!isCollapsed()) {
       <span class="block text-xs font-semibold text-400 uppercase mb-3 pl-2 letter-spacing-1 white-space-nowrap">Menú</span>
     }
@@ -26,9 +26,13 @@
       @for (item of filteredMenu(); track item.label) {
         <li class="mb-1">
           <div
-            class="flex align-items-center gap-2 p-3 text-600 cursor-pointer border-round-md transition-all text-sm font-medium white-space-nowrap"
-            [class.active]="item.route && isActive(item.route)"
+            class="flex align-items-center gap-2 text-600 cursor-pointer border-round-md transition-all text-sm font-medium white-space-nowrap"
+            [class.p-3]="!isCollapsed()"
+            [class.w-3rem]="isCollapsed()"
+            [class.h-3rem]="isCollapsed()"
+            [class.mx-auto]="isCollapsed()"
             [class.justify-content-center]="isCollapsed()"
+            [class.active]="item.route && isActive(item.route)"
             [title]="isCollapsed() ? item.label : ''"
             (click)="onItemClick(item)"
           >
@@ -60,19 +64,22 @@
     </ul>
   </nav>
 
-  <div class="p-3">
+  <div [class.p-3]="!isCollapsed()" [class.p-2]="isCollapsed()" [class.pb-3]="isCollapsed()">
     <div
-      class="flex align-items-center gap-2 p-2 border-round-md cursor-pointer shadow-1 overflow-hidden"
+      class="flex align-items-center gap-2 border-round-md cursor-pointer shadow-1 overflow-hidden"
+      [class.p-2]="!isCollapsed()"
+      [class.py-2]="isCollapsed()"
+      [class.px-1]="isCollapsed()"
       style="background: #064e3b"
       [class.justify-content-center]="isCollapsed()"
       (click)="navigate('/perfil')"
       [title]="isCollapsed() ? 'Ver Perfil' : ''"
     >
       @if (user()?.avatarUrl) {
-        <img [src]="user()?.avatarUrl" alt="Avatar" class="flex-shrink-0 border-1 border-white-alpha-20" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; border-radius: 6px; object-fit: cover" />
+        <img [src]="user()?.avatarUrl" alt="Avatar" class="flex-shrink-0 border-circle border-1 border-white-alpha-20 shadow-1" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; object-fit: cover" />
       } @else {
-        <div class="flex align-items-center justify-content-center text-white border-2 border-solid border-white flex-shrink-0" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; border-radius: 6px; background: #064e3b">
-          <i class="pi pi-user"></i>
+        <div class="flex align-items-center justify-content-center border-circle flex-shrink-0 shadow-1" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; background: #f1f5f9; color: #064e3b">
+          <i class="pi pi-user text-xl"></i>
         </div>
       }
       @if (!isCollapsed()) {

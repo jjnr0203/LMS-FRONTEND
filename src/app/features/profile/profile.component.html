@@ -1,63 +1,194 @@
 <p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
-@if (user(); as u) {
-  <div class="page-container">
-    <div class="page-header">
-      <div class="header-content">
-        <h1 class="title">Mi Perfil</h1>
-        <p class="description">Información personal de tu cuenta.</p>
-      </div>
-    </div>
-    
-    <div class="content-wrapper">
-      <div class="data-card profile-card">
-        <div class="profile-header-section">
-          <div class="avatar-wrapper" (click)="fileInput.click()">
-            @if (u.avatarUrl) {
-              <img [src]="u.avatarUrl" alt="Avatar" class="profile-avatar" />
-            } @else {
-              <div class="profile-avatar-fallback">{{ initials() }}</div>
-            }
-            <div class="avatar-overlay">
-              <i class="pi pi-camera"></i>
-              <span>Cambiar</span>
-            </div>
-            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none" />
-          </div>
-          
-          <div class="profile-title">
-            <h2 class="name">{{ u.firstName }} {{ u.lastName }}</h2>
-            <span class="role-badge">{{ formatRoleName(u.roleName) }}</span>
-            <p class="email">{{ u.email }}</p>
-          </div>
-        </div>
-        
-        <p-divider></p-divider>
-        
-        <h3 class="section-title">Detalles de la Cuenta</h3>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">Cédula / ID</span>
-            <span class="info-value font-mono">{{ u.id }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Estado</span>
-            <span class="info-value">
-              <span class="status-badge" [class.active]="u.isActive" [class.inactive]="!u.isActive">
-                {{ u.isActive ? 'Activo' : 'Inactivo' }}
-              </span>
-            </span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Miembro desde</span>
-            <span class="info-value">{{ u.createdAt | date: 'longDate' }}</span>
-          </div>
-        </div>
-        
-        <div class="action-buttons mt-5 flex justify-content-end">
-          <p-button label="Cambiar Contraseña" icon="pi pi-key" severity="info" (onClick)="goChangePassword()"></p-button>
-        </div>
-      </div>
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Mi <span>Perfil</span></h1>
+      <p class="description">Gestiona tu información personal, profesional y documentos de forma centralizada.</p>
     </div>
   </div>
-}
+  
+  <div class="content-wrapper">@if (user(); as u) {
+      <!-- Card 1: Resumen y Avatar -->
+      <div class="data-card profile-main-card mb-4">
+        <div class="flex flex-column md:flex-row align-items-center gap-8">
+          
+          <!-- Avatar Izquierda -->
+          <div class="avatar-section flex-shrink-0 flex justify-content-center relative">
+              <div class="avatar-wrapper relative cursor-pointer" style="width: 180px; height: 180px;" (click)="avatarUpload.click()">
+                @if (u.avatarUrl) {
+                  <img [src]="u.avatarUrl" alt="Avatar" class="border-circle w-full h-full object-cover shadow-2" />
+                } @else {
+                  <div class="avatar-placeholder border-circle w-full h-full flex align-items-center justify-content-center shadow-2">
+                    <i class="pi pi-user"></i>
+                  </div>
+                }
+                <div class="avatar-overlay border-circle">
+                  <i class="pi pi-camera"></i>
+                  <span>Cambiar</span>
+                </div>
+                <input type="file" #avatarUpload (change)="onFileSelected($event)" accept="image/*" class="hidden" />
+              </div>
+              
+              <!-- Botón Eliminar Sutil -->
+              @if (u.avatarUrl) {
+                <button 
+                  type="button"
+                  class="absolute flex align-items-center justify-content-center bg-white border-circle shadow-2 cursor-pointer text-red-500 hover:text-red-700 transition-colors z-2" 
+                  style="width: 36px; height: 36px; bottom: 8px; right: 8px; border: none; padding: 0;"
+                  (click)="onDeleteAvatar($event)"
+                  title="Eliminar foto"
+                >
+                  <i class="pi pi-trash text-lg"></i>
+                </button>
+              }
+            </div>
+          
+          <!-- Info Derecha -->
+          <div class="user-info-section flex-1 flex flex-column justify-content-center">
+            <h2 class="user-name m-0 mb-3">{{ u.firstName }} {{ u.lastName }}</h2>
+            
+            <div class="flex align-items-center gap-2 mb-3">
+              <span class="custom-badge">{{ formatRoleName(u.roleName) }}</span>
+              <span class="custom-badge">{{ u.isActive !== false ? 'Activo' : 'Inactivo' }}</span>
+            </div>
+            
+            <div class="flex align-items-center gap-2 text-600 mb-4">
+              <i class="pi pi-envelope"></i>
+              <span class="text-lg">{{ u.email }}</span>
+            </div>
+            
+            <p-divider></p-divider>
+            
+            <div class="flex flex-wrap gap-8 mt-3">
+              <div class="info-block">
+                <span class="info-label text-500 text-sm font-semibold uppercase flex align-items-center gap-2 mb-1">
+                  <i class="pi pi-id-card"></i> Cédula / ID
+                </span>
+                <span class="info-value text-900 font-bold text-lg">{{ u.id }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label text-500 text-sm font-semibold uppercase flex align-items-center gap-2 mb-1">
+                  <i class="pi pi-calendar"></i> Miembro Desde
+                </span>
+                <span class="info-value text-900 font-bold text-lg">{{ u.createdAt | date:'longDate' }}</span>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      <!-- Card 2: Datos Personales Extendidos -->
+      <div class="data-card">
+        <div class="section-header">
+          <h3 class="m-0 text-900 text-xl font-bold">Datos Personales</h3>
+        </div>
+
+        <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()">
+          <div class="formgrid grid">
+            <div class="field col-12 md:col-6 mb-3">
+              <label for="address" class="block font-medium text-700 mb-2">Dirección de Domicilio</label>
+              <input id="address" type="text" pInputText formControlName="address" class="w-full" placeholder="Ej. Av. Amazonas y Naciones Unidas" />
+            </div>
+            
+            <div class="field col-12 md:col-6 mb-3">
+              <label for="linkedin" class="block font-medium text-700 mb-2">Perfil de LinkedIn (URL)</label>
+              <input id="linkedin" type="text" pInputText formControlName="linkedIn" class="w-full" placeholder="Ej. https://linkedin.com/in/tu-perfil" />
+            </div>
+          </div>
+          <div class="actions-bar mt-2">
+            <p-button type="submit" label="Guardar Datos" icon="pi pi-save" [loading]="savingProfile()" class="save-btn"></p-button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Card 3: Perfil Profesional (CV) -->
+      <div class="data-card">
+        <div class="section-header">
+          <h3 class="m-0 text-900 text-xl font-bold">Hoja de Vida (CV)</h3>
+        </div>
+        @if (u.cvUrl) {
+          <div class="certificate-card group relative" style="max-width: 480px; align-items: center;">
+            <i class="pi pi-file-pdf cert-icon" style="margin-top: 0;"></i>
+            <div class="cert-details flex-1" style="margin-right: 1rem;">
+              <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden block" [title]="getFileName(u.cvUrl, 0)">{{ getFileName(u.cvUrl, 0) }}</span>
+              <span class="cert-date">Documento PDF</span>
+            </div>
+            <div class="flex flex-column gap-2 flex-shrink-0" style="width: 110px;">
+              <p-button label="Ver" icon="pi pi-eye" size="small" styleClass="w-full cv-action-btn" (onClick)="viewCv(u.cvUrl)"></p-button>
+              <p-button label="Eliminar" icon="pi pi-trash" severity="danger" size="small" styleClass="w-full" (onClick)="onDeleteCv()" [loading]="deletingCv()"></p-button>
+            </div>
+          </div>
+        } @else {
+          <div class="document-upload-area" 
+               [class.drag-over]="isDragOver()"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onDrop($event)">
+            <div class="doc-preview">
+              <div class="doc-placeholder">
+                <i class="pi pi-file"></i>
+              </div>
+            </div>
+            <div class="doc-actions flex-1 overflow-hidden">
+              <div class="doc-info mb-2">
+                <span>No has subido tu hoja de vida aún. Puedes arrastrar tu PDF aquí.</span>
+              </div>
+              <input type="file" #cvInput accept=".pdf" class="hidden" (change)="onCvSelected($event)" />
+              <p-button label="Subir Archivo" icon="pi pi-upload" severity="success" size="small" [loading]="uploadingCv()" (onClick)="cvInput.click()"></p-button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Card 4: Certificados (JSONB) -->
+      <div class="data-card">
+        <div class="flex justify-content-between align-items-start mb-2">
+          <div>
+            <h3 class="m-0 mb-1 text-xl font-bold text-900">Certificados Adicionales</h3>
+            <p class="text-500 m-0 text-sm">Añade certificados de cursos, maestrías o capacitaciones.</p>
+          </div>
+          <div class="font-bold text-600 text-lg">{{ u.certificates?.length || 0 }} / 5</div>
+        </div>
+
+        <div class="mb-4 mt-4">
+          <input type="file" #certInput accept=".pdf" class="hidden" (change)="onCertSelected($event)" />
+          @if ((u.certificates?.length || 0) < 5) {
+            <p-button label="Añadir Nuevo Certificado (PDF)" icon="pi pi-plus" styleClass="custom-green-btn p-button-sm" [loading]="uploadingCert()" (onClick)="certInput.click()"></p-button>
+          } @else {
+            <p-message severity="warn" text="Has alcanzado el límite máximo de certificados (5). Elimina uno para subir nuevos."></p-message>
+          }
+        </div>
+
+        @if (u.certificates && u.certificates.length > 0) {
+          <div class="certificates-grid">
+            @for (cert of u.certificates; track cert; let i = $index) {
+              <div class="certificate-card group relative">
+                <i class="pi pi-file-pdf cert-icon"></i>
+                <div class="cert-details">
+                  <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden block" [title]="getFileName(cert, i)">{{ getFileName(cert, i) }}</span>
+                  <span class="cert-date">Documento PDF</span>
+                </div>
+                <div class="cert-actions">
+                  <p-menu #menu [model]="getCertMenu(cert)" [popup]="true" appendTo="body"></p-menu>
+                  <button type="button" class="menu-dots-btn" (click)="menu.toggle($event)"><i class="pi pi-ellipsis-v"></i></button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="mt-4 mb-6 flex justify-content-end">
+        <p-button label="Cambiar Contraseña" icon="pi pi-key" severity="info" (onClick)="goChangePassword()"></p-button>
+      </div>
+
+    } @else {
+      <div class="flex justify-content-center align-items-center" style="height: 300px;">
+        <i class="pi pi-spin pi-spinner text-5xl" style="color: #064e3b"></i>
+      </div>
+    }
+    </div>
+  </div>

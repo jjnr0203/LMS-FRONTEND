@@ -1,6 +1,6 @@
 <p-toast />
 @if (!isModal()) {
-  <div class="surface-ground min-h-screen">
+  <div>
     <div class="bg-blue-800 text-white p-5 mb-5 border-round-xl">
       <h1 class="text-3xl font-semibold m-0 mb-2">Crear Personal Administrativo</h1>
       <p class="text-blue-100 m-0">Completa el siguiente formulario para registrar nuevo personal (Coordinador, Secretaría, Tesorería o Docente) en la plataforma.</p>
@@ -10,17 +10,17 @@
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           <div class="grid">
             <div class="col-12 md:col-6">
-              <div class="flex flex-column gap-2 mb-4">
-                <label for="id" class="font-semibold text-sm text-700">Cédula (10 dígitos)</label>
-                <input id="id" pInputText formControlName="id" placeholder="0000000000" />
-                @if (id.invalid && id.touched) {
-                  <small class="p-error">La cédula debe tener exactamente 10 dígitos.</small>
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="id" class="font-semibold text-sm text-700">Cédula <span class="text-red-500">*</span></label>
+                <input id="id" pInputText formControlName="id" maxlength="10" (input)="filterNumbers($event, 'id')" />
+                @if (id.invalid && submitted()) {
+                  <small class="p-error text-red-500">La cédula ingresada no es válida.</small>
                 }
               </div>
             </div>
             <div class="col-12 md:col-6">
-              <div class="flex flex-column gap-2 mb-4">
-                <label for="roleName" class="font-semibold text-sm text-700">Rol</label>
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="roleName" class="font-semibold text-sm text-700">Rol <span class="text-red-500">*</span></label>
                 <p-select
                   id="roleName"
                   formControlName="roleName"
@@ -29,18 +29,19 @@
                   optionValue="value"
                   placeholder="Seleccione rol"
                   styleClass="w-full"
+                  appendTo="body"
                 />
-            @if (roleName.invalid && roleName.touched) {
-              <small class="p-error">El rol es requerido.</small>
-            }
-          </div>
-        </div>
-        <div class="col-12 md:col-6">
-              <div class="flex flex-column gap-2 mb-4">
-                <label for="firstName" class="font-semibold text-sm text-700">Nombres</label>
-                <input id="firstName" pInputText formControlName="firstName" />
-                @if (firstName.invalid && firstName.touched) {
-                  <small class="p-error">Requerido.</small>
+                @if (roleName.invalid && submitted()) {
+                  <small class="p-error text-red-500">El rol es inválido.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="firstName" class="font-semibold text-sm text-700">Nombres <span class="text-red-500">*</span></label>
+                <input id="firstName" pInputText formControlName="firstName" maxlength="20" (input)="filterLetters($event, 'firstName')" />
+                @if (firstName.invalid && submitted()) {
+                  <small class="p-error text-red-500">Nombre inválido.</small>
                 }
               </div>
             </div>
@@ -63,33 +64,39 @@
               </div>
             }
             <div class="col-12 md:col-6">
-              <div class="flex flex-column gap-2 mb-4">
-                <label for="lastName" class="font-semibold text-sm text-700">Apellidos</label>
-                <input id="lastName" pInputText formControlName="lastName" />
-                @if (lastName.invalid && lastName.touched) {
-                  <small class="p-error">Requerido.</small>
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="lastName" class="font-semibold text-sm text-700">Apellidos <span class="text-red-500">*</span></label>
+                <input id="lastName" pInputText formControlName="lastName" maxlength="20" (input)="filterLetters($event, 'lastName')" />
+                @if (lastName.invalid && submitted()) {
+                  <small class="p-error text-red-500">Apellido inválido.</small>
                 }
               </div>
             </div>
             <div class="col-12 md:col-6">
-              <div class="flex flex-column gap-2 mb-4">
-                <label for="email" class="font-semibold text-sm text-700">Correo Electrónico</label>
-                <input id="email" pInputText formControlName="email" type="email" />
-                @if (email.invalid && email.touched) {
-                  <small class="p-error">Correo inválido.</small>
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="email" class="font-semibold text-sm text-700">Correo Electrónico <span class="text-red-500">*</span></label>
+                <input id="email" pInputText formControlName="email" type="email" maxlength="40" placeholder="ejemplo@gmail.com" />
+                @if (email.invalid && submitted()) {
+                  <small class="p-error text-red-500">Correo inválido.</small>
                 }
               </div>
             </div>
             <div class="col-12 md:col-6">
-              <div class="flex flex-column gap-2 mb-4">
-                <label for="birthDate" class="font-semibold text-sm text-700">Fecha de Nacimiento (Opcional)</label>
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="birthDate" class="font-semibold text-sm text-700">Fecha de Nacimiento <span class="text-red-500">*</span></label>
                 <input id="birthDate" type="date" pInputText formControlName="birthDate" />
+                @if (birthDate.errors?.['invalidDate'] && submitted()) {
+                  <small class="p-error text-red-500">La fecha debe ser del pasado.</small>
+                }
               </div>
             </div>
             <div class="col-12 md:col-6">
-              <div class="flex flex-column gap-2 mb-4">
+              <div class="flex flex-column gap-2 mb-3">
                 <label for="phone" class="font-semibold text-sm text-700">Teléfono (Opcional)</label>
-                <input id="phone" type="tel" pInputText formControlName="phone" />
+                <input id="phone" type="tel" pInputText formControlName="phone" maxlength="10" (input)="filterNumbers($event, 'phone')" />
+                @if (phone.invalid && submitted()) {
+                  <small class="p-error text-red-500">Solo se permiten números.</small>
+                }
               </div>
             </div>
           </div>
@@ -99,7 +106,7 @@
               label="Registrar Personal"
               icon="pi pi-check"
               [loading]="loading()"
-              [disabled]="form.invalid"
+              [disabled]="hasEmptyRequiredFields"
             />
           </div>
         </form>
@@ -110,17 +117,17 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="grid">
       <div class="col-12 md:col-6">
-        <div class="flex flex-column gap-2 mb-4">
-          <label for="id" class="font-semibold text-sm text-700">Cédula (10 dígitos)</label>
-          <input id="id" pInputText formControlName="id" placeholder="0000000000" />
-          @if (id.invalid && id.touched) {
-            <small class="p-error">La cédula debe tener exactamente 10 dígitos.</small>
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="id" class="font-semibold text-sm text-700">Cédula <span class="text-red-500">*</span></label>
+          <input id="id" pInputText formControlName="id" maxlength="10" (input)="filterNumbers($event, 'id')" />
+          @if (id.invalid && submitted()) {
+            <small class="p-error text-red-500">La cédula ingresada no es válida.</small>
           }
         </div>
       </div>
       <div class="col-12 md:col-6">
-        <div class="flex flex-column gap-2 mb-4">
-          <label for="roleName" class="font-semibold text-sm text-700">Rol</label>
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="roleName" class="font-semibold text-sm text-700">Rol <span class="text-red-500">*</span></label>
           <p-select
             id="roleName"
             formControlName="roleName"
@@ -129,18 +136,19 @@
             optionValue="value"
             placeholder="Seleccione rol"
             styleClass="w-full"
+            appendTo="body"
           />
-            @if (roleName.invalid && roleName.touched) {
-              <small class="p-error">El rol es requerido.</small>
-            }
-          </div>
+          @if (roleName.invalid && submitted()) {
+            <small class="p-error text-red-500">El rol es inválido.</small>
+          }
         </div>
-        <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2 mb-4">
-            <label for="firstName" class="font-semibold text-sm text-700">Nombres</label>
-          <input id="firstName" pInputText formControlName="firstName" />
-          @if (firstName.invalid && firstName.touched) {
-            <small class="p-error">Requerido.</small>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="firstName" class="font-semibold text-sm text-700">Nombres <span class="text-red-500">*</span></label>
+          <input id="firstName" pInputText formControlName="firstName" maxlength="20" (input)="filterLetters($event, 'firstName')" />
+          @if (firstName.invalid && submitted()) {
+            <small class="p-error text-red-500">Nombre inválido.</small>
           }
         </div>
       </div>
@@ -163,33 +171,39 @@
         </div>
       }
       <div class="col-12 md:col-6">
-        <div class="flex flex-column gap-2 mb-4">
-          <label for="lastName" class="font-semibold text-sm text-700">Apellidos</label>
-          <input id="lastName" pInputText formControlName="lastName" />
-          @if (lastName.invalid && lastName.touched) {
-            <small class="p-error">Requerido.</small>
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="lastName" class="font-semibold text-sm text-700">Apellidos <span class="text-red-500">*</span></label>
+          <input id="lastName" pInputText formControlName="lastName" maxlength="20" (input)="filterLetters($event, 'lastName')" />
+          @if (lastName.invalid && submitted()) {
+            <small class="p-error text-red-500">Apellido inválido.</small>
           }
         </div>
       </div>
       <div class="col-12 md:col-6">
-        <div class="flex flex-column gap-2 mb-4">
-          <label for="email" class="font-semibold text-sm text-700">Correo Electrónico</label>
-          <input id="email" pInputText formControlName="email" type="email" />
-          @if (email.invalid && email.touched) {
-            <small class="p-error">Correo inválido.</small>
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="email" class="font-semibold text-sm text-700">Correo Electrónico <span class="text-red-500">*</span></label>
+          <input id="email" pInputText formControlName="email" type="email" maxlength="40" placeholder="ejemplo@gmail.com" />
+          @if (email.invalid && submitted()) {
+            <small class="p-error text-red-500">Correo inválido.</small>
           }
         </div>
       </div>
       <div class="col-12 md:col-6">
-        <div class="flex flex-column gap-2 mb-4">
-          <label for="birthDate" class="font-semibold text-sm text-700">Fecha de Nacimiento (Opcional)</label>
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="birthDate" class="font-semibold text-sm text-700">Fecha de Nacimiento <span class="text-red-500">*</span></label>
           <input id="birthDate" type="date" pInputText formControlName="birthDate" />
+          @if (birthDate.errors?.['invalidDate'] && submitted()) {
+            <small class="p-error text-red-500">La fecha debe ser del pasado.</small>
+          }
         </div>
       </div>
       <div class="col-12 md:col-6">
-        <div class="flex flex-column gap-2 mb-4">
+        <div class="flex flex-column gap-2 mb-3">
           <label for="phone" class="font-semibold text-sm text-700">Teléfono (Opcional)</label>
-          <input id="phone" type="tel" pInputText formControlName="phone" />
+          <input id="phone" type="tel" pInputText formControlName="phone" maxlength="10" (input)="filterNumbers($event, 'phone')" />
+          @if (phone.invalid && submitted()) {
+            <small class="p-error text-red-500">Solo se permiten números.</small>
+          }
         </div>
       </div>
     </div>
@@ -199,7 +213,7 @@
         label="Registrar Personal"
         icon="pi pi-check"
         [loading]="loading()"
-        [disabled]="form.invalid"
+        [disabled]="hasEmptyRequiredFields"
       />
     </div>
   </form>

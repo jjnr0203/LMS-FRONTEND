@@ -1,53 +1,80 @@
 <p-toast position="top-center" [baseZIndex]="10000"></p-toast>
-<div class="surface-card p-6 w-full" style="max-width: 500px">
-  <div class="text-center mb-5">
-    <i class="pi pi-lock text-green-500 text-5xl mb-3"></i>
-    <h2 class="text-900 text-3xl font-bold mb-2">Primer Ingreso</h2>
-    <p class="text-600">Por motivos de seguridad, debes cambiar tu contraseña temporal antes de continuar.</p>
+<div class="w-full bg-white" style="max-width: 400px; margin: 0 auto; padding: 2rem 1.5rem;">
+  <div class="text-center mb-4">
+    <i class="pi pi-lock text-green-600 text-5xl mb-2"></i>
+    <h2 class="text-800 text-2xl font-bold mb-2 mt-0">Primer Ingreso</h2>
+    <p class="text-600 m-0 text-sm line-height-3">Por motivos de seguridad, debes cambiar tu contraseña temporal antes de continuar.</p>
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-column gap-4">
-    <div class="flex flex-column gap-2">
-      <label for="currentPassword" class="font-semibold text-700">Contraseña Actual (Temporal)</label>
-      <p-password 
-        id="currentPassword" 
-        formControlName="currentPassword" 
-        [toggleMask]="true" 
-        [feedback]="false"
-        styleClass="w-full"
-        inputStyleClass="w-full p-3">
-      </p-password>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-column gap-3 text-left">
+    <div class="flex flex-column gap-1">
+      <label for="currentPassword" class="font-semibold text-600 text-sm">Contraseña Actual</label>
+      <p-inputGroup>
+        <p-inputGroupAddon>
+          <i class="pi pi-lock text-green-600"></i>
+        </p-inputGroupAddon>
+        <p-password 
+          id="currentPassword" 
+          formControlName="currentPassword" 
+          [toggleMask]="true" 
+          [feedback]="false"
+          placeholder="Contraseña temporal"
+          styleClass="w-full"
+          inputStyleClass="w-full">
+        </p-password>
+      </p-inputGroup>
     </div>
 
-    <div class="flex flex-column gap-2">
-      <label for="newPassword" class="font-semibold text-700">Nueva Contraseña</label>
-      <p-password 
-        id="newPassword" 
-        formControlName="newPassword" 
-        [toggleMask]="true" 
-        [feedback]="true"
-        styleClass="w-full"
-        inputStyleClass="w-full p-3"
-        promptLabel="Ingresa una contraseña"
-        weakLabel="Débil"
-        mediumLabel="Media"
-        strongLabel="Fuerte">
-      </p-password>
+    <div class="flex flex-column gap-1">
+      <label for="newPassword" class="font-semibold text-600 text-sm">Nueva Contraseña</label>
+      <p-inputGroup>
+        <p-inputGroupAddon>
+          <i class="pi pi-lock text-green-600"></i>
+        </p-inputGroupAddon>
+        <p-password 
+          id="newPassword" 
+          formControlName="newPassword" 
+          [toggleMask]="true" 
+          [feedback]="true"
+          placeholder="Nueva contraseña"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          promptLabel="Ingresa una contraseña"
+          weakLabel="Débil"
+          mediumLabel="Media"
+          strongLabel="Fuerte">
+          <ng-template pTemplate="footer">
+            <p-divider></p-divider>
+            <p class="mt-2 mb-1 text-sm font-semibold text-600">Sugerencias:</p>
+            <ul class="pl-3 m-0 text-sm text-500" style="line-height: 1.5">
+                <li>Al menos una letra mayúscula</li>
+                <li>Al menos un número</li>
+                <li>Mínimo 6 caracteres</li>
+            </ul>
+          </ng-template>
+        </p-password>
+      </p-inputGroup>
       @if (form.controls.newPassword.invalid && form.controls.newPassword.touched) {
-        <small class="p-error">La contraseña debe tener al menos 6 caracteres.</small>
+        <small class="p-error">Mínimo 6 caracteres.</small>
       }
     </div>
 
-    <div class="flex flex-column gap-2">
-      <label for="confirmPassword" class="font-semibold text-700">Confirmar Contraseña</label>
-      <p-password 
-        id="confirmPassword" 
-        formControlName="confirmPassword" 
-        [toggleMask]="true" 
-        [feedback]="false"
-        styleClass="w-full"
-        inputStyleClass="w-full p-3">
-      </p-password>
+    <div class="flex flex-column gap-1">
+      <label for="confirmPassword" class="font-semibold text-600 text-sm">Confirmar Contraseña</label>
+      <p-inputGroup>
+        <p-inputGroupAddon>
+          <i class="pi pi-check-circle text-green-600"></i>
+        </p-inputGroupAddon>
+        <p-password 
+          id="confirmPassword" 
+          formControlName="confirmPassword" 
+          [toggleMask]="true" 
+          [feedback]="false"
+          placeholder="Confirme su contraseña"
+          styleClass="w-full"
+          inputStyleClass="w-full">
+        </p-password>
+      </p-inputGroup>
       @if (form.errors?.['mismatch'] && form.controls.confirmPassword.touched) {
         <small class="p-error">Las contraseñas no coinciden.</small>
       }
@@ -57,7 +84,8 @@
       type="submit" 
       label="Actualizar Contraseña" 
       icon="pi pi-check" 
-      styleClass="w-full p-3 text-lg mt-3 bg-green-500 border-none hover:bg-green-600"
+      styleClass="w-full mt-3 border-none"
+      [style]="{'background-color': '#6b9b84'}"
       [loading]="loading()"
       [disabled]="form.invalid">
     </p-button>

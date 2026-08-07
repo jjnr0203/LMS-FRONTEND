@@ -179,6 +179,44 @@ export class Careers implements OnInit {
   pendingWizardCurriculumId: string | null = null;
   wizardSemesters: number[] = [];
 
+  submittedCareer = signal(false);
+  submittedCurriculum = signal(false);
+  submittedSubject = signal(false);
+
+  get hasEmptyRequiredCareer() {
+    if (!this.careerForm) return true;
+    const c = this.careerForm.controls;
+    return !c['name'].value || !c['code'].value || !c['durationSemesters'].value || !c['facultyId'].value || c['modalityIds'].value?.length === 0 || c['jornadaIds'].value?.length === 0;
+  }
+
+  get hasEmptyRequiredCurriculum() {
+    if (!this.curriculumForm) return true;
+    const c = this.curriculumForm.controls;
+    return !c['name'].value;
+  }
+
+  get hasEmptyRequiredSubject() {
+    if (!this.subjectForm) return true;
+    const c = this.subjectForm.controls;
+    return !c['name'].value || !c['code'].value || !c['credits'].value || c['hours'].value === null || !c['semester'].value;
+  }
+
+  filterLetters(event: any, form: FormGroup, controlName: string) {
+    const value = event.target.value;
+    const filteredValue = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, '');
+    if (value !== filteredValue) {
+      form.get(controlName)?.setValue(filteredValue);
+    }
+  }
+
+  filterNumbers(event: any, form: FormGroup, controlName: string) {
+    const value = event.target.value;
+    const filteredValue = value.replace(/[^0-9]/g, '');
+    if (value !== filteredValue) {
+      form.get(controlName)?.setValue(filteredValue);
+    }
+  }
+
   ngOnInit() {
     this.initForms();
     this.loadCareers();
@@ -187,29 +225,29 @@ export class Careers implements OnInit {
 
   initForms() {
     this.careerForm = this.formBuilder.group({
-      name: ['', Validators.required],
-      code: ['', Validators.required],
-      durationSemesters: [1, [Validators.required, Validators.min(1)]],
-      modalityIds: [[]],
-      jornadaIds: [[]],
+      name: ['', [Validators.required, Validators.maxLength(40), Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/)]],
+      code: ['', [Validators.required, Validators.maxLength(8)]],
+      durationSemesters: [1, [Validators.required, Validators.min(1), Validators.max(9)]],
+      modalityIds: [[], Validators.required],
+      jornadaIds: [[], Validators.required],
       coordinatorId: [null],
-      facultyId: [null],
+      facultyId: [null, Validators.required],
       isActive: [true],
     });
 
     this.curriculumForm = this.formBuilder.group({
-      name: ['', Validators.required],
-      description: [''],
+      name: ['', [Validators.required, Validators.maxLength(15)]],
+      description: ['', Validators.maxLength(70)],
       isActive: [true],
     });
 
     this.subjectForm = this.formBuilder.group({
-      code: ['', Validators.required],
-      name: ['', Validators.required],
-      credits: [1, [Validators.required, Validators.min(1)]],
-      hours: [0, [Validators.required, Validators.min(0)]],
+      code: ['', [Validators.required, Validators.maxLength(7)]],
+      name: ['', [Validators.required, Validators.maxLength(40)]],
+      credits: [1, [Validators.required, Validators.min(1), Validators.max(9)]],
+      hours: [0, [Validators.required, Validators.min(0), Validators.max(999)]],
       semester: [1, [Validators.required, Validators.min(1)]],
-      description: [''],
+      description: ['', Validators.maxLength(150)],
     });
   }
 
@@ -299,6 +337,7 @@ export class Careers implements OnInit {
       this.faculties = data.filter(f => f.isActive);
       this.cdr.detectChanges();
     });
+    this.submittedCareer.set(false);
     this.displayCareerDialog = true;
   }
 
@@ -315,11 +354,17 @@ export class Careers implements OnInit {
       this.faculties = data.filter(f => f.isActive);
       this.cdr.detectChanges();
     });
+    this.submittedCareer.set(false);
     this.displayCareerDialog = true;
   }
 
   saveCareer() {
-    if (this.careerForm.invalid) return;
+    this.submittedCareer.set(true);
+    if (this.careerForm.invalid) {
+      this.careerForm.markAllAsTouched();
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Por favor, corrija los errores en el formulario' });
+      return;
+    }
     const data = this.careerForm.value;
 
     if (this.isEditCareer && this.editCareerId) {
@@ -377,6 +422,7 @@ export class Careers implements OnInit {
     this.isEditCurriculum = false;
     this.editCurriculumId = null;
     this.curriculumForm.reset({ isActive: true });
+    this.submittedCurriculum.set(false);
     this.displayCurriculumDialog = true;
   }
 
@@ -384,11 +430,17 @@ export class Careers implements OnInit {
     this.isEditCurriculum = true;
     this.editCurriculumId = cu.id;
     this.curriculumForm.patchValue(cu);
+    this.submittedCurriculum.set(false);
     this.displayCurriculumDialog = true;
   }
 
   saveCurriculum() {
-    if (this.curriculumForm.invalid || !this.selectedCareer) return;
+    this.submittedCurriculum.set(true);
+    if (this.curriculumForm.invalid || !this.selectedCareer) {
+      this.curriculumForm.markAllAsTouched();
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Por favor, corrija los errores en el formulario' });
+      return;
+    }
     const data = this.curriculumForm.value;
 
     if (this.isEditCurriculum && this.editCurriculumId) {
@@ -443,6 +495,7 @@ export class Careers implements OnInit {
     this.editSubjectId = null;
     this.subjectSemesters = Array.from({ length: this.selectedCareer.durationSemesters }, (_, i) => i + 1);
     this.subjectForm.reset({ credits: 1, hours: 0, semester: 1 });
+    this.submittedSubject.set(false);
     this.displaySubjectDialog = true;
   }
 
@@ -453,17 +506,23 @@ export class Careers implements OnInit {
       this.subjectSemesters = Array.from({ length: this.selectedCareer.durationSemesters }, (_, i) => i + 1);
     }
     this.subjectForm.patchValue(s);
+    this.submittedSubject.set(false);
     this.displaySubjectDialog = true;
   }
 
   saveSubject() {
-    if (this.subjectForm.invalid || !this.selectedCareer || !this.selectedCurriculum) return;
+    this.submittedSubject.set(true);
+    if (this.subjectForm.invalid || !this.selectedCareer || !this.selectedCurriculum) {
+      this.subjectForm.markAllAsTouched();
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Por favor, corrija los errores en el formulario' });
+      return;
+    }
     const raw = this.subjectForm.value;
     const data: any = {
       code: raw.code,
       name: raw.name,
-      credits: raw.credits,
-      hours: raw.hours || 0,
+      credits: Number(raw.credits),
+      hours: Number(raw.hours) || 0,
       careerId: this.selectedCareer.id,
       curriculumId: this.selectedCurriculum.id,
       semester: raw.semester,

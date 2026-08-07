@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -43,9 +43,24 @@ export class Modalities implements OnInit {
 
   modalities: Modality[] = [];
   displayDialog = false;
-  form!: FormGroup;
+  modalityForm!: FormGroup;
   isEdit = false;
   currentId: string | null = null;
+  submitted = signal(false);
+
+  get hasEmptyRequiredFields() {
+    if (!this.modalityForm) return true;
+    const c = this.modalityForm.controls;
+    return !c['name'].value;
+  }
+
+  filterLetters(event: any, form: FormGroup, controlName: string) {
+    const value = event.target.value;
+    const filteredValue = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, '');
+    if (value !== filteredValue) {
+      form.get(controlName)?.setValue(filteredValue);
+    }
+  }
 
   ngOnInit() {
     this.initForm();
@@ -53,10 +68,10 @@ export class Modalities implements OnInit {
   }
 
   initForm() {
-    this.form = this.formBuilder.group({
-      name: ['', Validators.required],
-      description: [''],
-      isActive: [true],
+    this.modalityForm = this.formBuilder.group({
+      name: ['', [Validators.required, Validators.maxLength(20), Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/)]],
+      description: ['', Validators.maxLength(150)],
+      isActive: [false],
     });
   }
 
@@ -74,29 +89,34 @@ export class Modalities implements OnInit {
   }
 
   openNew() {
-    this.loadModalities();
     this.isEdit = false;
     this.currentId = null;
-    this.form.reset({ isActive: true });
+    this.submitted.set(false);
+    this.modalityForm.reset({ isActive: false });
     this.displayDialog = true;
   }
 
-  editModality(mod: Modality) {
-    this.loadModalities();
+  editModality(m: Modality) {
     this.isEdit = true;
-    this.currentId = mod.id;
-    this.form.patchValue({
-      name: mod.name,
-      description: mod.description || '',
-      isActive: mod.isActive,
+    this.currentId = m.id;
+    this.modalityForm.patchValue({
+      name: m.name,
+      description: m.description || '',
+      isActive: m.isActive,
     });
+    this.submitted.set(false);
     this.displayDialog = true;
   }
 
   saveModality() {
-    if (this.form.invalid) return;
+    this.submitted.set(true);
+    if (this.modalityForm.invalid) {
+      this.modalityForm.markAllAsTouched();
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Por favor, corrija los errores en el formulario' });
+      return;
+    }
 
-    const data = this.form.value;
+    const data = this.modalityForm.value;
 
     if (this.isEdit && this.currentId) {
       this.academicService.updateModality(this.currentId, data).subscribe({

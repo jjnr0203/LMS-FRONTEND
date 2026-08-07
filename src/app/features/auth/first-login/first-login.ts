@@ -7,11 +7,14 @@ import { UserService } from '../../../core/services/user.service';
 import { ButtonModule } from 'primeng/button';
 import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-first-login',
   standalone: true,
-  imports: [ReactiveFormsModule, ButtonModule, PasswordModule, ToastModule],
+  imports: [ReactiveFormsModule, ButtonModule, PasswordModule, ToastModule, InputGroupModule, InputGroupAddonModule, DividerModule],
   templateUrl: './first-login.html',
   providers: [MessageService]
 })
