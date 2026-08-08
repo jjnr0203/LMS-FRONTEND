@@ -11,27 +11,21 @@
         <th>Nombre</th>
         <th>Estado</th>
         <th>Descripción</th>
-        <th style="width: 120px">Acciones</th>
+        <th class="text-center" style="width: 120px">Acciones</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-jor>
       <tr>
+        <td class="font-medium text-slate-800">{{ jor.name }}</td>
         <td>
-          <p-tag [value]="jor.name" severity="success" [style]="{'white-space': 'nowrap'}"></p-tag>
-        </td>
-        <td>
-          <span class="px-2 py-1 text-xs font-semibold rounded-full"
-                [class.bg-emerald-100]="jor.isActive" [class.text-emerald-800]="jor.isActive"
-                [class.bg-slate-100]="!jor.isActive" [class.text-slate-600]="!jor.isActive">
-            {{ jor.isActive ? 'Activa' : 'Inactiva' }}
-          </span>
+          <p-tag class="soft-tag" 
+                 [severity]="jor.isActive ? 'success' : 'secondary'" 
+                 [value]="jor.isActive ? 'Activa' : 'Inactiva'">
+          </p-tag>
         </td>
         <td class="text-sm text-slate-500 max-w-xs truncate" [title]="jor.description">{{ jor.description }}</td>
-        <td>
-          <div class="flex gap-2">
-            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (onClick)="editJornada(jor)" size="small" ></p-button>
-            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteJornada(jor.id)" size="small" ></p-button>
-          </div>
+        <td class="text-center">
+          <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="showMenu($event, menu, jor)"></p-button>
         </td>
       </tr>
     </ng-template>
@@ -41,6 +35,8 @@
       </tr>
     </ng-template>
   </p-table>
+
+  <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
 
   <p-dialog [(visible)]="displayDialog" [header]="isEdit ? 'Editar Jornada' : 'Nueva Jornada'" [modal]="true" [style]="{ width: '800px', 'max-width': '95vw' }" [closable]="true" appendTo="body">
     <form [formGroup]="jornadaForm" (ngSubmit)="saveJornada()" class="mt-3">

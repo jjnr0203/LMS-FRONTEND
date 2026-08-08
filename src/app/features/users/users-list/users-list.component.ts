@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, input } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, input, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -26,6 +26,8 @@ import { AcademicService } from '../../../core/services/academic.service';
 import { TeacherService } from '../../../core/services/teacher.service';
 import { TabsModule } from 'primeng/tabs';
 import { TooltipModule } from 'primeng/tooltip';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-users-list',
@@ -48,6 +50,7 @@ import { TooltipModule } from 'primeng/tooltip';
     MultiSelectModule,
     TabsModule,
     TooltipModule,
+    MenuModule,
     DatePipe,
     CommonModule
   ],
@@ -64,6 +67,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
   private formBuilder = inject(FormBuilder);
   private academicService = inject(AcademicService);
   private teacherService = inject(TeacherService);
+  private cdr = inject(ChangeDetectorRef);
 
   users = signal<User[]>([]);
   totalRecords = signal(0);
@@ -75,6 +79,10 @@ export class UsersListComponent implements OnInit, OnDestroy {
   teacherStats = signal<{ totalHours: number; careers: any[]; subjects: any[] } | null>(null);
   showCareersModal = signal(false);
   showSubjectsModal = signal(false);
+  activeTab: string = '0';
+  
+  menuItems: MenuItem[] = [];
+  selectedUserForMenu: any = null;
 
   mode = input<'admin' | 'hr'>('admin');
   roleFilter: string = '';
@@ -345,6 +353,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   openProfileModal(user: any) {
     this.selectedUser = user;
+    this.activeTab = '0'; // Reset to "Resumen" tab
     this.profileModalVisible = true;
     
     if (user.roleName === 'teacher' || user.roleName === 'Docente') {
@@ -359,6 +368,8 @@ export class UsersListComponent implements OnInit, OnDestroy {
       next: (fullUser) => {
         if (this.selectedUser && this.selectedUser.id === fullUser.id) {
           this.selectedUser = { ...this.selectedUser, ...fullUser };
+          this.cdr.markForCheck();
+          this.cdr.detectChanges(); // Force UI update so image loads immediately
         }
       }
     });
@@ -378,6 +389,34 @@ export class UsersListComponent implements OnInit, OnDestroy {
     } catch {
       return `Certificado ${index + 1}`;
     }
+  }
+
+  showMenu(event: Event, menu: any, user: any) {
+    this.selectedUserForMenu = user;
+    this.menuItems = [
+      {
+        label: 'Ver Perfil',
+        icon: 'pi pi-eye',
+        styleClass: 'action-view',
+        command: () => this.openProfileModal(this.selectedUserForMenu)
+      },
+      {
+        label: 'Editar',
+        icon: 'pi pi-pencil',
+        styleClass: 'action-edit',
+        command: () => this.openEditDialog(this.selectedUserForMenu)
+      },
+      {
+        separator: true
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        styleClass: 'action-delete',
+        command: () => this.confirmDelete(this.selectedUserForMenu)
+      }
+    ];
+    menu.toggle(event);
   }
 }
 

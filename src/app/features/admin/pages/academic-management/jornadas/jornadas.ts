@@ -14,6 +14,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TagModule } from 'primeng/tag';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { Jornada } from '../../../../../core/models';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-jornadas',
@@ -31,6 +33,7 @@ import { Jornada } from '../../../../../core/models';
     BadgeModule,
     ConfirmDialogModule,
     TagModule,
+    MenuModule
   ],
   templateUrl: './jornadas.html',
 })
@@ -47,6 +50,8 @@ export class Jornadas implements OnInit {
   isEdit = false;
   currentId: string | null = null;
   submitted = signal(false);
+  menuItems: MenuItem[] = [];
+  selectedJornadaForMenu: any = null;
 
   get hasEmptyRequiredFields() {
     if (!this.jornadaForm) return true;
@@ -157,5 +162,24 @@ export class Jornadas implements OnInit {
         });
       }
     });
+  }
+
+  showMenu(event: Event, menu: any, jornada: any) {
+    this.selectedJornadaForMenu = jornada;
+    this.menuItems = [
+      {
+        label: 'Editar',
+        icon: 'pi pi-pencil',
+        styleClass: 'action-edit',
+        command: () => this.editJornada(this.selectedJornadaForMenu)
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        styleClass: 'action-delete',
+        command: () => this.deleteJornada(this.selectedJornadaForMenu.id)
+      }
+    ];
+    menu.toggle(event);
   }
 }

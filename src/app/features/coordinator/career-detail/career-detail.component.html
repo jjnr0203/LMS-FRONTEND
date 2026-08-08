@@ -141,18 +141,18 @@
                           <p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full">
                             <ng-template pTemplate="header">
                                 <tr>
-                                  <th class="text-center" style="width: 8%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Código</th>
+                                  <th class="text-center" style="width: 8%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
                                   <th style="width: 25%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Materia</th>
                                   <th class="text-center" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
                                   <th class="text-center" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
                                   <th style="width: 43%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Docentes Asignados</th>
-                                  <th class="text-center" style="width: 10%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Acciones</th>
+                                  <th class="text-center" style="width: 10%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-right-radius': '6px', 'border-bottom-right-radius': '6px'}">Acciones</th>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-sub>
                               <tr>
-                                <td class="font-mono font-bold text-center">
-                                  <span [ngStyle]="{'color': subjectColorsMap().get(sub.subjectId || sub.id) || 'var(--text-color)'}">{{ sub.code }}</span>
+                                <td class="text-center">
+                                  <p-tag [value]="sub.code" styleClass="soft-tag text-xs px-2 py-1" [style]="{'background-color': (subjectColorsMap().get(sub.subjectId || sub.id) || getSemesterColor(sem.semester)) + '22', 'color': subjectColorsMap().get(sub.subjectId || sub.id) || getSemesterColor(sem.semester), 'white-space': 'nowrap'}"></p-tag>
                                 </td>
                                 <td class="font-medium text-left">{{ sub.name }}</td>
                                 <td class="text-center"><span class="font-semibold text-600">{{ sub.credits }}</span></td>
@@ -170,21 +170,7 @@
                                           </span>
                                         </div>
                                         <div class="flex gap-1">
-                                          <button type="button" class="border-none surface-300 text-700 border-round flex align-items-center justify-content-center cursor-pointer hover:surface-400 transition-duration-200 outline-none focus:shadow-none" style="width: 1.75rem; height: 1.75rem;" (click)="teacherMenuPrimary.toggle($event)">
-                                            <i class="pi pi-ellipsis-v"></i>
-                                          </button>
-                                          <p-popover #teacherMenuPrimary>
-                                            <div class="flex flex-column">
-                                              <button type="button" class="flex align-items-center gap-3 px-3 py-2 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-duration-200 outline-none" (click)="openScheduleModal(sub, sub.groupedAssignments[0].teacherId, sem.semester); teacherMenuPrimary.hide()">
-                                                <i class="pi pi-calendar-clock text-700 text-lg"></i>
-                                                <span class="white-space-nowrap font-medium text-700 text-sm">Crear Horario</span>
-                                              </button>
-                                              <button type="button" class="flex align-items-center gap-3 px-3 py-2 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-duration-200 outline-none" (click)="removeTeacher(sub.id, cur.id, sub.groupedAssignments[0].assignmentIds, sub.groupedAssignments[0].teacherId); teacherMenuPrimary.hide()" [disabled]="removingTeacherId() === sub.groupedAssignments[0].teacherId">
-                                                <i class="pi pi-times text-red-500 text-lg" [class.pi-spin]="removingTeacherId() === sub.groupedAssignments[0].teacherId" [class.pi-spinner]="removingTeacherId() === sub.groupedAssignments[0].teacherId"></i>
-                                                <span class="white-space-nowrap font-medium text-red-500 text-sm">Eliminar Docente</span>
-                                              </button>
-                                            </div>
-                                          </p-popover>
+                                          <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="showTeacherMenu($event, globalTeacherMenu, sub, sub.groupedAssignments[0].teacherId, sem.semester, sub.groupedAssignments[0].assignmentIds, cur.id); $event.stopPropagation()"></p-button>
                                         </div>
                                       </div>
 
@@ -194,31 +180,18 @@
                                             Ver más...
                                           </summary>
                                           <div class="flex flex-column gap-1 mt-1">
-                                            @for (assign of sub.groupedAssignments.slice(1); track assign.teacherId) {
-                                              <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" 
-                                                   style="width: 100%; border-left: 4px solid #10b981;">
+                                            @for (assign of sub.groupedAssignments.slice(1); track assign.teacherId; let i = $index) {
+                                              <div class="flex align-items-center justify-content-between gap-2 p-2 border-round" 
+                                                   [ngClass]="i % 2 === 0 ? 'bg-green-100' : 'bg-green-50'"
+                                                   [ngStyle]="{'width': '100%', 'border-left': i % 2 === 0 ? '4px solid #16a34a' : '4px solid #10b981'}">
                                                 <div class="flex flex-column text-left">
-                                                  <span class="text-900 font-medium text-xs">{{ assign.teacherName }}</span>
-                                                  <span class="text-600" style="font-size: 0.65rem">
+                                                  <span class="font-medium text-xs text-900">{{ assign.teacherName }}</span>
+                                                  <span style="font-size: 0.65rem" class="text-600">
                                                     {{ assign.displayPairs }}
                                                   </span>
                                                 </div>
                                                 <div class="flex gap-1">
-                                                  <button type="button" class="border-none surface-300 text-700 border-round flex align-items-center justify-content-center cursor-pointer hover:surface-400 transition-duration-200 outline-none focus:shadow-none" style="width: 1.75rem; height: 1.75rem;" (click)="teacherMenuSecondary.toggle($event)">
-                                                    <i class="pi pi-ellipsis-v"></i>
-                                                  </button>
-                                                  <p-popover #teacherMenuSecondary>
-                                                    <div class="flex flex-column">
-                                                      <button type="button" class="flex align-items-center gap-3 px-3 py-2 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-duration-200 outline-none" (click)="openScheduleModal(sub, assign.teacherId, sem.semester); teacherMenuSecondary.hide()">
-                                                        <i class="pi pi-calendar-clock text-700 text-lg"></i>
-                                                        <span class="white-space-nowrap font-medium text-700 text-sm">Crear Horario</span>
-                                                      </button>
-                                                      <button type="button" class="flex align-items-center gap-3 px-3 py-2 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-duration-200 outline-none" (click)="removeTeacher(sub.id, cur.id, assign.assignmentIds, assign.teacherId); teacherMenuSecondary.hide()" [disabled]="removingTeacherId() === assign.teacherId">
-                                                        <i class="pi pi-times text-red-500 text-lg" [class.pi-spin]="removingTeacherId() === assign.teacherId" [class.pi-spinner]="removingTeacherId() === assign.teacherId"></i>
-                                                        <span class="white-space-nowrap font-medium text-red-500 text-sm">Eliminar Docente</span>
-                                                      </button>
-                                                    </div>
-                                                  </p-popover>
+                                                  <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="showTeacherMenu($event, globalTeacherMenu, sub, assign.teacherId, sem.semester, assign.assignmentIds, cur.id); $event.stopPropagation()"></p-button>
                                                 </div>
                                               </div>
                                             }
@@ -775,3 +748,6 @@
     <p-button label="Guardar Horarios" severity="success" icon="pi pi-check" (click)="saveSchedules()" />
   </ng-template>
 </p-dialog>
+
+<!-- Global Teacher Menu -->
+<p-menu #globalTeacherMenu [model]="teacherMenuItems" [popup]="true" appendTo="body" styleClass="custom-action-menu" [style]="{ width: '180px' }"></p-menu>

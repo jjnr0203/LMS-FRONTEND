@@ -15,6 +15,8 @@ import { TagModule } from 'primeng/tag';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { Faculty } from '../../../../../core/models';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-faculties',
@@ -32,7 +34,8 @@ import { Faculty } from '../../../../../core/models';
     BadgeModule,
     SelectModule,
     ConfirmDialogModule,
-    TagModule
+    TagModule,
+    MenuModule
   ],
   templateUrl: './faculties.html',
 })
@@ -49,6 +52,8 @@ export class Faculties implements OnInit {
   isEdit = false;
   currentId: string | null = null;
   submitted = signal(false);
+  menuItems: MenuItem[] = [];
+  selectedFacultyForMenu: any = null;
 
   get hasEmptyRequiredFields() {
     if (!this.facultyForm) return true;
@@ -161,5 +166,24 @@ export class Faculties implements OnInit {
         });
       }
     });
+  }
+
+  showMenu(event: Event, menu: any, faculty: any) {
+    this.selectedFacultyForMenu = faculty;
+    this.menuItems = [
+      {
+        label: 'Editar',
+        icon: 'pi pi-pencil',
+        styleClass: 'action-edit',
+        command: () => this.editFaculty(this.selectedFacultyForMenu)
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        styleClass: 'action-delete',
+        command: () => this.deleteFaculty(this.selectedFacultyForMenu.id)
+      }
+    ];
+    menu.toggle(event);
   }
 }

@@ -14,6 +14,8 @@ import { TagModule } from 'primeng/tag';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { Modality } from '../../../../../core/models';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-modalities',
@@ -31,6 +33,7 @@ import { Modality } from '../../../../../core/models';
     TextareaModule,
     BadgeModule,
     TagModule,
+    MenuModule
   ],
   templateUrl: './modalities.html',
 })
@@ -47,6 +50,8 @@ export class Modalities implements OnInit {
   isEdit = false;
   currentId: string | null = null;
   submitted = signal(false);
+  menuItems: MenuItem[] = [];
+  selectedModalityForMenu: any = null;
 
   get hasEmptyRequiredFields() {
     if (!this.modalityForm) return true;
@@ -157,5 +162,24 @@ export class Modalities implements OnInit {
         });
       }
     });
+  }
+
+  showMenu(event: Event, menu: any, modality: any) {
+    this.selectedModalityForMenu = modality;
+    this.menuItems = [
+      {
+        label: 'Editar',
+        icon: 'pi pi-pencil',
+        styleClass: 'action-edit',
+        command: () => this.editModality(this.selectedModalityForMenu)
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        styleClass: 'action-delete',
+        command: () => this.deleteModality(this.selectedModalityForMenu.id)
+      }
+    ];
+    menu.toggle(event);
   }
 }

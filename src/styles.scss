@@ -123,3 +123,111 @@ html body .p-dialog .p-dialog-header .p-dialog-header-close-icon {
   stroke: #ffffff !important;
   fill: #ffffff !important;
 }
+
+/* Custom Action Menu (Users List) */
+.custom-action-menu,
+.p-menu-overlay {
+  width: 110px !important;
+  padding: 0.25rem 0 !important;
+}
+
+.custom-action-menu .p-menuitem-link,
+.p-menu-overlay .p-menuitem-link,
+.p-menu-overlay [class*="menuitem-link"],
+.p-menu-overlay [class*="menuitem-content"] {
+  padding: 0.4rem 0.5rem !important;
+  font-size: 0.85rem !important;
+  border-radius: 6px !important;
+  margin: 0.15rem 0.35rem !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Action View Hover */
+.p-menu-overlay .action-view:hover,
+.p-menu-overlay .action-view:hover > div,
+.p-menu-overlay .action-view:hover > a,
+.p-menu-overlay .action-view:hover > [class*="menuitem-content"] {
+  background-color: #e0f2fe !important;
+  color: #334155 !important;
+}
+.p-menu-overlay .action-view:hover * {
+  color: #334155 !important;
+}
+
+/* Action Edit Hover */
+.p-menu-overlay .action-edit:hover,
+.p-menu-overlay .action-edit:hover > div,
+.p-menu-overlay .action-edit:hover > a,
+.p-menu-overlay .action-edit:hover > [class*="menuitem-content"] {
+  background-color: #dcfce7 !important;
+  color: #334155 !important;
+}
+.p-menu-overlay .action-edit:hover * {
+  color: #334155 !important;
+}
+
+/* Action Delete Hover */
+.p-menu-overlay .action-delete:hover,
+.p-menu-overlay .action-delete:hover > div,
+.p-menu-overlay .action-delete:hover > a,
+.p-menu-overlay .action-delete:hover > [class*="menuitem-content"] {
+  background-color: #fee2e2 !important;
+  color: #b91c1c !important;
+}
+.p-menu-overlay .action-delete:hover * {
+  color: #b91c1c !important;
+}
+
+.p-button.action-menu-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #064e3b !important;
+  transition: all 0.2s ease !important;
+  
+  &:hover {
+    background: rgba(6, 78, 59, 0.08) !important;
+    color: #064e3b !important;
+  }
+}
+.p-button.action-menu-btn-light {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  transition: all 0.2s ease !important;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+  }
+}
+
+/* Global Soft Tags */
+.p-tag.soft-tag {
+  font-weight: 500 !important;
+  font-size: 0.7rem !important;
+  padding: 0.2rem 0.5rem !important;
+  border-radius: 6px !important;
+}
+.p-tag.soft-tag.p-tag-success { background-color: #dcfce7 !important; color: #166534 !important; }
+.p-tag.soft-tag.p-tag-info { background-color: #dbeafe !important; color: #1e40af !important; }
+.p-tag.soft-tag.p-tag-warning { background-color: #fef9c3 !important; color: #854d0e !important; }
+.p-tag.soft-tag.p-tag-danger { background-color: #fee2e2 !important; color: #991b1b !important; }
+.p-tag.soft-tag.p-tag-secondary { background-color: #f1f5f9 !important; color: #475569 !important; }
+.p-tag.soft-tag.p-tag-contrast { background-color: #ecfdf5 !important; color: #047857 !important; }
+.p-tag.soft-tag.p-tag-help { background-color: #f3e8ff !important; color: #7e22ce !important; }
+
+/* Global Dialog Restyling */
+html body .p-dialog {
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  overflow: hidden;
+}
+html body .p-dialog .p-dialog-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+html body .p-dialog.profile-modal .p-dialog-header {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}

@@ -12,6 +12,8 @@ import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -25,6 +27,7 @@ import { TabsModule } from 'primeng/tabs';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { PopoverModule } from 'primeng/popover';
 import { TooltipModule } from 'primeng/tooltip';
+import { TagModule } from 'primeng/tag';
 
 export interface TeacherAssignmentConfig {
   teacherId: string;
@@ -44,6 +47,7 @@ export interface TeacherAssignmentConfig {
     SkeletonModule,
     TableModule,
     DialogModule,
+    MenuModule,
     SelectModule,
     MultiSelectModule,
     ToastModule,
@@ -54,7 +58,8 @@ export interface TeacherAssignmentConfig {
     TabsModule,
     ColorPickerModule,
     PopoverModule,
-    TooltipModule
+    TooltipModule,
+    TagModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './career-detail.component.html',
@@ -625,6 +630,27 @@ export class CareerDetailComponent implements OnInit {
     this.selectedCurriculum.set(
       this.selectedCurriculum()?.id === cur.id ? null : cur,
     );
+  }
+
+  teacherMenuItems: MenuItem[] = [];
+
+  showTeacherMenu(event: Event, menu: any, sub: any, teacherId: string, semester: number, assignmentIds: string[], curriculumId: string) {
+    this.teacherMenuItems = [
+      {
+        label: 'Crear Horario',
+        icon: 'pi pi-calendar-clock',
+        styleClass: 'action-view text-700',
+        command: () => this.openScheduleModal(sub, teacherId, semester)
+      },
+      {
+        label: 'Eliminar Docente',
+        icon: 'pi pi-times',
+        styleClass: 'action-delete text-red-500',
+        disabled: this.removingTeacherId() === teacherId,
+        command: () => this.removeTeacher(sub.id, curriculumId, assignmentIds, teacherId)
+      }
+    ];
+    menu.toggle(event);
   }
 
   openBulkOfferModal(semester: number, subjects: any[], curriculumId: string) {

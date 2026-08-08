@@ -24,6 +24,8 @@ import * as XLSX from 'xlsx';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { UserService } from '../../../../../core/services/user.service';
 import { Career, Modality, Jornada, Faculty, User, Curriculum, Subject } from '../../../../../core/models';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-careers',
@@ -50,7 +52,8 @@ import { Career, Modality, Jornada, Faculty, User, Curriculum, Subject } from '.
     AccordionModule,
     ProgressSpinnerModule,
     PopoverModule,
-    SelectModule
+    SelectModule,
+    MenuModule
   ],
   templateUrl: './careers.html',
   styleUrls: ['./careers.scss'],
@@ -82,6 +85,16 @@ export class Careers implements OnInit {
   // --- Subject drill-down ---
   selectedCurriculum: Curriculum | null = null;
   subjects: Subject[] = [];
+
+  // --- Menus ---
+  careerMenuItems: MenuItem[] = [];
+  selectedCareerForMenu: any = null;
+  
+  curriculumMenuItems: MenuItem[] = [];
+  selectedCurriculumForMenu: any = null;
+  
+  subjectMenuItems: MenuItem[] = [];
+  selectedSubjectForMenu: any = null;
 
   searchQuery = signal<string>('');
   selectedSemesters = signal<number[]>([]);
@@ -764,5 +777,34 @@ export class Careers implements OnInit {
   getFacultyName(id: string | undefined): string {
     if (!id) return 'No asignada';
     return this.faculties.find(f => f.id === id)?.name || id;
+  }
+
+  showCareerMenu(event: Event, menu: any, career: any) {
+    this.selectedCareerForMenu = career;
+    this.careerMenuItems = [
+      { label: 'Ver Mallas', icon: 'pi pi-eye', styleClass: 'action-view', command: () => this.selectCareer(this.selectedCareerForMenu) },
+      { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => this.editCareer(this.selectedCareerForMenu) },
+      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => this.deleteCareer(this.selectedCareerForMenu.id) }
+    ];
+    menu.toggle(event);
+  }
+
+  showCurriculumMenu(event: Event, menu: any, curriculum: any) {
+    this.selectedCurriculumForMenu = curriculum;
+    this.curriculumMenuItems = [
+      { label: 'Ver Materias', icon: 'pi pi-eye', styleClass: 'action-view', command: () => this.selectCurriculum(this.selectedCurriculumForMenu) },
+      { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => this.editCurriculum(this.selectedCurriculumForMenu) },
+      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => this.deleteCurriculum(this.selectedCurriculumForMenu.id) }
+    ];
+    menu.toggle(event);
+  }
+
+  showSubjectMenu(event: Event, menu: any, subject: any) {
+    this.selectedSubjectForMenu = subject;
+    this.subjectMenuItems = [
+      { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => this.editSubject(this.selectedSubjectForMenu) },
+      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => this.deleteSubject(this.selectedSubjectForMenu.id) }
+    ];
+    menu.toggle(event);
   }
 }

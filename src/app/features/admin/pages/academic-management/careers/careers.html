@@ -14,29 +14,31 @@
   <p-table #dt [value]="careers" [paginator]="true" [rows]="10" styleClass="p-datatable-sm interactive-table" responsiveLayout="scroll" [globalFilterFields]="['code', 'name']">
     <ng-template pTemplate="header">
       <tr>
-        <th style="width: 8%;">Código</th>
         <th style="width: 12%;">Nombre</th>
+        <th style="width: 8%;">Código</th>
         <th style="width: 14%;">Facultad</th>
         <th style="width: 12%;">Modalidad</th>
         <th style="width: 12%;">Jornadas</th>
         <th style="width: 14%;">Coordinador</th>
         <th style="width: 8%;">Semestres</th>
-        <th style="width: 12%;">Acciones</th>
+        <th class="text-center" style="width: 12%;">Acciones</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-c>
       <tr style="cursor:pointer" (click)="selectCareer(c)">
-        <td class="font-medium text-slate-600" style="white-space: nowrap">{{ c.code }}</td>
         <td class="font-medium text-slate-800 hover-clickable-text">
           <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; line-height: 1.2;">
             {{ c.name }}
           </div>
         </td>
         <td>
+          <p-tag [value]="c.code" severity="info" styleClass="soft-tag text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag>
+        </td>
+        <td>
           <div class="flex gap-1 flex-wrap align-items-center">
             @if (c.facultyId) {
               <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; line-height: 1.2;">
-                <p-tag [value]="getFacultyName(c.facultyId)" severity="info" styleClass="text-xs px-2 py-1" [style]="{'white-space': 'normal'}"></p-tag>
+                <p-tag [value]="getFacultyName(c.facultyId)" styleClass="soft-tag p-tag-help text-xs px-2 py-1" [style]="{'white-space': 'normal'}"></p-tag>
               </div>
             } @else {
               <span class="text-xs text-slate-400 whitespace-nowrap">No asignada</span>
@@ -48,7 +50,7 @@
             @let modNames = getModalityList(c.modalityIds);
             @if (modNames.length > 0) {
               @for (m of modNames; track m) {
-                <p-tag [value]="m" severity="success" styleClass="text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag>
+                <p-tag [value]="m" severity="success" styleClass="soft-tag text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag>
               }
             } @else {
               <span class="text-xs text-slate-400 whitespace-nowrap">Ninguna</span>
@@ -59,7 +61,7 @@
           <div class="flex gap-1 flex-wrap align-items-center">
             @if (c.jornadaIds && c.jornadaIds.length > 0) {
               @for (j of c.jornadaIds; track j) {
-                <p-tag [value]="getJornadaName(j)" severity="secondary" styleClass="text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag>
+                <p-tag [value]="getJornadaName(j)" severity="warn" styleClass="soft-tag text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag>
               }
             } @else {
               <span class="text-xs text-slate-400 whitespace-nowrap">Ninguna</span>
@@ -71,13 +73,9 @@
             {{ getCoordinatorName(c.coordinatorId) }}
           </div>
         </td>
-        <td><p-tag [value]="c.durationSemesters + ' Semestres'" severity="info" styleClass="text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag></td>
-        <td>
-          <div class="flex gap-2">
-            <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="success" size="small" pTooltip="Ver Mallas" (click)="selectCareer(c); $event.stopPropagation()"></p-button>
-            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" size="small" (click)="editCareer(c); $event.stopPropagation()"></p-button>
-            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" size="small" (click)="deleteCareer(c.id); $event.stopPropagation()"></p-button>
-          </div>
+        <td><p-tag [value]="c.durationSemesters + ' Semestres'" severity="contrast" styleClass="soft-tag text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag></td>
+        <td class="text-center">
+          <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="showCareerMenu($event, careerMenu, c); $event.stopPropagation()"></p-button>
         </td>
       </tr>
     </ng-template>
@@ -85,6 +83,8 @@
         <tr><td colspan="8" class="text-center py-4 text-slate-500">No se encontraron carreras.</td></tr>
     </ng-template>
   </p-table>
+
+  <p-menu #careerMenu [model]="careerMenuItems" [popup]="true" appendTo="body"></p-menu>
 }
 
 @if (selectedCareer && !selectedCurriculum) {
@@ -110,7 +110,7 @@
           <th>Descripción</th>
           <th>Estado</th>
           <th>Creada</th>
-          <th style="width: 140px">Acciones</th>
+          <th class="text-center" style="width: 140px">Acciones</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-cu>
@@ -118,19 +118,14 @@
           <td class="font-medium text-slate-800 hover-clickable-text">{{ cu.name }}</td>
           <td class="text-slate-500">{{ cu.description || '-' }}</td>
           <td>
-            <span class="px-2 py-1 text-xs font-semibold rounded-full"
-                  [class.bg-emerald-100]="cu.isActive" [class.text-emerald-800]="cu.isActive"
-                  [class.bg-slate-100]="!cu.isActive" [class.text-slate-600]="!cu.isActive">
-              {{ cu.isActive ? 'Activa' : 'Inactiva' }}
-            </span>
+            <p-tag class="soft-tag" 
+                   [severity]="cu.isActive ? 'success' : 'secondary'" 
+                   [value]="cu.isActive ? 'Activa' : 'Inactiva'">
+            </p-tag>
           </td>
           <td class="text-slate-500">{{ cu.createdAt | date:'shortDate' }}</td>
-          <td>
-            <div class="flex gap-2">
-              <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="success" size="small" pTooltip="Ver Materias" (click)="selectCurriculum(cu); $event.stopPropagation()"></p-button>
-              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" size="small" (click)="editCurriculum(cu); $event.stopPropagation()"></p-button>
-              <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" size="small" (click)="deleteCurriculum(cu.id); $event.stopPropagation()"></p-button>
-            </div>
+          <td class="text-center">
+            <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="showCurriculumMenu($event, curriculumMenu, cu); $event.stopPropagation()"></p-button>
           </td>
         </tr>
       </ng-template>
@@ -138,6 +133,8 @@
         <tr><td colspan="5" class="text-center py-4 text-slate-500">No se encontraron mallas académicas.</td></tr>
       </ng-template>
     </p-table>
+
+    <p-menu #curriculumMenu [model]="curriculumMenuItems" [popup]="true" appendTo="body"></p-menu>
   }
 }
 
@@ -237,16 +234,18 @@
             <p-table [value]="group.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full" responsiveLayout="scroll">
               <ng-template pTemplate="header">
                 <tr>
-                  <th class="text-center" style="width: 20%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Código</th>
+                  <th class="text-center" style="width: 20%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
                   <th style="width: 40%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Materia</th>
                   <th class="text-center" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Créditos</th>
                   <th class="text-center" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Horas</th>
-                  <th class="text-center" style="width: 110px" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Acciones</th>
+                  <th class="text-center" style="width: 110px" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A', 'border-top-right-radius': '6px', 'border-bottom-right-radius': '6px'}">Acciones</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-s>
                 <tr>
-                  <td class="font-medium text-slate-600 text-center">{{ s.code }}</td>
+                  <td class="text-center">
+                    <p-tag [value]="s.code" styleClass="soft-tag text-xs px-2 py-1" [style]="{'background-color': getSemesterColor(group.semester) + '22', 'color': getSemesterColor(group.semester), 'white-space': 'nowrap'}"></p-tag>
+                  </td>
                   <td class="font-medium text-slate-800">{{ s.name }}</td>
                   <td class="text-center"><span class="font-semibold text-600">{{ s.credits }}</span></td>
                   <td class="text-center">
@@ -257,10 +256,7 @@
                     }
                   </td>
                   <td class="text-center">
-                    <div class="flex gap-2 justify-content-center">
-                      <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" size="small" (click)="editSubject(s)"></p-button>
-                      <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" size="small" (click)="deleteSubject(s.id)"></p-button>
-                    </div>
+                    <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="showSubjectMenu($event, subjectMenu, s)"></p-button>
                   </td>
                 </tr>
               </ng-template>
@@ -269,6 +265,8 @@
         </p-accordion-panel>
       }
     </p-accordion>
+    
+    <p-menu #subjectMenu [model]="subjectMenuItems" [popup]="true" appendTo="body"></p-menu>
   }
 }
 

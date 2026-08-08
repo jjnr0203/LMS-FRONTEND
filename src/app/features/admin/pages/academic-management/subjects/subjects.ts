@@ -18,6 +18,9 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { UserService } from '../../../../../core/services/user.service';
 import { Subject, User, Career, Modality, Curriculum } from '../../../../../core/models';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
+import { TagModule } from 'primeng/tag';
 
 @Component({
   selector: 'app-subjects',
@@ -38,8 +41,11 @@ import { Subject, User, Career, Modality, Curriculum } from '../../../../../core
     BadgeModule,
     IconFieldModule,
     InputIconModule,
+    MenuModule,
+    TagModule
   ],
   templateUrl: './subjects.html',
+  styleUrls: ['./subjects.scss'],
 })
 export class Subjects implements OnInit {
   private academicService = inject(AcademicService);
@@ -64,6 +70,9 @@ export class Subjects implements OnInit {
   form!: FormGroup;
   isEdit = false;
   currentId: string | null = null;
+  
+  menuItems: MenuItem[] = [];
+  selectedSubjectForMenu: any = null;
 
   ngOnInit() {
     this.initForm();
@@ -340,5 +349,24 @@ export class Subjects implements OnInit {
       });
     };
     reader.readAsBinaryString(this.selectedFile);
+  }
+
+  showMenu(event: Event, menu: any, subject: any) {
+    this.selectedSubjectForMenu = subject;
+    this.menuItems = [
+      {
+        label: 'Editar',
+        icon: 'pi pi-pencil',
+        styleClass: 'action-edit',
+        command: () => this.editSubject(this.selectedSubjectForMenu)
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        styleClass: 'action-delete',
+        command: () => this.deleteSubject(this.selectedSubjectForMenu.id)
+      }
+    ];
+    menu.toggle(event);
   }
 }

@@ -154,7 +154,19 @@
 }
 
 ::ng-deep .interactive-table .p-datatable-tbody > tr:hover {
-  background-color: #f1f5f9 !important;
+  background-color: rgba(6, 78, 59, 0.06) !important;
+}
+
+::ng-deep .action-menu-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #064e3b !important;
+  transition: all 0.2s ease !important;
+  
+  &:hover {
+    background: rgba(6, 78, 59, 0.08) !important;
+    color: #064e3b !important;
+  }
 }
 
 ::ng-deep .blue-action-btn {
@@ -167,3 +179,7 @@
     border-color: #2563eb !important;
   }
 }
+
+
+
+

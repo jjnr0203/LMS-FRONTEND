@@ -12,6 +12,9 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { AcademicTerm } from '../../../../../core/models';
 import { DatePipe } from '@angular/common';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
+import { TagModule } from 'primeng/tag';
 
 @Component({
   selector: 'app-academic-terms',
@@ -26,6 +29,8 @@ import { DatePipe } from '@angular/common';
     CheckboxModule,
     ToastModule,
     DatePipe,
+    MenuModule,
+    TagModule,
   ],
   templateUrl: './academic-terms.html',
 })
@@ -42,6 +47,8 @@ export class AcademicTerms implements OnInit {
   isEdit = false;
   currentTermId: string | null = null;
   submitted = signal(false);
+  menuItems: MenuItem[] = [];
+  selectedTermForMenu: any = null;
 
   get hasEmptyRequiredFields() {
     if (!this.termForm) return true;
@@ -151,5 +158,24 @@ export class AcademicTerms implements OnInit {
         });
       }
     });
+  }
+
+  showMenu(event: Event, menu: any, term: any) {
+    this.selectedTermForMenu = term;
+    this.menuItems = [
+      {
+        label: 'Editar',
+        icon: 'pi pi-pencil',
+        styleClass: 'action-edit',
+        command: () => this.editTerm(this.selectedTermForMenu)
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        styleClass: 'action-delete',
+        command: () => this.deleteTerm(this.selectedTermForMenu.id)
+      }
+    ];
+    menu.toggle(event);
   }
 }

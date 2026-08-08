@@ -1,0 +1,7 @@
+::ng-deep .interactive-table .p-datatable-tbody > tr {
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+::ng-deep .interactive-table .p-datatable-tbody > tr:hover {
+  background-color: rgba(6, 78, 59, 0.06) !important;
+}

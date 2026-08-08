@@ -57,11 +57,12 @@ interface CareerBreakdown {
 
 import { SelectModule } from 'primeng/select';
 import { PopoverModule } from 'primeng/popover';
+import { TagModule } from 'primeng/tag';
 
 @Component({
   selector: 'app-career-breakdown',
   standalone: true,
-  imports: [CommonModule, AccordionModule, TableModule, BadgeModule, ButtonModule, SkeletonModule, InputTextModule, IconFieldModule, InputIconModule, FormsModule, MultiSelectModule, ColorPickerModule, RouterModule, SelectModule, PopoverModule],
+  imports: [CommonModule, AccordionModule, TableModule, BadgeModule, ButtonModule, SkeletonModule, InputTextModule, IconFieldModule, InputIconModule, FormsModule, MultiSelectModule, ColorPickerModule, RouterModule, SelectModule, PopoverModule, TagModule],
   templateUrl: './career-breakdown.component.html',
   styleUrls: ['./career-breakdown.component.scss']
 })
