@@ -14,19 +14,14 @@ export default [
           import('./secretary-dashboard.component').then((m) => m.SecretaryDashboardComponent),
       },
       {
-        path: 'inscripciones',
+        path: 'estudiantes',
         loadComponent: () =>
-          import('../inscripciones/inscripciones.component').then((m) => m.InscripcionesComponent),
+          import('../students-list/students-list.component').then((m) => m.StudentsListComponent),
       },
       {
         path: 'matricula',
         loadComponent: () =>
           import('../matricula/matricula.component').then((m) => m.MatriculaComponent),
-      },
-      {
-        path: 'historial',
-        loadComponent: () =>
-          import('../historial/historial-academico.component').then((m) => m.HistorialAcademicoComponent),
       },
       {
         path: 'certificados',

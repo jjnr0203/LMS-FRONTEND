@@ -1,0 +1,148 @@
+<p-toast />
+@if (!isModal()) {
+  <div>
+    <div class="bg-blue-800 text-white p-5 mb-5 border-round-xl">
+      <h1 class="text-3xl font-semibold m-0 mb-2">Inscripción de Estudiantes</h1>
+      <p class="text-blue-100 m-0">Completa el siguiente formulario para inscribir a un estudiante en una carrera de la plataforma.</p>
+    </div>
+    <div class="flex justify-content-center">
+      <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="grid">
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="firstName" class="font-semibold text-sm text-700">Nombres <span class="text-red-500">*</span></label>
+                <input id="firstName" pInputText formControlName="firstName" maxlength="20" (input)="filterLetters($event, 'firstName')" placeholder="Nombres" />
+                @if (firstName.invalid && submitted()) {
+                  <small class="p-error text-red-500">Nombre inválido.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="lastName" class="font-semibold text-sm text-700">Apellidos <span class="text-red-500">*</span></label>
+                <input id="lastName" pInputText formControlName="lastName" maxlength="20" (input)="filterLetters($event, 'lastName')" placeholder="Apellidos" />
+                @if (lastName.invalid && submitted()) {
+                  <small class="p-error text-red-500">Apellido inválido.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="email" class="font-semibold text-sm text-700">Correo Electrónico <span class="text-red-500">*</span></label>
+                <input id="email" pInputText formControlName="email" type="email" maxlength="40" placeholder="correo@ejemplo.com" />
+                @if (email.invalid && submitted()) {
+                  <small class="p-error text-red-500">Correo inválido.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="studentId" class="font-semibold text-sm text-700">Cédula <span class="text-red-500">*</span></label>
+                <input id="studentId" pInputText formControlName="studentId" maxlength="10" (input)="filterNumbers($event, 'studentId')" placeholder="10 dígitos" />
+                @if (studentId.invalid && submitted()) {
+                  <small class="p-error text-red-500">La cédula ingresada no es válida.</small>
+                }
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-2 mb-3">
+                <label for="careerId" class="font-semibold text-sm text-700">Carrera <span class="text-red-500">*</span></label>
+                <p-select
+                  id="careerId"
+                  formControlName="careerId"
+                  [options]="careers()"
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Seleccione carrera"
+                  styleClass="w-full"
+                  appendTo="body"
+                />
+                @if (careerId.invalid && submitted()) {
+                  <small class="p-error text-red-500">La carrera es obligatoria.</small>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 flex justify-content-end">
+            <p-button
+              type="submit"
+              label="Inscribir Estudiante"
+              icon="pi pi-check"
+              [loading]="loading()"
+              [disabled]="hasEmptyRequiredFields"
+            />
+          </div>
+        </form>
+      </p-card>
+    </div>
+  </div>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="firstName" class="font-semibold text-sm text-700">Nombres <span class="text-red-500">*</span></label>
+          <input id="firstName" pInputText formControlName="firstName" maxlength="20" (input)="filterLetters($event, 'firstName')" placeholder="Nombres" />
+          @if (firstName.invalid && submitted()) {
+            <small class="p-error text-red-500">Nombre inválido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="lastName" class="font-semibold text-sm text-700">Apellidos <span class="text-red-500">*</span></label>
+          <input id="lastName" pInputText formControlName="lastName" maxlength="20" (input)="filterLetters($event, 'lastName')" placeholder="Apellidos" />
+          @if (lastName.invalid && submitted()) {
+            <small class="p-error text-red-500">Apellido inválido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="email" class="font-semibold text-sm text-700">Correo Electrónico <span class="text-red-500">*</span></label>
+          <input id="email" pInputText formControlName="email" type="email" maxlength="40" placeholder="correo@ejemplo.com" />
+          @if (email.invalid && submitted()) {
+            <small class="p-error text-red-500">Correo inválido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="studentId" class="font-semibold text-sm text-700">Cédula <span class="text-red-500">*</span></label>
+          <input id="studentId" pInputText formControlName="studentId" maxlength="10" (input)="filterNumbers($event, 'studentId')" placeholder="10 dígitos" />
+          @if (studentId.invalid && submitted()) {
+            <small class="p-error text-red-500">La cédula ingresada no es válida.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="careerId" class="font-semibold text-sm text-700">Carrera <span class="text-red-500">*</span></label>
+          <p-select
+            id="careerId"
+            formControlName="careerId"
+            [options]="careers()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Seleccione carrera"
+            styleClass="w-full"
+            appendTo="body"
+          />
+          @if (careerId.invalid && submitted()) {
+            <small class="p-error text-red-500">La carrera es obligatoria.</small>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="mt-4 flex justify-content-end">
+      <p-button
+        type="submit"
+        label="Inscribir Estudiante"
+        icon="pi pi-check"
+        [loading]="loading()"
+        [disabled]="hasEmptyRequiredFields"
+      />
+    </div>
+  </form>
+}

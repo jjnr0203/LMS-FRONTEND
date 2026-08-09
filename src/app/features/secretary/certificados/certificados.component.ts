@@ -5,7 +5,6 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -17,7 +16,6 @@ import { TagModule } from 'primeng/tag';
     ToastModule,
     CardModule,
     InputTextModule,
-    SelectModule,
     ButtonModule,
     TableModule,
     TagModule,
@@ -34,16 +32,8 @@ export class CertificadosComponent {
   certificates = signal<any[]>([]);
   loading = signal(false);
 
-  certificateTypes = [
-    { label: 'Matrícula', value: 'matricula' },
-    { label: 'Estudios', value: 'estudios' },
-    { label: 'Notas', value: 'notas' },
-    { label: 'Egreso', value: 'egreso' },
-  ];
-
   form = this.formBuilder.group({
     studentId: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-    type: ['', Validators.required],
   });
 
   searchForm = this.formBuilder.group({
@@ -51,7 +41,6 @@ export class CertificadosComponent {
   });
 
   get studentId() { return this.form.controls.studentId; }
-  get type() { return this.form.controls.type; }
 
   generate() {
     if (this.form.invalid) {
@@ -59,10 +48,22 @@ export class CertificadosComponent {
       return;
     }
     this.loading.set(true);
-    this.secretaryService.generateCertificate(this.form.value as any).subscribe({
-      next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Certificado generado correctamente' });
+    this.secretaryService.generateCertificate({ studentId: this.form.value.studentId! }).subscribe({
+      next: (res) => {
         this.loading.set(false);
+        if (res.certificate?.pdfUrl) {
+          const url = res.certificate.pdfUrl;
+          const downloadUrl = url.includes('/image/upload/')
+            ? url.replace('/image/upload/', '/image/upload/fl_attachment/')
+            : url;
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `certificado-matricula-${res.certificate.studentId}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Certificado de matrícula generado correctamente' });
         this.searchCertificates();
       },
       error: (err) => {
@@ -79,15 +80,5 @@ export class CertificadosComponent {
       next: (res) => this.certificates.set(res.certificates),
       error: () => {},
     });
-  }
-
-  getTypeLabel(type: string): string {
-    switch (type) {
-      case 'matricula': return 'Matrícula';
-      case 'estudios': return 'Estudios';
-      case 'notas': return 'Notas';
-      case 'egreso': return 'Egreso';
-      default: return type;
-    }
   }
 }

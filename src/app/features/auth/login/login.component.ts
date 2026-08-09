@@ -89,6 +89,7 @@ export class LoginComponent {
         else if (role === 'treasury') this.router.navigate(['/treasury']);
         else if (role === 'teacher') this.router.navigate(['/teacher']);
         else if (role === 'human_resources') this.router.navigate(['/human-resources']);
+        else if (role === 'secretary') this.router.navigate(['/secretary']);
         else this.router.navigate(['/perfil']);
       },
       error: (err) => {

@@ -1,0 +1,74 @@
+<p-toast />
+
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Lista de Estudiantes</h1>
+      <p class="description">Administra a todos los estudiantes registrados e inscritos en la institución.</p>
+    </div>
+  </div>
+  <div class="content-wrapper">
+    <div class="data-card">
+      <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div class="flex align-items-center gap-3">
+          <p-button label="Crear Estudiante" icon="pi pi-plus" (click)="openCreateDialog()" severity="success" size="small"></p-button>
+        </div>
+
+        <div class="flex align-items-center gap-2">
+          <p-iconField iconPosition="left" styleClass="w-20rem">
+            <p-inputIcon styleClass="pi pi-search" />
+            <input pInputText type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Buscar por cédula o nombre..." class="w-full" />
+          </p-iconField>
+        </div>
+      </div>
+
+      <p-table
+        [value]="students()"
+        [paginator]="true"
+        [rows]="10"
+        [totalRecords]="totalRecords()"
+        [lazy]="true"
+        (onLazyLoad)="onPageChange($event)"
+        [loading]="loading()"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Cédula</th>
+            <th>Nombre Completo</th>
+            <th>Correo</th>
+            <th>Carrera</th>
+            <th>Estado</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-student>
+          <tr>
+            <td class="font-medium text-900">{{ student.id }}</td>
+            <td>{{ student.firstName }} {{ student.lastName }}</td>
+            <td>{{ student.email }}</td>
+            <td>{{ student.careerName ?? 'Sin carrera asignada' }}</td>
+            <td>
+              <p-tag [value]="getStatusLabel(student.status)" [severity]="getStatusSeverity(student.status)"></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center p-4 text-500">No se encontraron registros.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  header="Crear Estudiante"
+  [(visible)]="createDialogVisible"
+  [modal]="true"
+  [style]="{ width: '800px', 'max-width': '95vw' }"
+  [closable]="true"
+>
+  <app-create-student [isModal]="true" (userCreated)="onStudentCreated()"></app-create-student>
+</p-dialog>

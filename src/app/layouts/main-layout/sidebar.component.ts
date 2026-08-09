@@ -139,21 +139,15 @@ export class SidebarComponent {
       roles: ['secretary'],
     },
     {
-      label: 'Inscripciones',
-      icon: 'pi pi-file-edit',
-      route: '/secretary/inscripciones',
+      label: 'Estudiantes',
+      icon: 'pi pi-users',
+      route: '/secretary/estudiantes',
       roles: ['secretary'],
     },
     {
       label: 'Matrícula',
       icon: 'pi pi-calendar',
       route: '/secretary/matricula',
-      roles: ['secretary'],
-    },
-    {
-      label: 'Historial Académico',
-      icon: 'pi pi-chart-bar',
-      route: '/secretary/historial',
       roles: ['secretary'],
     },
     {

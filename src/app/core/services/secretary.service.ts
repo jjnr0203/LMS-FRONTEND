@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Inscription, EnrollmentDetail, AcademicHistory, Certificate } from '../models';
+import { Inscription, EnrollmentDetail, Certificate } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class SecretaryService {
@@ -27,6 +27,12 @@ export class SecretaryService {
     return this.http.get<any>(`${this.apiUrl}/inscripciones`);
   }
 
+  listStudents(params: { page: number; limit: number; search?: string }): Observable<any> {
+    let url = `${this.apiUrl}/students?page=${params.page}&limit=${params.limit}`;
+    if (params.search) url += `&search=${encodeURIComponent(params.search)}`;
+    return this.http.get<any>(url);
+  }
+
   createEnrollment(data: {
     studentId: string;
     academicTermId: string;
@@ -37,13 +43,9 @@ export class SecretaryService {
     return this.http.post<any>(`${this.apiUrl}/matricula`, data);
   }
 
-  getAcademicHistory(studentId: string): Observable<AcademicHistory> {
-    return this.http.get<AcademicHistory>(`${this.apiUrl}/historial/${studentId}`);
-  }
-
   generateCertificate(data: {
     studentId: string;
-    type: string;
+    type?: string;
   }): Observable<{ message: string; certificate: Certificate }> {
     return this.http.post<any>(`${this.apiUrl}/certificados`, data);
   }

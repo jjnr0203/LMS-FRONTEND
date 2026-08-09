@@ -26,9 +26,8 @@ export class SecretaryDashboardComponent implements OnInit {
   loading = signal(false);
 
   modules = [
-    { label: 'Inscripciones', icon: 'pi pi-file-edit', route: '/secretary/inscripciones', color: '#3b82f6', bg: '#eff6ff' },
+    { label: 'Estudiantes', icon: 'pi pi-users', route: '/secretary/estudiantes', color: '#3b82f6', bg: '#eff6ff' },
     { label: 'Matrícula', icon: 'pi pi-calendar', route: '/secretary/matricula', color: '#10b981', bg: '#ecfdf5' },
-    { label: 'Historial Académico', icon: 'pi pi-chart-bar', route: '/secretary/historial', color: '#f59e0b', bg: '#fffbeb' },
     { label: 'Certificados', icon: 'pi pi-verified', route: '/secretary/certificados', color: '#8b5cf6', bg: '#f5f3ff' },
   ];
 

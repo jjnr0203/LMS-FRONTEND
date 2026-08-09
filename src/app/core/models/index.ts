@@ -202,21 +202,6 @@ export interface EnrollmentSubject {
   createdAt: string;
 }
 
-export interface AcademicRecord {
-  subjectName: string;
-  grade: number;
-  credits: number;
-  term: string;
-}
-
-export interface AcademicHistory {
-  studentId: string;
-  approved: AcademicRecord[];
-  failed: AcademicRecord[];
-  average: number;
-  totalCredits: number;
-}
-
 export interface Certificate {
   id: string;
   studentId: string;
