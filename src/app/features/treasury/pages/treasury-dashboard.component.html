@@ -1,13 +1,107 @@
-<p-toast />
-<div class="surface-ground min-h-screen">
-  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
-    <h1 class="text-3xl font-semibold m-0 mb-2">Bienvenido de nuevo, {{ user()?.firstName }}</h1>
-    <p class="text-green-100 m-0">Aquí puedes gestionar matrículas, registrar abonos y administrar la seguridad en tu rol de Tesorería.</p>
+<div class="page-container">
+  <!-- Dark Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Bienvenido de nuevo, <span>{{ user()?.firstName }}</span></h1>
+      <p class="description">
+        Aquí puedes ver el resumen de matrículas y pagos de la institución.
+      </p>
+    </div>
   </div>
-  <div class="flex justify-content-center">
-    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
-      <h3>Panel de Tesorería</h3>
-      <p>Utiliza el menú lateral para acceder a las opciones de gestión financiera y de usuarios.</p>
-    </p-card>
+
+  <!-- Main Content Card -->
+  <div class="content-wrapper">
+    <div class="data-card">
+
+      @if (!stats()) {
+        <div class="flex justify-content-center p-6">
+          <i class="pi pi-spin pi-spinner text-4xl text-emerald-500"></i>
+        </div>
+      } @else {
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <!-- Total Matrículas -->
+          <div class="stat-card clickable" (click)="goTo('matriculas')">
+            <div class="stat-icon total-icon">
+              <i class="pi pi-file"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ stats()?.total || 0 }}</span>
+              </h3>
+              <p>Total Matrículas</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+          <!-- Pagado Total -->
+          <div class="stat-card clickable" (click)="goTo('matriculas')">
+            <div class="stat-icon paid-icon">
+              <i class="pi pi-check-circle"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ stats()?.pagoTotal || 0 }}</span>
+              </h3>
+              <p>Pagado Total</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+          <!-- Pendientes -->
+          <div class="stat-card clickable" (click)="goTo('matriculas')">
+            <div class="stat-icon pending-icon">
+              <i class="pi pi-clock"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ stats()?.pendiente || 0 }}</span>
+              </h3>
+              <p>Pendientes</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+          <!-- No Paga -->
+          <div class="stat-card clickable" (click)="goTo('matriculas')">
+            <div class="stat-icon nopay-icon">
+              <i class="pi pi-times-circle"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ stats()?.noPaga || 0 }}</span>
+              </h3>
+              <p>No Paga</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+          <!-- Cuotas Pagadas -->
+          <div class="stat-card clickable" (click)="goTo('abonos')">
+            <div class="stat-icon installments-icon">
+              <i class="pi pi-wallet"></i>
+            </div>
+            <div class="stat-info">
+              <h3>
+                <span translate="no">{{ stats()?.cuotasPagadas || 0 }}</span>
+              </h3>
+              <p>Cuotas Pagadas</p>
+            </div>
+            <div class="action-arrow">
+              <i class="pi pi-arrow-right"></i>
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
   </div>
 </div>

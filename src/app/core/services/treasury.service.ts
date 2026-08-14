@@ -10,8 +10,14 @@ export class TreasuryService {
 
   constructor(private http: HttpClient) {}
 
-  getTuitions(): Observable<{ tuitions: Tuition[] }> {
-    return this.http.get<{ tuitions: Tuition[] }>(`${this.apiUrl}/matriculas`);
+  getDashboardStats(): Observable<{ stats: TreasuryDashboardStats; recentTuitions: Tuition[] }> {
+    return this.http.get<{ stats: TreasuryDashboardStats; recentTuitions: Tuition[] }>(
+      `${this.apiUrl}/dashboard`,
+    );
+  }
+
+  getMatriculas(): Observable<{ data: MatriculaRow[] }> {
+    return this.http.get<{ data: MatriculaRow[] }>(`${this.apiUrl}/matriculas`);
   }
 
   registerStudent(data: {
@@ -37,6 +43,26 @@ export class TreasuryService {
     return this.http.post<any>(`${this.apiUrl}/abonos`, { studentId });
   }
 
+  completePayment(studentId: string): Observable<{
+    message: string;
+    tuition: Tuition;
+  }> {
+    return this.http.post<any>(
+      `${this.apiUrl}/matriculas/${studentId}/pago-completo`,
+      {},
+    );
+  }
+
+  createConvenio(studentId: string): Observable<{
+    message: string;
+    tuition: Tuition;
+  }> {
+    return this.http.post<any>(
+      `${this.apiUrl}/matriculas/${studentId}/convenio`,
+      {},
+    );
+  }
+
   disableAccount(studentId: string): Observable<{
     message: string;
     user: Partial<User>;
@@ -44,4 +70,20 @@ export class TreasuryService {
   }> {
     return this.http.post<any>(`${this.apiUrl}/deshabilitar`, { studentId });
   }
+}
+
+export interface TreasuryDashboardStats {
+  total: number;
+  pagoTotal: number;
+  pendiente: number;
+  noPaga: number;
+  cuotasPagadas: number;
+}
+
+export interface MatriculaRow {
+  studentId: string;
+  firstName: string;
+  lastName: string;
+  status: 'pago_total' | 'pendiente' | 'convenio' | 'no_paga';
+  paidInstallments: number;
 }

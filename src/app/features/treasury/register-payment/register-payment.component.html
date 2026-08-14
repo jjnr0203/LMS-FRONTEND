@@ -1,11 +1,18 @@
 <p-toast />
-<div class="surface-ground min-h-screen">
-  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
-    <h1 class="text-3xl font-semibold m-0 mb-2">Registrar Abono</h1>
-    <p class="text-green-100 m-0">Registra un nuevo abono para la matrícula de un estudiante.</p>
+<div class="page-container">
+  <!-- Dark Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Registro de <span>Abonos</span></h1>
+      <p class="description">
+        Registra un nuevo abono para la matrícula de un estudiante.
+      </p>
+    </div>
   </div>
-  <div class="flex justify-content-center">
-    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
+
+  <!-- Main Content Card -->
+  <div class="content-wrapper">
+    <div class="data-card">
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="flex flex-column gap-2 mb-4">
           <label class="font-semibold text-sm text-700" for="studentId">Seleccione el Estudiante</label>
@@ -41,6 +48,6 @@
           <p><strong>Cuotas pagadas:</strong> {{ r.paidInstallments }} / 4</p>
         </div>
       }
-    </p-card>
+    </div>
   </div>
 </div>

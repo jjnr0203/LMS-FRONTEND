@@ -98,6 +98,7 @@ export class StudentsListComponent implements OnInit, OnDestroy {
   getStatusSeverity(status: string | null): 'success' | 'warn' | 'danger' | 'info' | 'secondary' {
     switch (status) {
       case 'approved': return 'success';
+      case 'matriculado': return 'info';
       case 'pending': return 'warn';
       case 'rejected': return 'danger';
       default: return 'secondary';
@@ -107,6 +108,7 @@ export class StudentsListComponent implements OnInit, OnDestroy {
   getStatusLabel(status: string | null): string {
     switch (status) {
       case 'approved': return 'Aprobada';
+      case 'matriculado': return 'Matriculado';
       case 'pending': return 'Pendiente';
       case 'rejected': return 'Rechazada';
       default: return 'Sin inscripción';

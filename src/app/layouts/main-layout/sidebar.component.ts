@@ -95,12 +95,8 @@ export class SidebarComponent {
     {
       label: 'Estudiantes',
       icon: 'pi pi-users',
+      route: '/treasury/estudiantes-list',
       roles: ['treasury'],
-      expanded: false,
-      children: [
-        { label: 'Ver Estudiantes', icon: '', route: '/treasury/estudiantes-list', roles: ['treasury'] },
-        { label: 'Registrar Estudiante', icon: '', route: '/treasury/estudiantes', roles: ['treasury'] },
-      ]
     },
     {
       label: 'Pagos',

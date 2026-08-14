@@ -19,7 +19,7 @@ export interface User {
 export interface Tuition {
   id: string;
   studentId: string;
-  status: 'pago_total' | 'pendiente' | 'no_paga';
+  status: 'pago_total' | 'pendiente' | 'convenio' | 'no_paga';
   paidInstallments: number;
 }
 

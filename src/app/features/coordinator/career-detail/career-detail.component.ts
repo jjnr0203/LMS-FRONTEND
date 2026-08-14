@@ -59,7 +59,7 @@ export interface TeacherAssignmentConfig {
     ColorPickerModule,
     PopoverModule,
     TooltipModule,
-    TagModule
+    TagModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './career-detail.component.html',
@@ -75,13 +75,13 @@ export class CareerDetailComponent implements OnInit {
   private messageService = inject(MessageService);
 
   career = signal<any>(null);
-  
+
   // Data lists for selects
   teachers = signal<any[]>([]);
   terms = signal<any[]>([]);
   modalities = signal<any[]>([]);
   jornadas = signal<any[]>([]);
-  
+
   curriculums = signal<any[]>([]);
   careerName = signal<string>('');
   loading = signal<boolean>(true);
@@ -89,7 +89,7 @@ export class CareerDetailComponent implements OnInit {
   // Filters
   searchQuery = signal<string>('');
   selectedSemesters = signal<number[]>([]);
-  
+
   availableSemesters = computed(() => {
     const sems = new Set<number>();
     for (const cur of this.curriculums()) {
@@ -103,37 +103,39 @@ export class CareerDetailComponent implements OnInit {
   filteredCurriculums = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     const sems = this.selectedSemesters();
-    
-    return this.curriculums().map(cur => {
+
+    return this.curriculums().map((cur) => {
       // Filter semesters
       let filteredSemesters = cur.semesters || [];
       if (sems.length > 0) {
         filteredSemesters = filteredSemesters.filter((sem: any) => sems.includes(sem.semester));
       }
-      
+
       // Filter subjects within those semesters
       if (q) {
-        filteredSemesters = filteredSemesters.map((sem: any) => ({
-          ...sem,
-          subjects: sem.subjects.filter((sub: any) => 
-            sub.name.toLowerCase().includes(q) || 
-            sub.code.toLowerCase().includes(q)
-          )
-        })).filter((sem: any) => sem.subjects.length > 0);
+        filteredSemesters = filteredSemesters
+          .map((sem: any) => ({
+            ...sem,
+            subjects: sem.subjects.filter(
+              (sub: any) =>
+                sub.name.toLowerCase().includes(q) || sub.code.toLowerCase().includes(q),
+            ),
+          }))
+          .filter((sem: any) => sem.subjects.length > 0);
       }
-      
+
       return {
         ...cur,
-        semesters: filteredSemesters
+        semesters: filteredSemesters,
       };
     });
   });
-  
+
   selectedCurriculum = signal<any | null>(null);
-  
+
   // Bulk Offer Modal State
   showOfferModal = signal(false);
-  
+
   // Schedule Modal State
   displayScheduleModal = signal(false);
   scheduleModalData = signal<{
@@ -143,9 +145,9 @@ export class CareerDetailComponent implements OnInit {
     semester?: number;
     assignments: any[]; // The specific assignments for this teacher in this subject
   } | null>(null);
-  
+
   scheduleCollisionError = signal<string | null>(null);
-  
+
   assigning = signal(false);
   filterTeacher = signal('');
   filterSubject = signal('');
@@ -156,7 +158,7 @@ export class CareerDetailComponent implements OnInit {
   calendarSelectedPair = signal<string>('');
   calendarSearchQuery = signal<string>('');
   filterSemesterCalendar = signal<number | null>(null);
-  
+
   removingSubjectId = signal<string | null>(null);
   removingTeacherId = signal<string | null>(null);
   subjectColorsMap = signal<Map<string, string>>(new Map());
@@ -164,71 +166,110 @@ export class CareerDetailComponent implements OnInit {
 
   predefinedColors = [
     // Reds & Pinks
-    '#ef4444', '#f43f5e', '#ec4899', '#d946ef', '#b91c1c', '#be185d',
+    '#ef4444',
+    '#f43f5e',
+    '#ec4899',
+    '#d946ef',
+    '#b91c1c',
+    '#be185d',
     // Oranges & Yellows
-    '#f97316', '#f59e0b', '#eab308', '#ea580c', '#b45309', '#ca8a04',
+    '#f97316',
+    '#f59e0b',
+    '#eab308',
+    '#ea580c',
+    '#b45309',
+    '#ca8a04',
     // Greens
-    '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#15803d', '#0f766e',
+    '#84cc16',
+    '#22c55e',
+    '#10b981',
+    '#14b8a6',
+    '#15803d',
+    '#0f766e',
     // Blues
-    '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#0369a1', '#1d4ed8',
+    '#06b6d4',
+    '#0ea5e9',
+    '#3b82f6',
+    '#6366f1',
+    '#0369a1',
+    '#1d4ed8',
     // Purples & Grays & Black
-    '#8b5cf6', '#a855f7', '#6d28d9', '#64748b', '#78716c', '#000000'
+    '#8b5cf6',
+    '#a855f7',
+    '#6d28d9',
+    '#64748b',
+    '#78716c',
+    '#000000',
   ];
-  
+
   bulkOfferForm = {
     semester: 0,
     academicTermId: '',
     curriculumId: '',
     subjects: [] as any[],
-    subjectConfigs: {} as Record<string, TeacherAssignmentConfig[]>
+    subjectConfigs: {} as Record<string, TeacherAssignmentConfig[]>,
   };
 
   teacherLoads = computed(() => {
     const termId = this.bulkOfferForm.academicTermId;
-    const loads = new Map<string, any>();
-    for (const cur of this.filteredCurriculums()) {
-      for (const sem of cur.semesters || []) {
-        for (const sub of sem.subjects || []) {
-          for (const assign of sub.assignments || []) {
-            if (termId && assign.academicTermId !== termId) continue;
-            
-            if (!loads.has(assign.teacherId)) {
-              loads.set(assign.teacherId, {
-                teacherId: assign.teacherId,
-                teacherName: assign.teacherName,
-                subjectsMap: new Map<string, any>(),
-                totalHours: 0
+
+    const build = (filterByTerm: boolean) => {
+      const loads = new Map<string, any>();
+      for (const cur of this.filteredCurriculums()) {
+        for (const sem of cur.semesters || []) {
+          for (const sub of sem.subjects || []) {
+            for (const assign of sub.assignments || []) {
+              if (filterByTerm && termId && assign.academicTermId !== termId) continue;
+
+              if (!loads.has(assign.teacherId)) {
+                loads.set(assign.teacherId, {
+                  teacherId: assign.teacherId,
+                  teacherName: assign.teacherName,
+                  subjectsMap: new Map<string, any>(),
+                  totalHours: 0,
+                });
+              }
+              const load = loads.get(assign.teacherId)!;
+              const pair = `${assign.modalityName || 'Sin Modalidad'} - ${assign.jornadaName || 'Sin Jornada'}`;
+              const key = `${sub.name}|${pair}|${sem.semester}`;
+              load.subjectsMap.set(key, {
+                name: sub.name,
+                pair: pair,
+                semester: sem.semester,
+                id: sub.id,
+                subjectId: sub.subjectId,
               });
-            }
-            const load = loads.get(assign.teacherId)!;
-            const pair = `${assign.modalityName || 'Sin Modalidad'} - ${assign.jornadaName || 'Sin Jornada'}`;
-            const key = `${sub.name}|${pair}|${sem.semester}`;
-            load.subjectsMap.set(key, { name: sub.name, pair: pair, semester: sem.semester, id: sub.id, subjectId: sub.subjectId });
-            
-            for (const sched of assign.schedules || []) {
-              const start = sched.startTime;
-              const end = sched.endTime;
-              if (start && end) {
-                const sSplit = start.split(':');
-                const eSplit = end.split(':');
-                const startMins = parseInt(sSplit[0]) * 60 + parseInt(sSplit[1]);
-                const endMins = parseInt(eSplit[0]) * 60 + parseInt(eSplit[1]);
-                const diff = (endMins - startMins) / 60;
-                if (diff > 0) load.totalHours += diff;
+
+              for (const sched of assign.schedules || []) {
+                const start = sched.startTime;
+                const end = sched.endTime;
+                if (start && end) {
+                  const sSplit = start.split(':');
+                  const eSplit = end.split(':');
+                  const startMins = parseInt(sSplit[0]) * 60 + parseInt(sSplit[1]);
+                  const endMins = parseInt(eSplit[0]) * 60 + parseInt(eSplit[1]);
+                  const diff = (endMins - startMins) / 60;
+                  if (diff > 0) load.totalHours += diff;
+                }
               }
             }
           }
         }
       }
-    }
-    return Array.from(loads.values()).map(l => {
-      const list = Array.from(l.subjectsMap.values());
-      return {
-        ...l,
-        subjectCount: l.subjectsMap.size,
-        subjectsList: list
-      };
-    }).sort((a, b) => b.totalHours - a.totalHours);
+      return Array.from(loads.values())
+        .map((l) => {
+          const list = Array.from(l.subjectsMap.values());
+          return {
+            ...l,
+            subjectCount: l.subjectsMap.size,
+            subjectsList: list,
+          };
+        })
+        .sort((a, b) => b.totalHours - a.totalHours);
+    };
+
+    const termLoads = build(true);
+    return termLoads.length > 0 ? termLoads : build(false);
   });
 
   filteredTeacherLoads = computed(() => {
@@ -237,15 +278,19 @@ export class CareerDetailComponent implements OnInit {
     const sem = this.filterSemester().toLowerCase().trim();
     const m = this.filterModality().toLowerCase().trim();
     const j = this.filterJornada().toLowerCase().trim();
-    
-    let loads = this.teacherLoads().map(load => {
+
+    let loads = this.teacherLoads().map((load) => {
       let filteredSubjects = load.subjectsList;
 
       if (s) {
-        filteredSubjects = filteredSubjects.filter((sub: any) => sub.name.toLowerCase().includes(s));
+        filteredSubjects = filteredSubjects.filter((sub: any) =>
+          sub.name.toLowerCase().includes(s),
+        );
       }
       if (sem) {
-        filteredSubjects = filteredSubjects.filter((sub: any) => sub.semester.toString() === sem || `semestre ${sub.semester}`.includes(sem));
+        filteredSubjects = filteredSubjects.filter(
+          (sub: any) => sub.semester.toString() === sem || `semestre ${sub.semester}`.includes(sem),
+        );
       }
       if (m) {
         filteredSubjects = filteredSubjects.filter((sub: any) => {
@@ -263,16 +308,16 @@ export class CareerDetailComponent implements OnInit {
       return {
         ...load,
         subjectsList: filteredSubjects,
-        subjectCount: filteredSubjects.length
+        subjectCount: filteredSubjects.length,
       };
     });
 
     if (s || sem || m || j) {
-      loads = loads.filter(l => l.subjectsList.length > 0);
+      loads = loads.filter((l) => l.subjectsList.length > 0);
     }
 
     if (t) {
-      loads = loads.filter(l => l.teacherName.toLowerCase().includes(t));
+      loads = loads.filter((l) => l.teacherName.toLowerCase().includes(t));
     }
 
     return loads;
@@ -285,7 +330,9 @@ export class CareerDetailComponent implements OnInit {
         if (sub.semester) sems.add(Number(sub.semester));
       }
     }
-    return Array.from(sems).sort((a, b) => a - b).map(v => ({ label: `Semestre ${v}`, value: v.toString() }));
+    return Array.from(sems)
+      .sort((a, b) => a - b)
+      .map((v) => ({ label: `Semestre ${v}`, value: v.toString() }));
   });
 
   filterAvailableModalities = computed(() => {
@@ -296,7 +343,9 @@ export class CareerDetailComponent implements OnInit {
         if (parts[0] && parts[0] !== 'Sin Modalidad') mods.add(parts[0].trim());
       }
     }
-    return Array.from(mods).sort().map(v => ({ label: v, value: v.toLowerCase() }));
+    return Array.from(mods)
+      .sort()
+      .map((v) => ({ label: v, value: v.toLowerCase() }));
   });
 
   filterAvailableJornadas = computed(() => {
@@ -307,7 +356,9 @@ export class CareerDetailComponent implements OnInit {
         if (parts.length > 1 && parts[1] && parts[1] !== 'Sin Jornada') jors.add(parts[1].trim());
       }
     }
-    return Array.from(jors).sort().map(v => ({ label: v, value: v.toLowerCase() }));
+    return Array.from(jors)
+      .sort()
+      .map((v) => ({ label: v, value: v.toLowerCase() }));
   });
 
   calendarAvailablePairs = computed(() => {
@@ -325,41 +376,60 @@ export class CareerDetailComponent implements OnInit {
       }
     }
     const arr = Array.from(pairs).sort();
-    
+
     // Auto-select the first pair if none is selected and pairs exist
     // Using an effect or untracked is better, but since computed shouldn't cause side effects,
     // we just use the first pair as a fallback inside calendarData if calendarSelectedPair is empty.
-    
+
     return arr;
   });
 
   calendarAvailableSemesters = computed(() => {
-     const sems = new Set<number>();
-     for (const cur of this.filteredCurriculums()) {
-       for (const sem of cur.semesters || []) {
-          sems.add(sem.semester);
-       }
-     }
-     return Array.from(sems).sort((a, b) => a - b);
+    const sems = new Set<number>();
+    for (const cur of this.filteredCurriculums()) {
+      for (const sem of cur.semesters || []) {
+        sems.add(sem.semester);
+      }
+    }
+    return Array.from(sems).sort((a, b) => a - b);
   });
 
   calendarDays = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
-  
+
   calendarDataBySemester = computed(() => {
-    const results: { semester: number, semesterName: string, events: any[], hours: number[] }[] = [];
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#14b8a6'];
+    const results: { semester: number; semesterName: string; events: any[]; hours: number[] }[] =
+      [];
+    const colors = [
+      '#3b82f6',
+      '#10b981',
+      '#f59e0b',
+      '#ef4444',
+      '#8b5cf6',
+      '#ec4899',
+      '#14b8a6',
+      '#f97316',
+      '#6366f1',
+      '#14b8a6',
+    ];
     let colorIndex = 0;
     const fallbackColors = new Map<string, string>();
     const customColors = this.subjectColorsMap();
 
     const availablePairs = this.calendarAvailablePairs();
     let selectedPair = this.calendarSelectedPair();
-    const query = this.calendarSearchQuery().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const query = this.calendarSearchQuery()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
     if (!selectedPair && availablePairs.length > 0) {
       selectedPair = availablePairs[0];
     }
 
-    const semesterDataMap = new Map<number, { minHour: number, maxHour: number, rawEvents: any[] }>();
+    const semesterDataMap = new Map<
+      number,
+      { minHour: number; maxHour: number; rawEvents: any[] }
+    >();
 
     for (const cur of this.filteredCurriculums()) {
       for (const sem of cur.semesters || []) {
@@ -371,22 +441,25 @@ export class CareerDetailComponent implements OnInit {
             for (const sched of assign.schedules || []) {
               if (sched.dayOfWeek && sched.startTime && sched.endTime) {
                 if (!semesterDataMap.has(sem.semester)) {
-                   semesterDataMap.set(sem.semester, { minHour: 24, maxHour: 0, rawEvents: [] });
+                  semesterDataMap.set(sem.semester, { minHour: 24, maxHour: 0, rawEvents: [] });
                 }
                 const semData = semesterDataMap.get(sem.semester)!;
 
                 const subId = sub.subjectId || sub.id;
                 let evColor = customColors.get(subId);
-                
+
                 if (!evColor) {
                   if (!fallbackColors.has(sub.name)) {
-                     fallbackColors.set(sub.name, colors[colorIndex % colors.length]);
-                     colorIndex++;
+                    fallbackColors.set(sub.name, colors[colorIndex % colors.length]);
+                    colorIndex++;
                   }
                   evColor = fallbackColors.get(sub.name);
                 }
 
-                const normalizedSubName = sub.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                const normalizedSubName = sub.name
+                  .normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+                  .toLowerCase();
                 if (query && !normalizedSubName.includes(query)) {
                   continue; // Skip if it doesn't match search query
                 }
@@ -395,25 +468,26 @@ export class CareerDetailComponent implements OnInit {
                 const eSplit = sched.endTime.split(':');
                 const startHour = parseInt(sSplit[0]);
                 const endHour = parseInt(eSplit[0]);
-                
+
                 if (startHour < semData.minHour) semData.minHour = startHour;
-                if (endHour > semData.maxHour) semData.maxHour = (parseInt(eSplit[1]) > 0) ? endHour + 1 : endHour;
+                if (endHour > semData.maxHour)
+                  semData.maxHour = parseInt(eSplit[1]) > 0 ? endHour + 1 : endHour;
 
                 const startMins = parseInt(sSplit[0]) * 60 + parseInt(sSplit[1]);
                 const endMins = parseInt(eSplit[0]) * 60 + parseInt(eSplit[1]);
 
-                const formatTime = (t: string) => t ? t.substring(0, 5) : '';
+                const formatTime = (t: string) => (t ? t.substring(0, 5) : '');
 
                 semData.rawEvents.push({
-                   id: sched.id || Math.random().toString(),
-                   dayOfWeek: sched.dayOfWeek,
-                   subjectName: sub.name,
-                   teacherName: assign.teacherName,
-                   startTime: formatTime(sched.startTime),
-                   endTime: formatTime(sched.endTime),
-                   startMins,
-                   endMins,
-                   color: evColor
+                  id: sched.id || Math.random().toString(),
+                  dayOfWeek: sched.dayOfWeek,
+                  subjectName: sub.name,
+                  teacherName: assign.teacherName,
+                  startTime: formatTime(sched.startTime),
+                  endTime: formatTime(sched.endTime),
+                  startMins,
+                  endMins,
+                  color: evColor,
                 });
               }
             }
@@ -425,50 +499,50 @@ export class CareerDetailComponent implements OnInit {
     const selectedSem = this.filterSemesterCalendar();
     const sortedSemesters = Array.from(semesterDataMap.keys()).sort((a, b) => a - b);
     for (const sem of sortedSemesters) {
-       if (selectedSem !== null && sem !== selectedSem) continue;
+      if (selectedSem !== null && sem !== selectedSem) continue;
 
-       const data = semesterDataMap.get(sem)!;
-       
-       let minH = data.minHour;
-       let maxH = data.maxHour;
-       if (minH === 24) minH = 7;
-       if (maxH === 0) maxH = 14;
-       if (maxH - minH < 4) maxH = minH + 4;
+      const data = semesterDataMap.get(sem)!;
 
-       const dayStartMins = minH * 60;
-       const totalDayMins = (maxH - minH + 1) * 60;
+      let minH = data.minHour;
+      let maxH = data.maxHour;
+      if (minH === 24) minH = 7;
+      if (maxH === 0) maxH = 14;
+      if (maxH - minH < 4) maxH = minH + 4;
 
-       const hours: number[] = [];
-       for (let i = minH; i <= maxH; i++) {
-         hours.push(i);
-       }
+      const dayStartMins = minH * 60;
+      const totalDayMins = (maxH - minH + 1) * 60;
 
-       const events: any[] = [];
-       for (const ev of data.rawEvents) {
-          const topPercent = ((ev.startMins - dayStartMins) / totalDayMins) * 100;
-          const heightPercent = ((ev.endMins - ev.startMins) / totalDayMins) * 100;
-          events.push({
-            ...ev,
-            top: topPercent + '%',
-            height: heightPercent + '%'
-          });
-       }
+      const hours: number[] = [];
+      for (let i = minH; i <= maxH; i++) {
+        hours.push(i);
+      }
 
-       if (events.length > 0) {
-         results.push({
-           semester: sem,
-           semesterName: `Semestre ${sem}`,
-           events,
-           hours
-         });
-       }
+      const events: any[] = [];
+      for (const ev of data.rawEvents) {
+        const topPercent = ((ev.startMins - dayStartMins) / totalDayMins) * 100;
+        const heightPercent = ((ev.endMins - ev.startMins) / totalDayMins) * 100;
+        events.push({
+          ...ev,
+          top: topPercent + '%',
+          height: heightPercent + '%',
+        });
+      }
+
+      if (events.length > 0) {
+        results.push({
+          semester: sem,
+          semesterName: `Semestre ${sem}`,
+          events,
+          hours,
+        });
+      }
     }
 
     return results;
   });
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
         this.loadData(id);
@@ -486,7 +560,7 @@ export class CareerDetailComponent implements OnInit {
         }
         this.subjectColorsMap.set(map);
       },
-      error: (err) => console.error('Error loading subject colors', err)
+      error: (err) => console.error('Error loading subject colors', err),
     });
   }
 
@@ -498,7 +572,18 @@ export class CareerDetailComponent implements OnInit {
     for (let i = 0; i < subName.length; i++) {
       hash = subName.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#14b8a6'];
+    const colors = [
+      '#3b82f6',
+      '#10b981',
+      '#f59e0b',
+      '#ef4444',
+      '#8b5cf6',
+      '#ec4899',
+      '#14b8a6',
+      '#f97316',
+      '#6366f1',
+      '#14b8a6',
+    ];
     return colors[Math.abs(hash) % colors.length];
   }
 
@@ -513,7 +598,12 @@ export class CareerDetailComponent implements OnInit {
         newMap.set(subjectId, color);
         this.subjectColorsMap.set(newMap);
       },
-      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el color' })
+      error: () =>
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo guardar el color',
+        }),
     });
   }
 
@@ -544,62 +634,64 @@ export class CareerDetailComponent implements OnInit {
             }
 
             const curriculums = careerDetailRes.curriculums.map((cur: any) => {
-          if (cur.semesters) {
-            cur.semesters = cur.semesters.map((sem: any) => {
-              if (sem.subjects) {
-                sem.subjects = sem.subjects.map((sub: any) => {
-                  if (sub.assignments && sub.assignments.length > 0) {
-                    const groups = new Map<string, any>();
-                    for (const assign of sub.assignments) {
-                      if (!groups.has(assign.teacherId)) {
-                        groups.set(assign.teacherId, {
-                          teacherId: assign.teacherId,
-                          teacherName: assign.teacherName,
-                          pairs: new Set<string>(),
-                          assignmentIds: []
-                        });
+              if (cur.semesters) {
+                cur.semesters = cur.semesters.map((sem: any) => {
+                  if (sem.subjects) {
+                    sem.subjects = sem.subjects.map((sub: any) => {
+                      if (sub.assignments && sub.assignments.length > 0) {
+                        const groups = new Map<string, any>();
+                        for (const assign of sub.assignments) {
+                          if (!groups.has(assign.teacherId)) {
+                            groups.set(assign.teacherId, {
+                              teacherId: assign.teacherId,
+                              teacherName: assign.teacherName,
+                              pairs: new Set<string>(),
+                              assignmentIds: [],
+                            });
+                          }
+                          const group = groups.get(assign.teacherId);
+                          const pair = `${assign.modalityName || 'Sin Modalidad'} - ${assign.jornadaName || 'Sin Jornada'}`;
+                          group.pairs.add(pair);
+                          group.assignmentIds.push(assign.id);
+                        }
+                        sub.groupedAssignments = Array.from(groups.values()).map((g) => ({
+                          ...g,
+                          displayPairs: Array.from(g.pairs).join(' ; '),
+                        }));
+                      } else {
+                        sub.groupedAssignments = [];
                       }
-                      const group = groups.get(assign.teacherId);
-                      const pair = `${assign.modalityName || 'Sin Modalidad'} - ${assign.jornadaName || 'Sin Jornada'}`;
-                      group.pairs.add(pair);
-                      group.assignmentIds.push(assign.id);
-                    }
-                    sub.groupedAssignments = Array.from(groups.values()).map(g => ({
-                      ...g,
-                      displayPairs: Array.from(g.pairs).join(' ; ')
-                    }));
-                  } else {
-                    sub.groupedAssignments = [];
+                      return sub;
+                    });
                   }
-                  return sub;
+                  return sem;
                 });
               }
-              return sem;
+              return cur;
             });
-          }
-          return cur;
-        });
-        
-        this.career.set(career);
-        this.curriculums.set(curriculums);
 
-        const careerMods = career.modalityIds || [];
-        const careerJorns = career.jornadaIds || [];
+            this.career.set(career);
+            this.curriculums.set(curriculums);
 
-        if (careerMods.length > 0) {
-          this.modalities.set(res.modalities.filter((m: any) => careerMods.includes(m.id)));
-        } else {
-          this.modalities.set(res.modalities);
-        }
+            const careerMods = career.modalityIds || [];
+            const careerJorns = career.jornadaIds || [];
 
-        if (careerJorns.length > 0) {
-          this.jornadas.set(res.jornadas.filter((j: any) => careerJorns.includes(j.id)));
-        } else {
-          this.jornadas.set(res.jornadas);
-        }
+            if (careerMods.length > 0) {
+              this.modalities.set(res.modalities.filter((m: any) => careerMods.includes(m.id)));
+            } else {
+              this.modalities.set(res.modalities);
+            }
+
+            if (careerJorns.length > 0) {
+              this.jornadas.set(res.jornadas.filter((j: any) => careerJorns.includes(j.id)));
+            } else {
+              this.jornadas.set(res.jornadas);
+            }
 
             if (this.selectedCurriculum()) {
-              const updatedCur = curriculums.find((c: any) => c.id === this.selectedCurriculum().id);
+              const updatedCur = curriculums.find(
+                (c: any) => c.id === this.selectedCurriculum().id,
+              );
               this.selectedCurriculum.set(updatedCur || null);
             }
 
@@ -612,7 +704,7 @@ export class CareerDetailComponent implements OnInit {
               detail: 'No se pudieron cargar los datos asociados a la carrera',
             });
             this.loading.set(false);
-          }
+          },
         });
       },
       error: () => {
@@ -622,51 +714,58 @@ export class CareerDetailComponent implements OnInit {
           detail: 'No se pudo cargar el detalle de la carrera',
         });
         this.loading.set(false);
-      }
+      },
     });
   }
 
   selectCurriculum(cur: any) {
-    this.selectedCurriculum.set(
-      this.selectedCurriculum()?.id === cur.id ? null : cur,
-    );
+    this.selectedCurriculum.set(this.selectedCurriculum()?.id === cur.id ? null : cur);
   }
 
   teacherMenuItems: MenuItem[] = [];
 
-  showTeacherMenu(event: Event, menu: any, sub: any, teacherId: string, semester: number, assignmentIds: string[], curriculumId: string) {
+  showTeacherMenu(
+    event: Event,
+    menu: any,
+    sub: any,
+    teacherId: string,
+    semester: number,
+    assignmentIds: string[],
+    curriculumId: string,
+  ) {
     this.teacherMenuItems = [
       {
         label: 'Crear Horario',
         icon: 'pi pi-calendar-clock',
         styleClass: 'action-view text-700',
-        command: () => this.openScheduleModal(sub, teacherId, semester)
+        command: () => this.openScheduleModal(sub, teacherId, semester),
       },
       {
         label: 'Eliminar Docente',
         icon: 'pi pi-times',
         styleClass: 'action-delete text-red-500',
         disabled: this.removingTeacherId() === teacherId,
-        command: () => this.removeTeacher(sub.id, curriculumId, assignmentIds, teacherId)
-      }
+        command: () => this.removeTeacher(sub.id, curriculumId, assignmentIds, teacherId),
+      },
     ];
     menu.toggle(event);
   }
 
   openBulkOfferModal(semester: number, subjects: any[], curriculumId: string) {
-    const termId = this.bulkOfferForm.academicTermId || (this.terms().length > 0 ? this.terms()[0].id : '');
-    
+    const termId =
+      this.bulkOfferForm.academicTermId || (this.terms().length > 0 ? this.terms()[0].id : '');
+
     this.bulkOfferForm = {
       semester,
       curriculumId,
       academicTermId: termId,
       subjects: [...subjects],
-      subjectConfigs: {}
+      subjectConfigs: {},
     };
 
     // Pre-load configs if we have a term selected
     this.updateConfigsFromTerm();
-    
+
     this.showOfferModal.set(true);
   }
 
@@ -676,16 +775,16 @@ export class CareerDetailComponent implements OnInit {
 
     for (const sub of this.bulkOfferForm.subjects) {
       const configsMap: TeacherAssignmentConfig[] = [];
-      
+
       if (sub.assignments && sub.assignments.length > 0) {
         const termAssignments = sub.assignments.filter((a: any) => a.academicTermId === termId);
-        
+
         for (const assign of termAssignments) {
-            configsMap.push({
-              teacherId: assign.teacherId,
-              modalityId: assign.modalityId || '',
-              jornadaId: assign.jornadaId || ''
-            });
+          configsMap.push({
+            teacherId: assign.teacherId,
+            modalityId: assign.modalityId || '',
+            jornadaId: assign.jornadaId || '',
+          });
         }
       }
       this.bulkOfferForm.subjectConfigs[sub.id] = configsMap;
@@ -699,7 +798,7 @@ export class CareerDetailComponent implements OnInit {
     this.bulkOfferForm.subjectConfigs[subjectId].push({
       teacherId: '',
       modalityId: '',
-      jornadaId: ''
+      jornadaId: '',
     });
   }
 
@@ -714,28 +813,38 @@ export class CareerDetailComponent implements OnInit {
 
   getAvailableModalitiesForSubject(subjectId: string, currentConfig: TeacherAssignmentConfig) {
     const configs = this.bulkOfferForm.subjectConfigs[subjectId] || [];
-    
+
     const usedModalityIdsWithSameJornada = new Set<string>();
     for (const c of configs) {
-      if (c !== currentConfig && c.modalityId && c.jornadaId && currentConfig.jornadaId === c.jornadaId) {
+      if (
+        c !== currentConfig &&
+        c.modalityId &&
+        c.jornadaId &&
+        currentConfig.jornadaId === c.jornadaId
+      ) {
         usedModalityIdsWithSameJornada.add(c.modalityId);
       }
     }
-    
-    return this.modalities().filter(m => !usedModalityIdsWithSameJornada.has(m.id));
+
+    return this.modalities().filter((m) => !usedModalityIdsWithSameJornada.has(m.id));
   }
 
   getAvailableJornadasForSubject(subjectId: string, currentConfig: TeacherAssignmentConfig) {
     const configs = this.bulkOfferForm.subjectConfigs[subjectId] || [];
-    
+
     const usedJornadaIdsWithSameModality = new Set<string>();
     for (const c of configs) {
-      if (c !== currentConfig && c.jornadaId && c.modalityId && currentConfig.modalityId === c.modalityId) {
+      if (
+        c !== currentConfig &&
+        c.jornadaId &&
+        c.modalityId &&
+        currentConfig.modalityId === c.modalityId
+      ) {
         usedJornadaIdsWithSameModality.add(c.jornadaId);
       }
     }
-    
-    return this.jornadas().filter(j => !usedJornadaIdsWithSameModality.has(j.id));
+
+    return this.jornadas().filter((j) => !usedJornadaIdsWithSameModality.has(j.id));
   }
 
   closeOfferModal() {
@@ -744,70 +853,86 @@ export class CareerDetailComponent implements OnInit {
 
   saveBulkOffer() {
     if (!this.bulkOfferForm.academicTermId) {
-      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Debe seleccionar un Ciclo Académico.' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Atención',
+        detail: 'Debe seleccionar un Ciclo Académico.',
+      });
       return;
     }
 
     const payloadSubjects: any[] = [];
-    
+
     for (const sub of this.bulkOfferForm.subjects) {
       const configs = this.bulkOfferForm.subjectConfigs[sub.id] || [];
-      const validConfigs = configs.filter(c => c.teacherId && c.modalityId && c.jornadaId);
-      
+      const validConfigs = configs.filter((c) => c.teacherId && c.modalityId && c.jornadaId);
+
       if (validConfigs.length > 0) {
         // Transformar al payload que espera el backend (arrays de 1 elemento)
-        const payloadAssignments = validConfigs.map(c => ({
+        const payloadAssignments = validConfigs.map((c) => ({
           teacherId: c.teacherId,
           modalityIds: [c.modalityId],
-          jornadaIds: [c.jornadaId]
+          jornadaIds: [c.jornadaId],
         }));
 
         payloadSubjects.push({
           subjectId: sub.id,
-          assignments: payloadAssignments
+          assignments: payloadAssignments,
         });
       }
     }
 
     if (payloadSubjects.length === 0) {
-      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Debe configurar al menos un docente con modalidades y jornadas para alguna materia.' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Atención',
+        detail:
+          'Debe configurar al menos un docente con modalidades y jornadas para alguna materia.',
+      });
       return;
     }
 
     this.assigning.set(true);
 
-    this.coordinatorService.bulkAssignTeachers({
-      curriculumId: this.bulkOfferForm.curriculumId,
-      academicTermId: this.bulkOfferForm.academicTermId,
-      subjects: payloadSubjects
-    }).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Éxito',
-          detail: 'Oferta académica del semestre guardada exitosamente',
-        });
-        
-        const careerId = this.route.snapshot.paramMap.get('id');
-        if (careerId) {
-          this.loadData(careerId);
-        }
-        
-        this.assigning.set(false);
-        this.closeOfferModal();
-      },
-      error: (err) => {
-        this.assigning.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: err.error?.message ?? 'Error al guardar la oferta',
-        });
-      },
-    });
+    this.coordinatorService
+      .bulkAssignTeachers({
+        curriculumId: this.bulkOfferForm.curriculumId,
+        academicTermId: this.bulkOfferForm.academicTermId,
+        subjects: payloadSubjects,
+      })
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Oferta académica del semestre guardada exitosamente',
+          });
+
+          const careerId = this.route.snapshot.paramMap.get('id');
+          if (careerId) {
+            this.loadData(careerId);
+          }
+
+          this.assigning.set(false);
+          this.closeOfferModal();
+        },
+        error: (err) => {
+          this.assigning.set(false);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.error?.message ?? 'Error al guardar la oferta',
+          });
+        },
+      });
   }
 
-  removeTeacher(subjectId: string, curriculumId?: string, assignmentIds?: string | string[], teacherId?: string) {
+  removeTeacher(
+    subjectId: string,
+    curriculumId?: string,
+    assignmentIds?: string | string[],
+    teacherId?: string,
+  ) {
     this.confirmationService.confirm({
       header: 'Confirmar eliminación',
       message: '¿Estás seguro de que deseas eliminar esta asignación?',
@@ -823,10 +948,16 @@ export class CareerDetailComponent implements OnInit {
         }
 
         if (Array.isArray(assignmentIds)) {
-          const requests = assignmentIds.map(id => this.coordinatorService.unassignTeacher(subjectId, curriculumId, id));
+          const requests = assignmentIds.map((id) =>
+            this.coordinatorService.unassignTeacher(subjectId, curriculumId, id),
+          );
           forkJoin(requests).subscribe({
             next: () => {
-              this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Oferta retirada exitosamente' });
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Éxito',
+                detail: 'Oferta retirada exitosamente',
+              });
               const careerId = this.route.snapshot.paramMap.get('id');
               if (careerId) this.loadData(careerId);
               this.removingSubjectId.set(null);
@@ -835,17 +966,17 @@ export class CareerDetailComponent implements OnInit {
             error: (err) => {
               this.removingSubjectId.set(null);
               this.removingTeacherId.set(null);
-              this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al retirar la oferta' });
-            }
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error al retirar la oferta',
+              });
+            },
           });
           return;
         }
 
-        this.coordinatorService.unassignTeacher(
-          subjectId,
-          curriculumId,
-          assignmentIds,
-        ).subscribe({
+        this.coordinatorService.unassignTeacher(subjectId, curriculumId, assignmentIds).subscribe({
           next: () => {
             this.messageService.add({
               severity: 'success',
@@ -869,7 +1000,7 @@ export class CareerDetailComponent implements OnInit {
             });
           },
         });
-      }
+      },
     });
   }
 
@@ -891,9 +1022,20 @@ export class CareerDetailComponent implements OnInit {
 
   getSemesterColor(semester: number): string {
     const colors = this.academicService.semesterColors();
-    const found = colors.find(c => c.semester === semester);
+    const found = colors.find((c) => c.semester === semester);
     if (found) return found.color;
-    const defaultColors = ['#312e81', '#1d4ed8', '#0ea5e9', '#059669', '#166534', '#65a30d', '#ca8a04', '#ea580c', '#b91c1c', '#be123c'];
+    const defaultColors = [
+      '#312e81',
+      '#1d4ed8',
+      '#0ea5e9',
+      '#059669',
+      '#166534',
+      '#65a30d',
+      '#ca8a04',
+      '#ea580c',
+      '#b91c1c',
+      '#be123c',
+    ];
     return defaultColors[(semester - 1) % defaultColors.length] || '#9e9e9e';
   }
 
@@ -908,7 +1050,7 @@ export class CareerDetailComponent implements OnInit {
       { bg: 'bg-pink-100', text: 'text-pink-900', subtext: 'text-pink-700' },
       { bg: 'bg-indigo-100', text: 'text-indigo-900', subtext: 'text-indigo-700' },
       { bg: 'bg-yellow-100', text: 'text-yellow-900', subtext: 'text-yellow-800' },
-      { bg: 'bg-red-100', text: 'text-red-900', subtext: 'text-red-700' }
+      { bg: 'bg-red-100', text: 'text-red-900', subtext: 'text-red-700' },
     ];
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
@@ -926,15 +1068,15 @@ export class CareerDetailComponent implements OnInit {
     // Find the specific grouped assignment for this teacher
     const grouped = subject.groupedAssignments?.find((g: any) => g.teacherId === teacherId);
     if (!grouped) return;
-    
+
     // Find all raw assignments for this teacher in this subject
     const rawAssignments = subject.assignments?.filter((a: any) => a.teacherId === teacherId) || [];
-    
+
     // Prepare the data. For each raw assignment, we need to fetch its existing schedules.
     // We'll initialize them with an empty schedules array first.
     const assignmentsWithSchedules = rawAssignments.map((a: any) => ({
       ...a,
-      schedules: [] // will be loaded from API
+      schedules: [], // will be loaded from API
     }));
 
     this.scheduleModalData.set({
@@ -942,7 +1084,7 @@ export class CareerDetailComponent implements OnInit {
       teacherId,
       teacherName: grouped.teacherName,
       semester,
-      assignments: assignmentsWithSchedules
+      assignments: assignmentsWithSchedules,
     });
 
     this.displayScheduleModal.set(true);
@@ -951,13 +1093,13 @@ export class CareerDetailComponent implements OnInit {
     assignmentsWithSchedules.forEach((assign: any, index: number) => {
       this.coordinatorService.getSchedules(assign.id).subscribe({
         next: (schedules) => {
-          this.scheduleModalData.update(data => {
+          this.scheduleModalData.update((data) => {
             if (!data) return data;
             const updatedAssignments = [...data.assignments];
             updatedAssignments[index] = { ...updatedAssignments[index], schedules };
             return { ...data, assignments: updatedAssignments };
           });
-        }
+        },
       });
     });
   }
@@ -970,18 +1112,21 @@ export class CareerDetailComponent implements OnInit {
 
   addScheduleLine(assignmentIndex: number) {
     this.scheduleCollisionError.set(null);
-    this.scheduleModalData.update(data => {
+    this.scheduleModalData.update((data) => {
       if (!data) return data;
       const updatedAssignments = [...data.assignments];
       const assign = updatedAssignments[assignmentIndex];
-      assign.schedules = [...assign.schedules, { dayOfWeek: 'Lunes', startTime: '18:00', endTime: '22:00' }];
+      assign.schedules = [
+        ...assign.schedules,
+        { dayOfWeek: 'Lunes', startTime: '18:00', endTime: '22:00' },
+      ];
       return { ...data, assignments: updatedAssignments };
     });
   }
 
   removeScheduleLine(assignmentIndex: number, scheduleIndex: number) {
     this.scheduleCollisionError.set(null);
-    this.scheduleModalData.update(data => {
+    this.scheduleModalData.update((data) => {
       if (!data) return data;
       const updatedAssignments = [...data.assignments];
       const assign = updatedAssignments[assignmentIndex];
@@ -1005,15 +1150,20 @@ export class CareerDetailComponent implements OnInit {
     // VALIDATION: Check for schedule collisions
     // We run this even if data.semester is undefined, just checking all semesters if needed.
     let collisionMsg = '';
-    
+
     const getPair = (a: any) => {
       const m = a.modalityName || a.modality?.name || 'Sin Modalidad';
       const j = a.jornadaName || a.jornada?.name || 'Sin Jornada';
       return `${m} - ${j}`.trim().toLowerCase();
     };
 
-    const normalizeStr = (s: string) => (s || '').trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    
+    const normalizeStr = (s: string) =>
+      (s || '')
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+
     const existingSchedules: any[] = [];
     for (const cur of this.filteredCurriculums()) {
       for (const sem of cur.semesters || []) {
@@ -1025,17 +1175,17 @@ export class CareerDetailComponent implements OnInit {
         for (const sub of sem.subjects || []) {
           // Skip the exact same subject by comparing name (foolproof)
           if (normalizeStr(sub.name) === normalizeStr(data.subject.name)) continue;
-          
+
           for (const assign of sub.assignments || []) {
             const pair = getPair(assign);
             for (const sch of assign.schedules || []) {
-               existingSchedules.push({
-                 subjectName: sub.name,
-                 pair,
-                 dayOfWeek: normalizeStr(sch.dayOfWeek),
-                 startTime: sch.startTime,
-                 endTime: sch.endTime
-               });
+              existingSchedules.push({
+                subjectName: sub.name,
+                pair,
+                dayOfWeek: normalizeStr(sch.dayOfWeek),
+                startTime: sch.startTime,
+                endTime: sch.endTime,
+              });
             }
           }
         }
@@ -1046,21 +1196,25 @@ export class CareerDetailComponent implements OnInit {
     for (const assign of data.assignments) {
       const pair = getPair(assign);
       for (let i = 0; i < assign.schedules.length; i++) {
-         for (let j = i + 1; j < assign.schedules.length; j++) {
-            const sch1 = assign.schedules[i];
-            const sch2 = assign.schedules[j];
-            if (sch1.dayOfWeek && sch2.dayOfWeek && normalizeStr(sch1.dayOfWeek) === normalizeStr(sch2.dayOfWeek)) {
-               const s1 = this.timeToMinutes(sch1.startTime);
-               const e1 = this.timeToMinutes(sch1.endTime);
-               const s2 = this.timeToMinutes(sch2.startTime);
-               const e2 = this.timeToMinutes(sch2.endTime);
-               if (Math.max(s1, s2) < Math.min(e1, e2)) {
-                 collisionMsg = `Cruce de horarios interno. El bloque ${sch1.startTime}-${sch1.endTime} choca con ${sch2.startTime}-${sch2.endTime} (${sch1.dayOfWeek}).`;
-                 break;
-               }
+        for (let j = i + 1; j < assign.schedules.length; j++) {
+          const sch1 = assign.schedules[i];
+          const sch2 = assign.schedules[j];
+          if (
+            sch1.dayOfWeek &&
+            sch2.dayOfWeek &&
+            normalizeStr(sch1.dayOfWeek) === normalizeStr(sch2.dayOfWeek)
+          ) {
+            const s1 = this.timeToMinutes(sch1.startTime);
+            const e1 = this.timeToMinutes(sch1.endTime);
+            const s2 = this.timeToMinutes(sch2.startTime);
+            const e2 = this.timeToMinutes(sch2.endTime);
+            if (Math.max(s1, s2) < Math.min(e1, e2)) {
+              collisionMsg = `Cruce de horarios interno. El bloque ${sch1.startTime}-${sch1.endTime} choca con ${sch2.startTime}-${sch2.endTime} (${sch1.dayOfWeek}).`;
+              break;
             }
-         }
-         if (collisionMsg) break;
+          }
+        }
+        if (collisionMsg) break;
       }
       if (collisionMsg) break;
     }
@@ -1069,41 +1223,41 @@ export class CareerDetailComponent implements OnInit {
     if (!collisionMsg) {
       for (const assign of data.assignments) {
         const pair = getPair(assign);
-        
+
         for (const newSch of assign.schedules) {
-           const start1 = this.timeToMinutes(newSch.startTime);
-           const end1 = this.timeToMinutes(newSch.endTime);
-           const newDay = normalizeStr(newSch.dayOfWeek);
+          const start1 = this.timeToMinutes(newSch.startTime);
+          const end1 = this.timeToMinutes(newSch.endTime);
+          const newDay = normalizeStr(newSch.dayOfWeek);
 
-           for (const ext of existingSchedules) {
-             if (ext.pair === pair && ext.dayOfWeek === newDay) {
-               const start2 = this.timeToMinutes(ext.startTime);
-               const end2 = this.timeToMinutes(ext.endTime);
+          for (const ext of existingSchedules) {
+            if (ext.pair === pair && ext.dayOfWeek === newDay) {
+              const start2 = this.timeToMinutes(ext.startTime);
+              const end2 = this.timeToMinutes(ext.endTime);
 
-               if (Math.max(start1, start2) < Math.min(end1, end2)) {
-                 collisionMsg = `Cruce de horarios en la misma modalidad y jornada. El bloque de ${newSch.startTime}-${newSch.endTime} (${newSch.dayOfWeek}) choca con la materia "${ext.subjectName}" (${ext.startTime} a ${ext.endTime}).`;
-                 break;
-               }
-             }
-           }
-           if (collisionMsg) break;
+              if (Math.max(start1, start2) < Math.min(end1, end2)) {
+                collisionMsg = `Cruce de horarios en la misma modalidad y jornada. El bloque de ${newSch.startTime}-${newSch.endTime} (${newSch.dayOfWeek}) choca con la materia "${ext.subjectName}" (${ext.startTime} a ${ext.endTime}).`;
+                break;
+              }
+            }
+          }
+          if (collisionMsg) break;
         }
         if (collisionMsg) break;
       }
     }
 
     if (collisionMsg) {
-       this.scheduleCollisionError.set(collisionMsg);
-       return; // Cancel save
+      this.scheduleCollisionError.set(collisionMsg);
+      return; // Cancel save
     } else {
-       this.scheduleCollisionError.set(null);
+      this.scheduleCollisionError.set(null);
     }
 
     let totalSaved = 0;
     const totalToSave = data.assignments.length;
-    
+
     // Save schedules for each assignment
-    data.assignments.forEach(assign => {
+    data.assignments.forEach((assign) => {
       this.coordinatorService.saveSchedules(assign.id, assign.schedules).subscribe({
         next: () => {
           totalSaved++;
@@ -1111,7 +1265,7 @@ export class CareerDetailComponent implements OnInit {
             this.messageService.add({
               severity: 'success',
               summary: 'Éxito',
-              detail: 'Horarios guardados correctamente'
+              detail: 'Horarios guardados correctamente',
             });
             this.closeScheduleModal();
             const careerId = this.route.snapshot.paramMap.get('id');
@@ -1122,9 +1276,9 @@ export class CareerDetailComponent implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudieron guardar los horarios'
+            detail: 'No se pudieron guardar los horarios',
           });
-        }
+        },
       });
     });
   }

@@ -56,11 +56,23 @@ export class RegisterPaymentComponent {
   }
 
   statusLabel(s: string): string {
-    return s === 'pago_total' ? 'Pagado Total' : s === 'pendiente' ? 'Pendiente' : 'No paga';
+    return s === 'pago_total'
+      ? 'Pagado Total'
+      : s === 'convenio'
+        ? 'Convenio'
+        : s === 'pendiente'
+          ? 'Pendiente'
+          : 'No paga';
   }
 
-  statusSeverity(s: string): 'success' | 'warn' | 'danger' {
-    return s === 'pago_total' ? 'success' : s === 'pendiente' ? 'warn' : 'danger';
+  statusSeverity(s: string): 'success' | 'warn' | 'danger' | 'info' {
+    return s === 'pago_total'
+      ? 'success'
+      : s === 'convenio'
+        ? 'info'
+        : s === 'pendiente'
+          ? 'warn'
+          : 'danger';
   }
 
   onSubmit() {

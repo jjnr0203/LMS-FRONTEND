@@ -25,13 +25,6 @@ export default [
         data: { roleFilter: 'student' },
       },
       {
-        path: 'estudiantes',
-        loadComponent: () =>
-          import('../register-student/register-student.component').then(
-            (m) => m.RegisterStudentComponent,
-          ),
-      },
-      {
         path: 'abonos',
         loadComponent: () =>
           import('../register-payment/register-payment.component').then(
