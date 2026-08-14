@@ -10,6 +10,7 @@ import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TextareaModule } from 'primeng/textarea';
+import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -53,7 +54,8 @@ import { MenuItem } from 'primeng/api';
     ProgressSpinnerModule,
     PopoverModule,
     SelectModule,
-    MenuModule
+    MenuModule,
+    TooltipModule
   ],
   templateUrl: './careers.html',
   styleUrls: ['./careers.scss'],
@@ -156,6 +158,12 @@ export class Careers implements OnInit {
       .sort((a, b) => a.semester - b.semester);
   }
 
+  get possibleSuccessors(): Subject[] {
+    const sem = this.subjectForm?.get('semester')?.value;
+    if (!sem) return [];
+    return this.subjects.filter(s => (s.semester || 0) > sem);
+  }
+
   updateSemesterColor(semester: number, color: string) {
     const current = this.academicService.semesterColors();
     const idx = current.findIndex(c => c.semester === semester);
@@ -184,8 +192,15 @@ export class Careers implements OnInit {
 
   // --- Bulk upload dialog ---
   displayBulkDialog = false;
-  selectedBulkFile: File | null = null;
   bulkUploading = false;
+  selectedBulkFile: File | null = null;
+
+  selectedSubjectForPrerequisites: any = null;
+  possiblePrerequisites: any[] = [];
+  filteredPossiblePrerequisites: any[] = [];
+  selectedPrerequisiteIds: string[] = [];
+  displayPrerequisitesDialog = false;
+
   deletingAllSubjects: boolean = false;
 
   // --- Wizard: career → curriculum → subjects ---
@@ -260,6 +275,7 @@ export class Careers implements OnInit {
       credits: [1, [Validators.required, Validators.min(1), Validators.max(9)]],
       hours: [0, [Validators.required, Validators.min(0), Validators.max(999)]],
       semester: [1, [Validators.required, Validators.min(1)]],
+      successorIds: [[]],
       description: ['', Validators.maxLength(150)],
     });
   }
@@ -302,8 +318,71 @@ export class Careers implements OnInit {
   }
 
   loadSubjects(curriculumId: string) {
-    this.academicService.getCurriculumSubjects(curriculumId).subscribe((data) => {
-      this.subjects = data;
+    if (!this.selectedCareer) return;
+
+    this.academicService.getCareerBreakdown(this.selectedCareer.id).subscribe((res: any) => {
+      const cur = res.curriculums.find((c: any) => c.id === curriculumId);
+      if (!cur) {
+        this.subjects = [];
+        return;
+      }
+
+      const allSubjectsMap = new Map<string, any>();
+      const flatSubjects: any[] = [];
+
+      cur.semesters.forEach((sem: any) => {
+        sem.subjects.forEach((sub: any) => {
+          sub.successors = [];
+          
+          if (sub.assignments && sub.assignments.length > 0) {
+            const groups = new Map<string, any>();
+            for (const assign of sub.assignments) {
+              if (!groups.has(assign.teacherId)) {
+                groups.set(assign.teacherId, {
+                  teacherId: assign.teacherId,
+                  teacherName: assign.teacherName,
+                  modalityNames: new Set<string>(),
+                  jornadaNames: new Set<string>(),
+                  assignmentIds: []
+                });
+              }
+              const group = groups.get(assign.teacherId);
+              if (assign.modalityName) group.modalityNames.add(assign.modalityName);
+              if (assign.jornadaName) group.jornadaNames.add(assign.jornadaName);
+              group.assignmentIds.push(assign.id);
+            }
+            sub.groupedAssignments = Array.from(groups.values()).map(g => ({
+              ...g,
+              modalityNames: Array.from(g.modalityNames).join(' - '),
+              jornadaNames: Array.from(g.jornadaNames).join(' - '),
+            }));
+          } else {
+            sub.groupedAssignments = [];
+          }
+
+          // Use id for relationId to keep compatibility with the backend structure
+          // The backend getCareerBreakdown returns id as relationId and subjectId as subjectId!
+          // Wait! Let's map it safely.
+          sub.relationId = sub.id; 
+          sub.id = sub.subjectId;
+
+          allSubjectsMap.set(sub.relationId, sub);
+          flatSubjects.push(sub);
+        });
+      });
+
+      flatSubjects.forEach((sub: any) => {
+        if (sub.prerequisiteIds && sub.prerequisiteIds.length > 0) {
+          sub.prerequisiteIds.forEach((preId: string) => {
+            const prerequisite = allSubjectsMap.get(preId);
+            if (prerequisite) {
+              prerequisite.successors.push(sub);
+            }
+          });
+        }
+      });
+
+      this.subjects = flatSubjects;
       this.cdr.detectChanges();
     });
   }
@@ -544,16 +623,33 @@ export class Careers implements OnInit {
 
     if (this.isEditSubject && this.editSubjectId) {
       this.academicService.updateSubject(this.editSubjectId, data).subscribe({
-        next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Materia actualizada' });
-          this.loadSubjects(this.selectedCurriculum!.id);
-          this.displaySubjectDialog = false;
+        next: (res: any) => {
+          const relationId = res?.relationId || this.editSubjectId;
+          if (raw.successorIds && raw.successorIds.length > 0) {
+            this.academicService.updateSubjectSuccessors(relationId, raw.successorIds).subscribe({
+              next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Materia actualizada' });
+                this.loadSubjects(this.selectedCurriculum!.id);
+                this.displaySubjectDialog = false;
+              }
+            });
+          } else {
+            this.academicService.updateSubjectSuccessors(relationId, []).subscribe();
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Materia actualizada' });
+            this.loadSubjects(this.selectedCurriculum!.id);
+            this.displaySubjectDialog = false;
+          }
         },
         error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar la materia' }),
       });
     } else {
       this.academicService.createSubject(data).subscribe({
-        next: () => {
+        next: (res: any) => {
+          const relationId = res?.relationId || res?.id;
+          if (relationId && raw.successorIds && raw.successorIds.length > 0) {
+            this.academicService.updateSubjectSuccessors(relationId, raw.successorIds).subscribe();
+          }
+
           this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Materia creada' });
           this.loadSubjects(this.selectedCurriculum!.id);
           this.displaySubjectDialog = false;
@@ -657,8 +753,10 @@ export class Careers implements OnInit {
 
   downloadTemplate() {
     const data = [
-      { 'Código': 'MAT-101', 'Nombre': 'Cálculo I', 'Créditos': 4, 'Horas': 64, 'Semestre': 1 },
-      { 'Código': 'FIS-101', 'Nombre': 'Física I', 'Créditos': 4, 'Horas': 64, 'Semestre': 1 }
+      { 'Código': 'MAT-101', 'Nombre': 'Cálculo I', 'Créditos': 4, 'Horas': 64, 'Semestre': 1, 'Sucesoras': '' },
+      { 'Código': 'FIS-101', 'Nombre': 'Física I', 'Créditos': 4, 'Horas': 64, 'Semestre': 1, 'Sucesoras': '' },
+      { 'Código': 'MAT-102', 'Nombre': 'Cálculo II', 'Créditos': 4, 'Horas': 64, 'Semestre': 2, 'Sucesoras': '' },
+      { 'Código': 'FIS-102', 'Nombre': 'Física II', 'Créditos': 4, 'Horas': 64, 'Semestre': 2, 'Sucesoras': '' }
     ];
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
@@ -693,7 +791,11 @@ export class Careers implements OnInit {
       const payload: any[] = [];
       for (const row of data as any[]) {
         if (row['Código'] && row['Nombre'] && row['Créditos'] && row['Semestre']) {
-
+          
+          let successorCodes: string[] = [];
+          if (row['Sucesoras']) {
+            successorCodes = row['Sucesoras'].toString().split(',').map((c: string) => c.trim()).filter((c: string) => c);
+          }
 
           payload.push({
             curriculumId,
@@ -702,6 +804,7 @@ export class Careers implements OnInit {
             credits: parseInt(row['Créditos'], 10) || 0,
             semester: parseInt(row['Semestre'], 10) || 1,
             hours: parseInt(row['Horas'], 10) || 0,
+            successorCodes
           });
         }
       }
@@ -801,10 +904,39 @@ export class Careers implements OnInit {
 
   showSubjectMenu(event: Event, menu: any, subject: any) {
     this.selectedSubjectForMenu = subject;
-    this.subjectMenuItems = [
+    menu.model = [
+      { label: 'Vincular Sucesora', icon: 'pi pi-link', styleClass: 'action-view', command: () => this.openPrerequisitesDialog(this.selectedSubjectForMenu) },
       { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => this.editSubject(this.selectedSubjectForMenu) },
       { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => this.deleteSubject(this.selectedSubjectForMenu.id) }
     ];
     menu.toggle(event);
+  }
+
+  openPrerequisitesDialog(subject: any) {
+    if (!this.selectedCurriculum) return;
+    this.selectedSubjectForPrerequisites = subject;
+    // We are managing SUCCESSORS. Pre-select current successors.
+    this.selectedPrerequisiteIds = subject.successors ? subject.successors.map((s: any) => s.relationId) : [];
+    this.displayPrerequisitesDialog = true;
+    this.academicService.getPossiblePrerequisites(this.selectedCurriculum.id, subject.id).subscribe({
+      next: (res) => {
+        this.possiblePrerequisites = res;
+        this.filteredPossiblePrerequisites = res.filter((p: any) => p.semester > subject.semester);
+      },
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las posibles sucesoras' })
+    });
+  }
+
+  savePrerequisites() {
+    if (!this.selectedSubjectForPrerequisites) return;
+    const careerSubjectId = this.selectedSubjectForPrerequisites.relationId || this.selectedSubjectForPrerequisites.id;
+    this.academicService.updateSubjectSuccessors(careerSubjectId, this.selectedPrerequisiteIds).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Sucesoras actualizadas correctamente' });
+        this.displayPrerequisitesDialog = false;
+        this.loadSubjects(this.selectedCurriculum!.id);
+      },
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron actualizar las sucesoras' })
+    });
   }
 }

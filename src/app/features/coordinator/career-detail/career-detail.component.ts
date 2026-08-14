@@ -670,6 +670,32 @@ export class CareerDetailComponent implements OnInit {
               return cur;
             });
 
+            // Map successors for each curriculum
+            curriculums.forEach((cur: any) => {
+              const allSubjectsMap = new Map<string, any>();
+              cur.semesters?.forEach((sem: any) => {
+                sem.subjects?.forEach((sub: any) => {
+                  sub.successors = [];
+                  // the backend might return 'id' as relationId or subjectId. 
+                  // career-breakdown uses the relation id as 'id' usually.
+                  allSubjectsMap.set(sub.id, sub);
+                });
+              });
+
+              cur.semesters?.forEach((sem: any) => {
+                sem.subjects?.forEach((sub: any) => {
+                  if (sub.prerequisiteIds && sub.prerequisiteIds.length > 0) {
+                    sub.prerequisiteIds.forEach((preId: string) => {
+                      const prerequisite = allSubjectsMap.get(preId);
+                      if (prerequisite) {
+                        prerequisite.successors.push(sub);
+                      }
+                    });
+                  }
+                });
+              });
+            });
+
             this.career.set(career);
             this.curriculums.set(curriculums);
 
@@ -745,15 +771,64 @@ export class CareerDetailComponent implements OnInit {
         icon: 'pi pi-times',
         styleClass: 'action-delete text-red-500',
         disabled: this.removingTeacherId() === teacherId,
-        command: () => this.removeTeacher(sub.id, curriculumId, assignmentIds, teacherId),
-      },
+        command: () => this.removeTeacher(sub.subjectId || sub.id, curriculumId, assignmentIds, teacherId),
+      }
     ];
     menu.toggle(event);
   }
 
+  subjectMenuItems: MenuItem[] = [];
+
+  showSubjectMenu(
+    event: Event,
+    menu: any,
+    sub: any,
+    curriculumId: string,
+    colorPanel: any
+  ) {
+    this.subjectMenuItems = [
+      {
+        label: 'Cambiar Color',
+        icon: 'pi pi-palette',
+        styleClass: 'action-edit text-blue-500',
+        command: () => {
+          // Open the color picker popover
+          colorPanel.toggle(event);
+        },
+      },
+    ];
+
+    if (sub.assignments && sub.assignments.length > 0) {
+      this.subjectMenuItems.push({
+        label: 'Limpiar Asignaciones',
+        icon: 'pi pi-trash',
+        styleClass: 'action-delete text-red-500',
+        disabled: this.removingSubjectId() === sub.id,
+        command: () => this.removeTeacher(sub.subjectId || sub.id, curriculumId),
+      });
+    }
+
+    menu.toggle(event);
+  }
+
   openBulkOfferModal(semester: number, subjects: any[], curriculumId: string) {
-    const termId =
-      this.bulkOfferForm.academicTermId || (this.terms().length > 0 ? this.terms()[0].id : '');
+    let termId = this.bulkOfferForm.academicTermId;
+    
+    if (!termId) {
+      for (const sub of subjects) {
+        if (sub.assignments && sub.assignments.length > 0) {
+           const assignWithTerm = sub.assignments.find((a: any) => a.academicTermId);
+           if (assignWithTerm) {
+             termId = assignWithTerm.academicTermId;
+             break;
+           }
+        }
+      }
+    }
+    
+    if (!termId && this.terms().length > 0) {
+      termId = this.terms()[0].id;
+    }
 
     this.bulkOfferForm = {
       semester,
@@ -777,7 +852,10 @@ export class CareerDetailComponent implements OnInit {
       const configsMap: TeacherAssignmentConfig[] = [];
 
       if (sub.assignments && sub.assignments.length > 0) {
-        const termAssignments = sub.assignments.filter((a: any) => a.academicTermId === termId);
+        // Also load assignments that might not have a term set (legacy data)
+        const termAssignments = sub.assignments.filter(
+          (a: any) => a.academicTermId === termId || !a.academicTermId
+        );
 
         for (const assign of termAssignments) {
           configsMap.push({
@@ -876,7 +954,7 @@ export class CareerDetailComponent implements OnInit {
         }));
 
         payloadSubjects.push({
-          subjectId: sub.id,
+          subjectId: sub.subjectId || sub.id,
           assignments: payloadAssignments,
         });
       }

@@ -118,7 +118,7 @@ export class HrCreateUserComponent {
 
   constructor() {
     this.academicService.getFaculties().subscribe({
-      next: (data) => this.faculties.set(data),
+      next: (data: any) => this.faculties.set(data.data || data),
       error: (err) => console.error('Failed to load faculties', err),
     });
   }

@@ -106,7 +106,7 @@
         <div class="col-12 md:col-6">
           <div class="flex flex-column gap-2 mb-4">
             <label for="curriculumId" class="font-semibold text-sm text-slate-700">Malla Académica</label>
-            <p-select formControlName="curriculumId" [options]="curriculums" optionLabel="name" optionValue="id" placeholder="Seleccione una malla" [showClear]="true" styleClass="w-full">
+            <p-select formControlName="curriculumId" [options]="curriculums" optionLabel="name" optionValue="id" placeholder="Seleccione una malla" [showClear]="true" styleClass="w-full" (onChange)="onCurriculumChange()">
             </p-select>
             @if (!form.get('careerId')?.value) {
               <small class="text-slate-500">Debe seleccionar una carrera primero</small>
@@ -135,6 +135,23 @@
             <p-multiSelect formControlName="modalityIds" [options]="availableModalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
             @if (!form.get('careerId')?.value) {
               <small class="text-slate-500">Debe seleccionar una carrera primero</small>
+            }
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="field col-12 md:col-6 mb-3">
+            <label for="prerequisiteIds" class="font-semibold text-sm text-slate-700">Requisitos (Opcional)</label>
+            <p-multiSelect formControlName="prerequisiteIds" [options]="possiblePrerequisites" optionLabel="name" optionValue="id" placeholder="Seleccione requisitos" [showClear]="true" display="chip" styleClass="w-full">
+              <ng-template let-subject pTemplate="item">
+                <div class="flex align-items-center gap-2">
+                  <span class="font-medium">{{ subject.code }}</span>
+                  <span>- {{ subject.name }}</span>
+                </div>
+              </ng-template>
+            </p-multiSelect>
+            @if (!form.get('curriculumId')?.value) {
+              <small class="text-slate-500">Debe seleccionar una malla académica primero</small>
             }
           </div>
         </div>

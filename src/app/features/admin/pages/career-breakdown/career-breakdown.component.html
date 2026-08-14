@@ -173,11 +173,12 @@
                         <p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full" responsiveLayout="scroll">
                           <ng-template pTemplate="header">
                             <tr>
-                              <th class="text-center font-bold text-900" style="width: 8%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
+                              <th class="text-center font-bold text-900" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
                               <th class="font-bold text-900" style="width: 25%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Nombre</th>
-                              <th class="text-center font-bold text-900" style="width: 7%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
-                              <th class="text-center font-bold text-900" style="width: 7%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
-                              <th class="text-center font-bold text-900" style="width: 53%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-right-radius': '6px', 'border-bottom-right-radius': '6px'}">Docentes Asignados</th>
+                              <th class="text-center font-bold text-900" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
+                              <th class="text-center font-bold text-900" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
+                              <th class="text-center font-bold text-900" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Sucesoras</th>
+                              <th class="text-center font-bold text-900" style="width: 30%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-right-radius': '6px', 'border-bottom-right-radius': '6px'}">Docentes Asignados</th>
                             </tr>
                           </ng-template>
                           <ng-template pTemplate="body" let-s>
@@ -196,11 +197,22 @@
                                   <span class="text-400">-</span>
                                 }
                               </td>
-                              <td style="width: 25%;">
+                              <td class="text-center">
+                                @if (s.successors && s.successors.length > 0) {
+                                  <div class="flex flex-wrap justify-content-center gap-1">
+                                    @for (suc of s.successors; track suc.id) {
+                                      <p-tag [value]="suc.code" [pTooltip]="suc.name + ' (Sem ' + suc.semester + ')'" tooltipStyleClass="small-tooltip" tooltipPosition="top" styleClass="soft-tag text-xs px-2 py-1 cursor-pointer" [style]="{'background-color': getSemesterColor(suc.semester) + '22', 'color': getSemesterColor(suc.semester)}"></p-tag>
+                                    }
+                                  </div>
+                                } @else {
+                                  <span class="text-400">-</span>
+                                }
+                              </td>
+                              <td style="width: 30%;">
                                 @if (s.groupedAssignments && s.groupedAssignments.length > 0) {
                                   <div class="flex flex-column gap-1 align-items-center">
                                     <!-- Docente Principal -->
-                                    <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" style="width: fit-content; min-width: 22rem; margin: 0 auto; border-left: 4px solid #10b981;">
+                                    <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" style="width: 100%; margin: 0 auto; border-left: 4px solid #10b981;">
                                       <div class="flex flex-column text-left w-full">
                                         <span class="text-900 font-medium text-xs">{{ s.groupedAssignments[0].teacherName }}</span>
                                         <span class="text-600" style="font-size: 0.65rem">
@@ -210,7 +222,7 @@
                                     </div>
 
                                     @if (s.groupedAssignments.length > 1) {
-                                      <details style="width: fit-content; min-width: 22rem; margin: 0 auto;">
+                                      <details style="width: 100%; margin: 0 auto;">
                                         <summary class="text-xs text-500 hover:text-700 cursor-pointer p-0 m-0 mt-1 select-none hide-marker text-left">
                                           Ver más...
                                         </summary>

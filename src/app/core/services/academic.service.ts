@@ -140,6 +140,28 @@ export class AcademicService {
     return this.http.post<Curriculum>(`${this.apiUrl}/careers/${careerId}/curriculums`, data);
   }
 
+  getPossiblePrerequisites(curriculumId: string, excludeSubjectId?: string): Observable<any[]> {
+    let url = `${this.apiUrl}/curriculums/${curriculumId}/possible-prerequisites`;
+    if (excludeSubjectId) {
+      url += `?excludeCareerSubjectId=${excludeSubjectId}`;
+    }
+    return this.http.get<any>(url).pipe(
+      map(res => res.data || res)
+    );
+  }
+
+  updateSubjectPrerequisites(id: string, prerequisiteIds: string[]): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/career-subjects/${id}/prerequisites`, {
+      prerequisiteIds
+    });
+  }
+
+  updateSubjectSuccessors(id: string, successorIds: string[]): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/career-subjects/${id}/successors`, {
+      successorIds
+    });
+  }
+
   updateCurriculum(id: string, data: Partial<Curriculum>): Observable<Curriculum> {
     return this.http.put<Curriculum>(`${this.apiUrl}/curriculums/${id}`, data);
   }
