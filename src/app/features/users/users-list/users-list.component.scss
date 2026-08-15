@@ -77,8 +77,10 @@
     border-color: #064e3b;
     
     .cert-icon { color: #ffffff !important; transform: scale(1.1); }
-    .cert-details .cert-name { color: #ffffff !important; }
+    .cert-details .cert-name, .cert-name { color: #ffffff !important; }
     .cert-details .cert-date { color: #d1fae5 !important; }
+    .number-value { color: #ffffff !important; }
+    .icon-bg { background-color: rgba(255, 255, 255, 0.2) !important; }
     
     ::ng-deep .cv-action-btn {
       background: #ffffff !important;
@@ -182,4 +184,100 @@
 
 
 
+
+
+
+/* Dots Button Shared Style */
+.menu-dots-btn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+  color: #064e3b;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  i {
+    font-size: 1.25rem;
+  }
+  
+  &:hover {
+    background: #e2e8f0;
+  }
+}
+
+:host ::ng-deep .hide-tab-arrows {
+  .p-tablist-nav-btn {
+    display: none !important;
+  }
+  .p-tablist-nav-content {
+    overflow: visible !important;
+  }
+}
+
+.certificate-card:hover .menu-dots-btn {
+  color: #ffffff !important;
+  &:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+
+.teacher-stat-card {
+  padding: 0;
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  
+  .stat-icon-wrapper {
+    width: 64px;
+    height: 100%;
+    min-height: 80px;
+    border-radius: var(--border-radius) 0 0 var(--border-radius) !important;
+  }
+
+  .stat-value-badge {
+    min-width: 60px;
+  }
+
+  &:hover {
+    .stat-icon-wrapper.bg-green-50 {
+      background-color: var(--green-600) !important;
+      color: white !important;
+    }
+    .stat-icon-wrapper.bg-blue-50 {
+      background-color: var(--blue-600) !important;
+      color: white !important;
+    }
+    .stat-icon-wrapper.bg-orange-50 {
+      background-color: var(--orange-600) !important;
+      color: white !important;
+    }
+    
+    .cert-name {
+      color: var(--primary-color) !important;
+    }
+  }
+}
+
+.action-menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-color-secondary);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-color);
+  }
+}
 

@@ -33,4 +33,24 @@ export class HumanResourcesService {
   createTeacher(payload: any): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/teachers`, payload);
   }
+
+  uploadUserCv(userId: string, file: File): Observable<{ message: string, cvUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ message: string, cvUrl: string }>(`${this.apiUrl}/users/${userId}/cv`, formData);
+  }
+
+  deleteUserCv(userId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/users/${userId}/cv`);
+  }
+
+  uploadUserCertificate(userId: string, file: File): Observable<{ message: string, certificateUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ message: string, certificateUrl: string }>(`${this.apiUrl}/users/${userId}/certificates`, formData);
+  }
+
+  deleteUserCertificate(userId: string, url: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/users/${userId}/certificates`, { body: { url } });
+  }
 }

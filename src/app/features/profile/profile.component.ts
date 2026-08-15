@@ -102,6 +102,28 @@ export class ProfileComponent implements OnInit {
 
   private certMenuCache = new Map<string, MenuItem[]>();
 
+  private cvMenuCache = new Map<string, MenuItem[]>();
+
+  getCvMenu(cvUrl: string): MenuItem[] {
+    if (this.cvMenuCache.has(cvUrl)) {
+      return this.cvMenuCache.get(cvUrl)!;
+    }
+    const menu: MenuItem[] = [
+      {
+        label: 'Ver Documento',
+        icon: 'pi pi-eye',
+        command: () => this.viewCv(cvUrl)
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        command: () => this.onDeleteCv()
+      }
+    ];
+    this.cvMenuCache.set(cvUrl, menu);
+    return menu;
+  }
+
   getCertMenu(certUrl: string): MenuItem[] {
     if (this.certMenuCache.has(certUrl)) {
       return this.certMenuCache.get(certUrl)!;

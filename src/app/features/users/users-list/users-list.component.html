@@ -94,6 +94,7 @@
   [(visible)]="editDialogVisible"
   [modal]="true"
   [style]="{ width: '400px' }"
+  appendTo="body"
 >
   <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()">
     <div class="flex flex-column gap-3 mt-3">
@@ -156,6 +157,7 @@
   [modal]="true"
   [style]="{ width: '800px', 'max-width': '95vw' }"
   [closable]="true"
+  appendTo="body"
 >
   @if (mode() === 'admin') {
     <app-create-user [isModal]="true" (userCreated)="onUserCreated()"></app-create-user>
@@ -194,15 +196,15 @@
       </div>
     </div>
     
-    <p-tabs [(value)]="activeTab">
+    <p-tabs [(value)]="activeTab" [ngClass]="{'hide-tab-arrows': selectedUser.roleName !== 'teacher' && selectedUser.roleName !== 'Docente'}">
       <p-tablist>
         <p-tab value="0">Resumen</p-tab>
-        @if (selectedUser.roleName === 'teacher' || selectedUser.roleName === 'Docente') {
-          <p-tab value="1">Contacto y Detalles</p-tab>
-          <p-tab value="2">Información Académica</p-tab>
-        } @else if (selectedUser.roleName !== 'student' && selectedUser.roleName !== 'Estudiante') {
+        @if (selectedUser.roleName !== 'student' && selectedUser.roleName !== 'Estudiante') {
           <p-tab value="1">Contacto y Detalles</p-tab>
           <p-tab value="2">Documentos</p-tab>
+        }
+        @if (selectedUser.roleName === 'teacher' || selectedUser.roleName === 'Docente') {
+          <p-tab value="3">Información Académica</p-tab>
         }
       </p-tablist>
       
@@ -224,78 +226,20 @@
             </div>
           </div>
         </p-tabpanel>
-        @if (selectedUser.roleName === 'teacher' || selectedUser.roleName === 'Docente') {
+
+        @if (selectedUser.roleName !== 'student' && selectedUser.roleName !== 'Estudiante') {
+          <!-- Contacto y Detalles -->
           <p-tabpanel value="1">
-            <div class="flex flex-column gap-3 py-3">
-              <div class="grid">
-                <div class="col-4 font-semibold text-700">Teléfono:</div>
-                <div class="col-8">{{ selectedUser.phone || 'No registrado' }}</div>
-                
-                <div class="col-4 font-semibold text-700">Fecha de Nacimiento:</div>
-                <div class="col-8">
-                  @if (selectedUser.birthDate) {
-                    {{ selectedUser.birthDate | date:'longDate' }} ({{ calculateAge(selectedUser.birthDate) }} años)
-                  } @else {
-                    No registrado
+              <div class="flex flex-column gap-3 py-3">
+                <div class="grid relative">
+                  @if (mode() === 'hr' && !isEditingContact()) {
+                    <div class="absolute right-0 top-0 mt-2 mr-2">
+                      <p-menu #menuContact [popup]="true" [model]="contactMenu" appendTo="body"></p-menu>
+                      <button pButton icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-sm text-600" (click)="menuContact.toggle($event)"></button>
+                    </div>
                   }
-                </div>
-              </div>
-            </div>
-          </p-tabpanel>
-          <p-tabpanel value="2">
-            <div class="py-4">
-              <h3 class="m-0 mb-3 text-900">Resumen Académico</h3>
-              
-              <div class="flex flex-column gap-3">
-                <!-- Horas Asignadas -->
-                <div class="certificate-card border-round">
-                  <i class="pi pi-clock cert-icon"></i>
-                  <div class="cert-details flex-grow-1">
-                    <span class="cert-name text-lg">Horas Asignadas</span>
-                    <span class="cert-date">Total de horas clase semanales</span>
-                  </div>
-                  <div class="flex align-items-center justify-content-center bg-gray-50 border-round px-3 py-2 border-1 border-gray-200">
-                    <span class="font-bold text-xl text-900">{{ teacherStats() ? (teacherStats()!.totalHours | number:'1.0-1') : '...' }}</span>
-                  </div>
-                </div>
-
-                <!-- Carreras -->
-                <div class="certificate-card border-round">
-                  <i class="pi pi-graduation-cap cert-icon"></i>
-                  <div class="cert-details flex-grow-1">
-                    <span class="cert-name text-lg">Carreras Asignadas</span>
-                    <span class="cert-date">Programas académicos a los que pertenece</span>
-                  </div>
-                  <div class="flex align-items-center gap-3">
-                    <div class="flex align-items-center justify-content-center bg-gray-50 border-round px-3 py-2 border-1 border-gray-200">
-                      <span class="font-bold text-xl text-900">{{ teacherStats() ? teacherStats()!.careers.length : '...' }}</span>
-                    </div>
-                    <p-button icon="pi pi-eye" styleClass="cv-action-btn" [rounded]="true" [text]="true" size="small" pTooltip="Ver Carreras" (onClick)="openCareersList()"></p-button>
-                  </div>
-                </div>
-
-                <!-- Materias -->
-                <div class="certificate-card border-round">
-                  <i class="pi pi-book cert-icon"></i>
-                  <div class="cert-details flex-grow-1">
-                    <span class="cert-name text-lg">Materias Impartidas</span>
-                    <span class="cert-date">Total de asignaturas asignadas</span>
-                  </div>
-                  <div class="flex align-items-center gap-3">
-                    <div class="flex align-items-center justify-content-center bg-gray-50 border-round px-3 py-2 border-1 border-gray-200">
-                      <span class="font-bold text-xl text-900">{{ teacherStats() ? teacherStats()!.subjects.length : '...' }}</span>
-                    </div>
-                    <p-button icon="pi pi-eye" styleClass="cv-action-btn" [rounded]="true" [text]="true" size="small" pTooltip="Ver Materias" (onClick)="openSubjectsList()"></p-button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </p-tabpanel>
-        } @else if (selectedUser.roleName !== 'student' && selectedUser.roleName !== 'Estudiante') {
-          <p-tabpanel value="1">
-            <div class="flex flex-column gap-3 py-3">
-              <div class="grid">
-                <div class="col-4 font-semibold text-700">Teléfono:</div>
+                  
+                  <div class="col-4 font-semibold text-700 flex align-items-center">Teléfono:</div>
                 <div class="col-8">{{ selectedUser.phone || 'No registrado' }}</div>
                 
                 <div class="col-4 font-semibold text-700">Fecha de Nacimiento:</div>
@@ -307,36 +251,77 @@
                   }
                 </div>
                 
-                <div class="col-4 font-semibold text-700">Dirección:</div>
-                <div class="col-8">{{ $any(selectedUser)?.address || 'No registrado' }}</div>
-                
-                <div class="col-4 font-semibold text-700">LinkedIn:</div>
+                <div class="col-4 font-semibold text-700 flex align-items-center">Dirección:</div>
                 <div class="col-8">
-                  @if ($any(selectedUser)?.linkedIn) {
-                    <a [href]="$any(selectedUser).linkedIn" target="_blank" class="text-green-600 font-medium no-underline hover:underline">Ver Perfil <i class="pi pi-external-link text-xs"></i></a>
+                  @if (mode() === 'hr' && isEditingContact()) {
+                    <input type="text" pInputText [formControl]="contactForm.controls.address" class="w-full" placeholder="Ej. Calle Principal 123" />
                   } @else {
-                    <span class="text-500">No registrado</span>
+                    <span>{{ $any(selectedUser)?.address || 'No registrado' }}</span>
                   }
                 </div>
+                
+                <div class="col-4 font-semibold text-700 flex align-items-center">LinkedIn:</div>
+                <div class="col-8">
+                  @if (mode() === 'hr' && isEditingContact()) {
+                    <input type="text" pInputText [formControl]="contactForm.controls.linkedIn" class="w-full" placeholder="Ej. https://linkedin.com/in/usuario" />
+                  } @else {
+                    @if ($any(selectedUser)?.linkedIn) {
+                      <a [href]="$any(selectedUser).linkedIn" target="_blank" class="text-green-600 font-medium no-underline hover:underline">Ver Perfil <i class="pi pi-external-link text-xs"></i></a>
+                    } @else {
+                      <span class="text-500">No registrado</span>
+                    }
+                  }
+                </div>
+                
+                @if (mode() === 'hr' && isEditingContact()) {
+                  <div class="col-12 flex justify-content-end mt-2 gap-2">
+                    <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="isEditingContact.set(false)" size="small"></p-button>
+                    <p-button label="Guardar Datos" icon="pi pi-save" [loading]="savingContact()" (onClick)="onSaveContact()" size="small"></p-button>
+                  </div>
+                }
               </div>
             </div>
           </p-tabpanel>
+
+          <!-- Documentos -->
           <p-tabpanel value="2">
+            <!-- Hidden inputs for HR -->
+            <input type="file" #cvInput accept="application/pdf" style="display: none;" (change)="onCvFileSelected($event)">
+            <input type="file" #certInput accept="application/pdf" style="display: none;" (change)="onCertFileSelected($event)">
+            
             <div class="py-4">
               <h3 class="m-0 mb-3 text-900">Hoja de Vida</h3>
               @if ($any(selectedUser)?.cvUrl) {
-                <div class="certificate-card mb-4">
-                  <i class="pi pi-file-pdf cert-icon"></i>
-                  <div class="cert-details">
-                    <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden" [title]="getFileName($any(selectedUser).cvUrl, 0)">{{ getFileName($any(selectedUser).cvUrl, 0) }}</span>
-                    <span class="cert-date">Hoja de Vida (CV)</span>
+                <div class="certificate-card border-round flex align-items-center mb-4" style="padding: 1rem 1.25rem; gap: 1rem;">
+                  <div class="flex-grow-1 flex align-items-center gap-3 cursor-pointer" style="min-width: 0;" (click)="viewCv($any(selectedUser).cvUrl)">
+                    <i class="pi pi-file-pdf cert-icon text-2xl"></i>
+                    <div class="cert-details flex flex-column gap-1" style="min-width: 0; flex: 1;">
+                      <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden text-900 font-semibold" [title]="getFileName($any(selectedUser).cvUrl, 0)">
+                        {{ getFileName($any(selectedUser).cvUrl, 0) }}
+                      </span>
+                      <span class="cert-date text-500 text-sm">Hoja de Vida (CV)</span>
+                    </div>
                   </div>
-                  <p-button icon="pi pi-eye" styleClass="cv-action-btn" [rounded]="true" [text]="true" size="small" pTooltip="Ver Documento" (onClick)="viewCv($any(selectedUser).cvUrl)"></p-button>
+                  @if (mode() === 'hr') {
+                    <div class="cert-actions flex-shrink-0">
+                      <p-menu #menuCv [popup]="true" [model]="getCvMenu($any(selectedUser).cvUrl)" appendTo="body"></p-menu>
+                      <button type="button" class="menu-dots-btn" (click)="menuCv.toggle($event); $event.stopPropagation()"><i class="pi pi-ellipsis-v"></i></button>
+                    </div>
+                  }
                 </div>
               } @else {
-                <div class="text-center py-4 mb-4 bg-gray-50 border-round border-1 border-300">
-                  <i class="pi pi-folder-open text-300 text-4xl mb-2"></i>
-                  <p class="text-500 m-0">Este usuario aún no ha subido su hoja de vida.</p>
+                <div class="text-center py-4 mb-4 bg-gray-50 border-round border-1 border-300 transition-colors transition-duration-200" 
+                     [ngClass]="{'cursor-pointer hover:bg-gray-100 hover:border-green-400': mode() === 'hr'}"
+                     (click)="mode() === 'hr' && triggerCvUpload()">
+                  @if (isUploadingCv()) {
+                    <i class="pi pi-spin pi-spinner text-green-500 text-4xl mb-2"></i>
+                    <p class="text-500 m-0">Subiendo hoja de vida...</p>
+                  } @else {
+                    <i class="pi pi-folder-open text-300 text-4xl mb-2"></i>
+                    <p class="text-500 m-0">
+                      {{ mode() === 'hr' ? 'Haz clic para subir la hoja de vida (PDF)' : 'Este usuario aún no ha subido su hoja de vida.' }}
+                    </p>
+                  }
                 </div>
               }
 
@@ -345,22 +330,114 @@
                 <div class="grid">
                   @for (cert of $any(selectedUser).certificates; track cert; let i = $index) {
                     <div class="col-12 md:col-6">
-                      <div class="certificate-card h-full">
-                        <i class="pi pi-file-pdf cert-icon"></i>
-                        <div class="cert-details">
-                          <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden" [title]="getFileName(cert, i)">{{ getFileName(cert, i) }}</span>
-                          <span class="cert-date">Certificado PDF</span>
+                      <div class="certificate-card border-round flex align-items-center" style="padding: 1rem 1.25rem; gap: 1rem;">
+                        <div class="flex-grow-1 flex align-items-center gap-3 cursor-pointer" style="min-width: 0;" (click)="viewCv(cert)">
+                          <i class="pi pi-file-pdf cert-icon text-2xl"></i>
+                          <div class="cert-details flex flex-column gap-1" style="min-width: 0; flex: 1;">
+                            <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden text-900 font-semibold" [title]="getFileName(cert, i)">
+                              {{ getFileName(cert, i) }}
+                            </span>
+                            <span class="cert-date text-500 text-sm">Certificado PDF</span>
+                          </div>
                         </div>
-                        <p-button icon="pi pi-eye" styleClass="cv-action-btn" [rounded]="true" [text]="true" size="small" pTooltip="Ver Documento" (onClick)="viewCv(cert)"></p-button>
+                        @if (mode() === 'hr') {
+                          <div class="cert-actions flex-shrink-0">
+                            <p-menu #menuCert [popup]="true" [model]="getCertMenu(cert)" appendTo="body"></p-menu>
+                            <button type="button" class="menu-dots-btn" (click)="menuCert.toggle($event); $event.stopPropagation()"><i class="pi pi-ellipsis-v"></i></button>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                  @if (mode() === 'hr') {
+                    <!-- Botón Extra para RRHH para añadir más certificados si ya hay algunos -->
+                    <div class="col-12 md:col-6">
+                      <div class="flex align-items-center justify-content-center bg-gray-50 border-round border-1 border-300 border-dashed cursor-pointer hover:bg-gray-100 transition-colors transition-duration-200" 
+                           style="padding: 1rem 1.25rem; min-height: 72px;"
+                           (click)="triggerCertUpload()">
+                        @if (isUploadingCert()) {
+                          <div class="flex flex-column align-items-center gap-1">
+                            <i class="pi pi-spin pi-spinner text-green-500 text-xl"></i>
+                            <span class="text-500 font-medium text-sm">Subiendo...</span>
+                          </div>
+                        } @else {
+                          <div class="flex flex-column align-items-center gap-1">
+                            <i class="pi pi-plus-circle text-400 text-xl"></i>
+                            <span class="text-500 font-medium text-sm">Añadir Otro</span>
+                          </div>
+                        }
                       </div>
                     </div>
                   }
                 </div>
               } @else {
-                <div class="text-center py-4 bg-gray-50 border-round border-1 border-300">
-                  <p class="text-500 m-0">No hay certificados adicionales registrados.</p>
+                <div class="text-center py-4 bg-gray-50 border-round border-1 border-300 transition-colors transition-duration-200"
+                     [ngClass]="{'cursor-pointer hover:bg-gray-100 hover:border-green-400': mode() === 'hr'}"
+                     (click)="mode() === 'hr' && triggerCertUpload()">
+                  @if (isUploadingCert()) {
+                    <i class="pi pi-spin pi-spinner text-green-500 text-4xl mb-2"></i>
+                    <p class="text-500 m-0">Subiendo certificado...</p>
+                  } @else {
+                    <p class="text-500 m-0">
+                      {{ mode() === 'hr' ? 'Haz clic para subir certificados (PDF)' : 'No hay certificados adicionales registrados.' }}
+                    </p>
+                  }
                 </div>
               }
+            </div>
+          </p-tabpanel>
+        }
+
+        @if (selectedUser.roleName === 'teacher' || selectedUser.roleName === 'Docente') {
+          <p-tabpanel value="3">
+            <div class="py-4">
+              <h3 class="m-0 mb-3 text-900">Resumen Académico</h3>
+                 <div class="grid">
+                <!-- Horas Asignadas -->
+                <div class="col-12 md:col-4 mb-2">
+                  <div class="certificate-card border-round h-full flex flex-column align-items-center justify-content-center py-3 px-2 w-full">
+                    <div class="flex flex-column align-items-center justify-content-center w-full" style="gap: 0px;">
+                      <div class="flex align-items-center justify-content-center gap-2" style="margin-bottom: 6px; position: relative; z-index: 2;">
+                        <div class="flex align-items-center justify-content-center bg-green-50 border-round icon-bg" style="width: 2.5rem; height: 2.5rem; flex-shrink: 0; border-radius: 8px !important;">
+                          <i class="pi pi-clock cert-icon text-lg"></i>
+                        </div>
+                        <span class="font-bold text-3xl text-900 number-value line-height-1 m-0">{{ teacherStats() ? (teacherStats()!.totalHours | number:'1.0-1') : '...' }}h</span>
+                      </div>
+                      <span class="cert-name text-900 font-medium text-sm text-center w-full m-0" style="letter-spacing: 0.5px; line-height: 1; position: relative; z-index: 1;">Horas semana</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Carreras -->
+                <div class="col-12 md:col-4 mb-2">
+                  <div class="certificate-card border-round h-full flex flex-column align-items-center justify-content-center py-3 px-2 w-full cursor-pointer" (click)="openCareersList()">
+                    <div class="flex flex-column align-items-center justify-content-center w-full" style="gap: 0px;">
+                      <div class="flex align-items-center justify-content-center gap-2" style="margin-bottom: 6px; position: relative; z-index: 2;">
+                        <div class="flex align-items-center justify-content-center bg-green-50 border-round icon-bg" style="width: 2.5rem; height: 2.5rem; flex-shrink: 0; border-radius: 8px !important;">
+                          <i class="pi pi-graduation-cap cert-icon text-lg"></i>
+                        </div>
+                        <span class="font-bold text-3xl text-900 number-value line-height-1 m-0">{{ teacherStats() ? teacherStats()!.careers.length : '...' }}</span>
+                      </div>
+                      <span class="cert-name text-900 font-medium text-sm text-center w-full m-0" style="letter-spacing: 0.5px; line-height: 1; position: relative; z-index: 1;">Carreras</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Materias -->
+                <div class="col-12 md:col-4 mb-2">
+                  <div class="certificate-card border-round h-full flex flex-column align-items-center justify-content-center py-3 px-2 w-full cursor-pointer" (click)="openSubjectsList()">
+                    <div class="flex flex-column align-items-center justify-content-center w-full" style="gap: 0px;">
+                      <div class="flex align-items-center justify-content-center gap-2" style="margin-bottom: 6px; position: relative; z-index: 2;">
+                        <div class="flex align-items-center justify-content-center bg-green-50 border-round icon-bg" style="width: 2.5rem; height: 2.5rem; flex-shrink: 0; border-radius: 8px !important;">
+                          <i class="pi pi-book cert-icon text-lg"></i>
+                        </div>
+                        <span class="font-bold text-3xl text-900 number-value line-height-1 m-0">{{ teacherStats() ? teacherStats()!.subjects.length : '...' }}</span>
+                      </div>
+                      <span class="cert-name text-900 font-medium text-sm text-center w-full m-0" style="letter-spacing: 0.5px; line-height: 1; position: relative; z-index: 1;">Materias</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </p-tabpanel>
         }
@@ -370,32 +447,44 @@
 </p-dialog>
 
 <!-- Modals for Careers and Subjects -->
-<p-dialog [(visible)]="showCareersModal" [header]="'Carreras Asignadas'" [modal]="true" [style]="{ width: '400px' }">
-  @if (teacherStats() && teacherStats()!.careers.length > 0) {
-    <ul class="list-none p-0 m-0">
+<p-dialog [(visible)]="showCareersModal" [header]="'Carreras Asignadas'" [modal]="true" [style]="{ width: '450px' }">
+  <div class="grid mt-2">
+    @if (teacherStats() && teacherStats()!.careers.length > 0) {
       @for (career of teacherStats()!.careers; track career.id) {
-        <li class="py-3 border-bottom-1 border-300 flex align-items-center">
-          <i class="pi pi-graduation-cap text-blue-600 mr-3 text-xl"></i>
-          <span class="text-700 font-medium">{{ career.name }}</span>
-        </li>
+        <div class="col-12" [ngClass]="{'md:col-6': teacherStats()!.careers.length > 1}">
+          <div class="certificate-card border-round h-full flex align-items-center" style="padding: 0.5rem 0.75rem; gap: 0.5rem;">
+            <i class="pi pi-graduation-cap cert-icon" style="font-size: 1.2rem;"></i>
+            <div class="cert-details flex-grow-1">
+              <span class="cert-name text-sm">{{ career.name }}</span>
+            </div>
+          </div>
+        </div>
       }
-    </ul>
-  } @else {
-    <p class="text-500 text-center py-4">No tiene carreras asignadas.</p>
-  }
+    } @else {
+      <div class="col-12">
+        <p class="text-500 text-center py-4 m-0">No tiene carreras asignadas.</p>
+      </div>
+    }
+  </div>
 </p-dialog>
 
-<p-dialog [(visible)]="showSubjectsModal" [header]="'Materias Impartidas'" [modal]="true" [style]="{ width: '400px' }">
-  @if (teacherStats() && teacherStats()!.subjects.length > 0) {
-    <ul class="list-none p-0 m-0">
+<p-dialog [(visible)]="showSubjectsModal" [header]="'Materias Asignadas'" [modal]="true" [style]="{ width: '450px' }">
+  <div class="grid mt-2">
+    @if (teacherStats() && teacherStats()!.subjects.length > 0) {
       @for (sub of teacherStats()!.subjects; track sub.id) {
-        <li class="py-3 border-bottom-1 border-300 flex align-items-center">
-          <i class="pi pi-book text-orange-600 mr-3 text-xl"></i>
-          <span class="text-700 font-medium">{{ sub.name }}</span>
-        </li>
+        <div class="col-12" [ngClass]="{'md:col-6': teacherStats()!.subjects.length > 1}">
+          <div class="certificate-card border-round h-full flex align-items-center" style="padding: 0.5rem 0.75rem; gap: 0.5rem;">
+            <i class="pi pi-book cert-icon" style="font-size: 1.2rem;"></i>
+            <div class="cert-details flex-grow-1">
+              <span class="cert-name text-sm">{{ sub.name }}</span>
+            </div>
+          </div>
+        </div>
       }
-    </ul>
-  } @else {
-    <p class="text-500 text-center py-4">No tiene materias impartidas.</p>
-  }
+    } @else {
+      <div class="col-12">
+        <p class="text-500 text-center py-4 m-0">No tiene materias asignadas.</p>
+      </div>
+    }
+  </div>
 </p-dialog>
