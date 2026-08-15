@@ -131,15 +131,26 @@ export class UsersListComponent implements OnInit, OnDestroy {
     address: [''],
     linkedIn: ['']
   });
+  isEditingAddress = signal(false);
+  isEditingLinkedIn = signal(false);
   savingContact = signal(false);
-  isEditingContact = signal(false);
 
-  contactMenu = [
+  addressMenu = [
     {
       label: 'Editar',
       icon: 'pi pi-pencil',
       command: () => {
-        this.isEditingContact.set(true);
+        this.isEditingAddress.set(true);
+      }
+    }
+  ];
+
+  linkedInMenu = [
+    {
+      label: 'Editar',
+      icon: 'pi pi-pencil',
+      command: () => {
+        this.isEditingLinkedIn.set(true);
       }
     }
   ];
@@ -464,7 +475,8 @@ export class UsersListComponent implements OnInit, OnDestroy {
         this.selectedUser.linkedIn = updates.linkedIn;
         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Datos de contacto actualizados' });
         this.savingContact.set(false);
-        this.isEditingContact.set(false);
+        this.isEditingAddress.set(false);
+        this.isEditingLinkedIn.set(false);
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar los datos' });
@@ -535,7 +547,8 @@ export class UsersListComponent implements OnInit, OnDestroy {
   openProfileModal(user: any) {
     this.selectedUser = user;
     this.activeTab = '0'; // Reset to "Resumen" tab
-    this.isEditingContact.set(false);
+    this.isEditingAddress.set(false);
+    this.isEditingLinkedIn.set(false);
     this.contactForm.patchValue({
       address: user.address || '',
       linkedIn: user.linkedIn || ''

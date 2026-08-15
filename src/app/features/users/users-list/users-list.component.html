@@ -232,13 +232,6 @@
           <p-tabpanel value="1">
               <div class="flex flex-column gap-3 py-3">
                 <div class="grid relative">
-                  @if (mode() === 'hr' && !isEditingContact()) {
-                    <div class="absolute right-0 top-0 mt-2 mr-2">
-                      <p-menu #menuContact [popup]="true" [model]="contactMenu" appendTo="body"></p-menu>
-                      <button pButton icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-sm text-600" (click)="menuContact.toggle($event)"></button>
-                    </div>
-                  }
-                  
                   <div class="col-4 font-semibold text-700 flex align-items-center">Teléfono:</div>
                 <div class="col-8">{{ selectedUser.phone || 'No registrado' }}</div>
                 
@@ -253,32 +246,47 @@
                 
                 <div class="col-4 font-semibold text-700 flex align-items-center">Dirección:</div>
                 <div class="col-8">
-                  @if (mode() === 'hr' && isEditingContact()) {
-                    <input type="text" pInputText [formControl]="contactForm.controls.address" class="w-full" placeholder="Ej. Calle Principal 123" />
+                  @if (mode() === 'hr' && isEditingAddress()) {
+                    <div class="flex gap-2">
+                      <input type="text" pInputText [formControl]="contactForm.controls.address" class="w-full" placeholder="Ej. Calle Principal 123" />
+                      <button pButton icon="pi pi-check" class="p-button-rounded p-button-success p-button-text p-button-sm p-0 m-0" (click)="onSaveContact()"></button>
+                      <button pButton icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text p-button-sm p-0 m-0" (click)="isEditingAddress.set(false)"></button>
+                    </div>
                   } @else {
-                    <span>{{ $any(selectedUser)?.address || 'No registrado' }}</span>
+                    <div class="flex align-items-center justify-content-between">
+                      <span>{{ $any(selectedUser)?.address || 'No registrado' }}</span>
+                      @if (mode() === 'hr') {
+                        <p-menu #menuAddress [popup]="true" [model]="addressMenu" appendTo="body"></p-menu>
+                        <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="menuAddress.toggle($event)"></p-button>
+                      }
+                    </div>
                   }
                 </div>
                 
                 <div class="col-4 font-semibold text-700 flex align-items-center">LinkedIn:</div>
                 <div class="col-8">
-                  @if (mode() === 'hr' && isEditingContact()) {
-                    <input type="text" pInputText [formControl]="contactForm.controls.linkedIn" class="w-full" placeholder="Ej. https://linkedin.com/in/usuario" />
+                  @if (mode() === 'hr' && isEditingLinkedIn()) {
+                    <div class="flex gap-2">
+                      <input type="text" pInputText [formControl]="contactForm.controls.linkedIn" class="w-full" placeholder="Ej. https://linkedin.com/in/usuario" />
+                      <button pButton icon="pi pi-check" class="p-button-rounded p-button-success p-button-text p-button-sm p-0 m-0" (click)="onSaveContact()"></button>
+                      <button pButton icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text p-button-sm p-0 m-0" (click)="isEditingLinkedIn.set(false)"></button>
+                    </div>
                   } @else {
-                    @if ($any(selectedUser)?.linkedIn) {
-                      <a [href]="$any(selectedUser).linkedIn" target="_blank" class="text-green-600 font-medium no-underline hover:underline">Ver Perfil <i class="pi pi-external-link text-xs"></i></a>
-                    } @else {
-                      <span class="text-500">No registrado</span>
-                    }
+                    <div class="flex align-items-center justify-content-between w-full">
+                      <div>
+                        @if ($any(selectedUser)?.linkedIn) {
+                          <a [href]="$any(selectedUser).linkedIn" target="_blank" class="text-green-600 font-medium no-underline hover:underline">Ver Perfil <i class="pi pi-external-link text-xs"></i></a>
+                        } @else {
+                          <span class="text-500">No registrado</span>
+                        }
+                      </div>
+                      @if (mode() === 'hr') {
+                        <p-menu #menuLinkedIn [popup]="true" [model]="linkedInMenu" appendTo="body"></p-menu>
+                        <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="menuLinkedIn.toggle($event)"></p-button>
+                      }
+                    </div>
                   }
                 </div>
-                
-                @if (mode() === 'hr' && isEditingContact()) {
-                  <div class="col-12 flex justify-content-end mt-2 gap-2">
-                    <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="isEditingContact.set(false)" size="small"></p-button>
-                    <p-button label="Guardar Datos" icon="pi pi-save" [loading]="savingContact()" (onClick)="onSaveContact()" size="small"></p-button>
-                  </div>
-                }
               </div>
             </div>
           </p-tabpanel>
