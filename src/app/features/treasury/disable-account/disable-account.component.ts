@@ -1,84 +1,127 @@
-import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TreasuryService } from '../../../core/services/treasury.service';
-import { MessageService, ConfirmationService } from 'primeng/api';
-import { InputTextModule } from 'primeng/inputtext';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { TreasuryService, OverdueStudent } from '../../../core/services/treasury.service';
+import { ConfirmationService, MessageService, MenuItem } from 'primeng/api';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
-import { SelectModule } from 'primeng/select';
-import { UserService } from '../../../core/services/user.service';
+import { TagModule } from 'primeng/tag';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { MenuModule } from 'primeng/menu';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-disable-account',
   imports: [
-    ReactiveFormsModule,
-    InputTextModule,
+    TableModule,
     ButtonModule,
     ToastModule,
-    ConfirmDialogModule,
     CardModule,
-    SelectModule,
+    TagModule,
+    ConfirmDialogModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
+    MenuModule,
+    FormsModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './disable-account.component.html',
   styleUrl: './disable-account.component.scss',
 })
-export class DisableAccountComponent {
-  private formBuilder = inject(FormBuilder);
+export class DisableAccountComponent implements OnInit {
   private treasuryService = inject(TreasuryService);
-  private userService = inject(UserService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
 
-  loading = signal(false);
-  students = signal<any[]>([]);
+  students = signal<OverdueStudent[]>([]);
+  loading = signal(true);
+  searchTerm = '';
+  searchVersion = signal(0);
+  menuItems: MenuItem[] = [];
 
-  form = this.formBuilder.group({
-    studentId: ['', Validators.required],
+  filteredStudents = computed(() => {
+    this.searchVersion();
+    const term = this.searchTerm.toLowerCase().trim();
+    return this.students().filter((s) => {
+      if (!term) return true;
+      return (
+        s.studentId.toLowerCase().includes(term) ||
+        s.firstName.toLowerCase().includes(term) ||
+        s.lastName.toLowerCase().includes(term) ||
+        this.fullName(s).toLowerCase().includes(term)
+      );
+    });
   });
 
-  constructor() {
-    this.loadData();
+  ngOnInit() {
+    this.load();
   }
 
-  loadData() {
-    this.userService.getUsers(1, 1000, 'student').subscribe((res) => {
-      const mapped = res.data.map((u) => ({ ...u, fullName: `${u.firstName} ${u.lastName} (${u.id})` }));
-      this.students.set(mapped);
+  onSearchChange(value: string) {
+    this.searchTerm = value;
+    this.searchVersion.set(this.searchVersion() + 1);
+  }
+
+  load() {
+    this.loading.set(true);
+    this.treasuryService.getOverdueStudents().subscribe({
+      next: (res) => {
+        this.students.set(res.data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudieron cargar los estudiantes con deuda',
+        });
+        this.loading.set(false);
+      },
     });
   }
 
-  get studentId() {
-    return this.form.controls.studentId;
+  fullName(row: OverdueStudent): string {
+    return `${row.firstName} ${row.lastName}`;
   }
 
-  confirm() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  showMenu(event: Event, menu: any, row: OverdueStudent) {
+    event.stopPropagation();
+    this.menuItems = [
+      {
+        label: 'Deshabilitar Cuenta',
+        icon: 'pi pi-ban',
+        styleClass: 'text-red-500',
+        command: () => this.confirmDisable(row),
+      },
+    ];
+    menu.toggle(event);
+  }
 
+  confirmDisable(row: OverdueStudent) {
     this.confirmationService.confirm({
-      message: `¿Está seguro de deshabilitar la cuenta del estudiante con cédula ${this.form.value.studentId}? Esta acción no se puede deshacer fácilmente.`,
+      message: `¿Está seguro de deshabilitar la cuenta de ${this.fullName(row)} (${row.studentId})? Esta acción no se puede deshacer fácilmente.`,
       header: 'Confirmar Deshabilitación',
       icon: 'pi pi-exclamation-triangle',
-      accept: () => this.onSubmit(),
+      acceptLabel: 'Sí, Deshabilitar',
+      rejectLabel: 'Cancelar',
+      accept: () => this.doDisable(row.studentId),
     });
   }
 
-  onSubmit() {
+  private doDisable(studentId: string) {
     this.loading.set(true);
-    this.treasuryService.disableAccount(this.form.value.studentId!).subscribe({
+    this.treasuryService.disableAccount(studentId).subscribe({
       next: (res) => {
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
           detail: res.message ?? 'Cuenta deshabilitada',
         });
-        this.form.reset();
-        this.loading.set(false);
+        this.load();
       },
       error: (err) => {
         this.loading.set(false);
@@ -91,9 +134,3 @@ export class DisableAccountComponent {
     });
   }
 }
-
-
-
-
-
-

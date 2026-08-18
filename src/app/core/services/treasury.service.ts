@@ -63,12 +63,23 @@ export class TreasuryService {
     );
   }
 
+  enrollStudent(studentId: string): Observable<{
+    message: string;
+    tuition: Tuition;
+  }> {
+    return this.http.post<any>(`${this.apiUrl}/matricular`, { studentId });
+  }
+
   disableAccount(studentId: string): Observable<{
     message: string;
     user: Partial<User>;
     tuition: Partial<Tuition>;
   }> {
     return this.http.post<any>(`${this.apiUrl}/deshabilitar`, { studentId });
+  }
+
+  getOverdueStudents(): Observable<{ data: OverdueStudent[] }> {
+    return this.http.get<{ data: OverdueStudent[] }>(`${this.apiUrl}/overdue-students`);
   }
 }
 
@@ -84,6 +95,17 @@ export interface MatriculaRow {
   studentId: string;
   firstName: string;
   lastName: string;
+  enrolled: boolean;
   status: 'pago_total' | 'pendiente' | 'convenio' | 'no_paga';
   paidInstallments: number;
+}
+
+export interface OverdueStudent {
+  studentId: string;
+  firstName: string;
+  lastName: string;
+  paidInstallments: number;
+  expectedInstallments: number;
+  overdueMonths: number;
+  nextDueDate: string;
 }

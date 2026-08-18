@@ -1,11 +1,12 @@
 <p-toast />
+<p-confirmDialog />
 <div class="page-container">
   <!-- Dark Header -->
   <div class="page-header">
     <div class="header-content">
       <h1 class="title">Registro de <span>Abonos</span></h1>
       <p class="description">
-        Registra un nuevo abono para la matrícula de un estudiante.
+        Registra abonos, convenios o pagos totales para la colegiatura de los estudiantes.
       </p>
     </div>
   </div>
@@ -13,41 +14,62 @@
   <!-- Main Content Card -->
   <div class="content-wrapper">
     <div class="data-card">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="flex flex-column gap-2 mb-4">
-          <label class="font-semibold text-sm text-700" for="studentId">Seleccione el Estudiante</label>
-          <p-select
-            id="studentId"
-            [options]="students()"
-            formControlName="studentId"
-            optionLabel="fullName"
-            optionValue="id"
-            placeholder="Seleccione un estudiante"
-            [filter]="true"
-            filterBy="fullName"
-            [showClear]="true"
-          ></p-select>
-          @if (studentId.invalid && studentId.touched) {
-            <small class="p-error">Debe seleccionar un estudiante.</small>
-          }
-        </div>
-        <div class="flex justify-content-end mt-3">
-          <p-button
-            type="submit"
-            label="Registrar Abono"
-            [loading]="loading()"
-            [disabled]="form.invalid"
-          />
-        </div>
-      </form>
+      <!-- Search Filter -->
+      <div class="flex flex-wrap justify-content-end align-items-center mb-4 gap-3">
+        <p-iconField iconPosition="left" styleClass="w-20rem">
+          <p-inputIcon styleClass="pi pi-search" />
+          <input pInputText type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" placeholder="Buscar por cédula o nombre..." class="w-full" />
+        </p-iconField>
+      </div>
 
-      @if (result(); as r) {
-        <div class="bg-gray-50 p-3 border-1 border-gray-200 border-round mt-4">
-          <h3>Resultado</h3>
-          <p><strong>Estado:</strong> <p-tag [value]="statusLabel(r.status)" [severity]="statusSeverity(r.status)" /></p>
-          <p><strong>Cuotas pagadas:</strong> {{ r.paidInstallments }} / 4</p>
-        </div>
-      }
+      <!-- Table -->
+      <p-table
+        [value]="filteredTuitions()"
+        [loading]="loading()"
+        [paginator]="true"
+        [rows]="15"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-sm p-datatable-striped"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Cédula</th>
+            <th>Nombre</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-t>
+          <tr>
+            <td class="font-medium text-900">{{ t.studentId }}</td>
+            <td>{{ fullName(t) }}</td>
+            <td>
+              <span class="font-medium text-700">{{ t.paidInstallments }} / 4</span>
+            </td>
+            <td class="text-center">
+              @if (!isPaid(t)) {
+                <p-button
+                  icon="pi pi-ellipsis-v"
+                  [rounded]="true"
+                  [text]="true"
+                  styleClass="action-menu-btn"
+                  size="small"
+                  (onClick)="showMenu($event, menu, t)"
+                />
+              } @else {
+                <span class="inline-flex align-items-center justify-content-center text-green-600 font-semibold" style="min-height: 36px; min-width: 36px; font-size: 0.75rem;">Pagado</span>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4" class="text-center p-4 text-500">No se encontraron resultados.</td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
   </div>
 </div>
+
+<p-menu #menu [model]="menuItems" [popup]="true" appendTo="body" [style]="{ width: '200px' }"></p-menu>

@@ -1,17 +1,33 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { TreasuryService, MatriculaRow } from '../../../core/services/treasury.service';
-import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
-import { MenuModule } from 'primeng/menu';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-tuition-list',
-  imports: [TableModule, TagModule, ButtonModule, ToastModule, CardModule, MenuModule, ConfirmDialogModule],
+  imports: [
+    TableModule,
+    TagModule,
+    ButtonModule,
+    ToastModule,
+    CardModule,
+    ConfirmDialogModule,
+    InputTextModule,
+    SelectModule,
+    IconFieldModule,
+    InputIconModule,
+    FormsModule,
+  ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './tuition-list.component.html',
   styleUrl: './tuition-list.component.scss',
@@ -23,11 +39,46 @@ export class TuitionListComponent implements OnInit {
 
   tuitions = signal<MatriculaRow[]>([]);
   loading = signal(true);
-  menuItems: MenuItem[] = [];
-  selectedRow: MatriculaRow | null = null;
+  searchTerm = '';
+  searchVersion = signal(0);
+  statusFilter = signal<string>('all');
+
+  statusOptions = [
+    { label: 'Todos', value: 'all' },
+    { label: 'Matriculado', value: 'matriculado' },
+    { label: 'Pendiente', value: 'pendiente' },
+  ];
+
+  filteredTuitions = computed(() => {
+    this.searchVersion();
+    const term = this.searchTerm.toLowerCase().trim();
+    const status = this.statusFilter();
+
+    return this.tuitions().filter((t) => {
+      const matchesSearch =
+        !term ||
+        t.studentId.toLowerCase().includes(term) ||
+        t.firstName.toLowerCase().includes(term) ||
+        t.lastName.toLowerCase().includes(term) ||
+        this.fullName(t).toLowerCase().includes(term);
+
+      const matriculado = t.enrolled;
+      const matchesStatus =
+        status === 'all' ||
+        (status === 'matriculado' && matriculado) ||
+        (status === 'pendiente' && !matriculado);
+
+      return matchesSearch && matchesStatus;
+    });
+  });
 
   ngOnInit() {
     this.load();
+  }
+
+  onSearchChange(value: string) {
+    this.searchTerm = value;
+    this.searchVersion.set(this.searchVersion() + 1);
   }
 
   load() {
@@ -52,77 +103,28 @@ export class TuitionListComponent implements OnInit {
     return `${row.firstName} ${row.lastName}`;
   }
 
-  statusLabel(s: string): string {
-    return s === 'pago_total'
-      ? 'Pagado Total'
-      : s === 'convenio'
-        ? 'Convenio'
-        : s === 'pendiente'
-          ? 'Pendiente'
-          : 'No paga';
+  statusLabel(enrolled: boolean): string {
+    return enrolled ? 'Matriculado' : 'Pendiente';
   }
 
-  statusSeverity(s: string): 'success' | 'warn' | 'danger' | 'info' {
-    return s === 'pago_total'
-      ? 'success'
-      : s === 'convenio'
-        ? 'info'
-        : s === 'pendiente'
-          ? 'warn'
-          : 'danger';
+  statusSeverity(enrolled: boolean): 'success' | 'warn' {
+    return enrolled ? 'success' : 'warn';
   }
 
-  showMenu(event: Event, menu: any, row: MatriculaRow) {
-    event.stopPropagation();
-    this.selectedRow = row;
-    this.menuItems = [
-      {
-        label: 'Pago Completo',
-        icon: 'pi pi-check-circle',
-        command: () => this.confirmComplete(),
-      },
-      {
-        label: 'Convenio',
-        icon: 'pi pi-file-edit',
-        command: () => this.confirmConvenio(),
-      },
-    ];
-    menu.toggle(event);
-  }
-
-  confirmComplete() {
-    const row = this.selectedRow;
-    if (!row) {
-      return;
-    }
+  confirmEnroll(row: MatriculaRow) {
     this.confirmationService.confirm({
-      message: `¿Marcar como pago completo a ${this.fullName(row)}? Se bloquearán los abonos de esta matrícula.`,
-      header: 'Confirmar Pago Completo',
+      message: `¿Matricular a ${this.fullName(row)}? Se creará una matrícula para el estudiante.`,
+      header: 'Confirmar Matrícula',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, Pagar Completo',
+      acceptLabel: 'Sí, Matricular',
       rejectLabel: 'Cancelar',
-      accept: () => this.doComplete(row),
+      accept: () => this.doEnroll(row),
     });
   }
 
-  confirmConvenio() {
-    const row = this.selectedRow;
-    if (!row) {
-      return;
-    }
-    this.confirmationService.confirm({
-      message: `¿Crear convenio de 4 cuotas para ${this.fullName(row)}?`,
-      header: 'Confirmar Convenio',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, Crear Convenio',
-      rejectLabel: 'Cancelar',
-      accept: () => this.doConvenio(row),
-    });
-  }
-
-  doComplete(row: MatriculaRow) {
+  doEnroll(row: MatriculaRow) {
     this.loading.set(true);
-    this.treasuryService.completePayment(row.studentId).subscribe({
+    this.treasuryService.enrollStudent(row.studentId).subscribe({
       next: (res) => {
         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: res.message });
         this.load();
@@ -132,25 +134,7 @@ export class TuitionListComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: err.error?.message ?? 'No se pudo marcar el pago completo',
-        });
-      },
-    });
-  }
-
-  doConvenio(row: MatriculaRow) {
-    this.loading.set(true);
-    this.treasuryService.createConvenio(row.studentId).subscribe({
-      next: (res) => {
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: res.message });
-        this.load();
-      },
-      error: (err) => {
-        this.loading.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: err.error?.message ?? 'No se pudo crear el convenio',
+          detail: err.error?.message ?? 'No se pudo matricular al estudiante',
         });
       },
     });

@@ -6,7 +6,7 @@
     <div class="header-content">
       <h1 class="title">Listado de <span>Matrículas</span></h1>
       <p class="description">
-        Visualiza el estado de las matrículas y gestiona el pago completo o convenio de cada estudiante.
+        Visualiza el estado de las matrículas y gestiona la matrícula de cada estudiante.
       </p>
     </div>
   </div>
@@ -14,19 +14,42 @@
   <!-- Main Content Card -->
   <div class="content-wrapper">
     <div class="data-card">
+      <!-- Filters -->
+      <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div class="flex align-items-center gap-2">
+          <label class="font-semibold text-sm text-700">Estado</label>
+          <p-select
+            [options]="statusOptions"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="statusFilter.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Filtrar por estado"
+            styleClass="w-12rem"
+          />
+        </div>
+
+        <div class="flex align-items-center gap-2">
+          <p-iconField iconPosition="left" styleClass="w-20rem">
+            <p-inputIcon styleClass="pi pi-search" />
+            <input pInputText type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" placeholder="Buscar por cédula o nombre..." class="w-full" />
+          </p-iconField>
+        </div>
+      </div>
+
+      <!-- Table -->
       <p-table
-        [value]="tuitions()"
+        [value]="filteredTuitions()"
         [loading]="loading()"
         [paginator]="true"
         [rows]="15"
-        [tableStyle]="{ 'min-width': '50rem' }"
+        [tableStyle]="{ 'min-width': '40rem' }"
       >
         <ng-template pTemplate="header">
           <tr>
             <th>Cédula</th>
             <th>Nombre</th>
             <th>Estado</th>
-            <th>Cuotas</th>
             <th class="text-center">Acciones</th>
           </tr>
         </ng-template>
@@ -35,36 +58,30 @@
             <td>{{ t.studentId }}</td>
             <td>{{ fullName(t) }}</td>
             <td>
-              <p-tag [value]="statusLabel(t.status)" [severity]="statusSeverity(t.status)" />
+              <p-tag [value]="statusLabel(t.enrolled)" [severity]="statusSeverity(t.enrolled)" />
             </td>
-            <td>{{ t.paidInstallments }} / 4</td>
             <td class="text-center">
-              <p-button
-                icon="pi pi-ellipsis-v"
-                [rounded]="true"
-                [text]="true"
-                styleClass="action-menu-btn"
-                size="small"
-                (onClick)="showMenu($event, menu, t)"
-              />
+              @if (!t.enrolled) {
+                <p-button
+                  label="Matricular"
+                  icon="pi pi-user-plus"
+                  size="small"
+                  [rounded]="true"
+                  [loading]="loading()"
+                  (onClick)="confirmEnroll(t)"
+                />
+              } @else {
+                <span class="text-500 text-sm">Ya matriculado</span>
+              }
             </td>
           </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="5" class="text-center">No hay matrículas registradas.</td>
+            <td colspan="4" class="text-center">No se encontraron resultados.</td>
           </tr>
         </ng-template>
       </p-table>
-
-      <div class="flex gap-3 mt-3 text-sm text-500">
-        <span><i class="pi pi-circle-fill text-red-500 mr-1" style="font-size: 0.6rem"></i> No paga</span>
-        <span><i class="pi pi-circle-fill text-blue-500 mr-1" style="font-size: 0.6rem"></i> Convenio</span>
-        <span><i class="pi pi-circle-fill text-yellow-500 mr-1" style="font-size: 0.6rem"></i> Pendiente</span>
-        <span><i class="pi pi-circle-fill text-green-500 mr-1" style="font-size: 0.6rem"></i> Pagado total</span>
-      </div>
     </div>
   </div>
 </div>
-
-<p-menu #menu [model]="menuItems" [popup]="true" appendTo="body" [style]="{ width: '140px' }"></p-menu>

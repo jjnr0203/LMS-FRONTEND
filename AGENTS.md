@@ -20,14 +20,14 @@ SCSS styles; `src/styles.scss` imports `primeicons/primeicons.css` and `primefle
 - **Entrypoint:** `src/main.ts` bootstraps standalone `App` via `bootstrapApplication`
 - **Config:** `src/app/app.config.ts` — router, HTTP client (`authInterceptor` + `errorInterceptor`), PrimeNG Aura theme, async animations
 - **Routing** (role-based, lazy-loaded via `loadComponent`/`loadChildren`):
-  - `''` → redirects to `login`
+  - `''` → loads auth routes (effectively login)
   - `/login` — public
-  - `/admin`, `/coordinator`, `/treasury`, `/teacher` — each guarded by `AuthGuard` + `RoleGuard` with `data.roles`, loads `MainLayoutComponent` + role child routes
+  - `/admin`, `/coordinator`, `/treasury`, `/teacher`, `/secretary`, `/human-resources` — each guarded by `AuthGuard` + `RoleGuard` with `data.roles`, loads `MainLayoutComponent` + role child routes
   - `/perfil` — guarded by `AuthGuard`, children: `''` (ProfileComponent), `cambiar-password` (ChangePasswordComponent)
   - `**` → redirects to `login`
 - **Layout:** `MainLayoutComponent` (template with sidebar + `<router-outlet />`), `SidebarComponent` filters nav items by `user.role()`
 - **Core:** `src/app/core/` — `guards/`, `interceptors/`, `services/`, `models/`
-- **Features:** `src/app/features/` — `auth/`, `admin/`, `coordinator/`, `treasury/`, `teacher/`, `profile/`, `users/`
+- **Features:** `src/app/features/` — `auth/`, `admin/`, `coordinator/`, `treasury/`, `teacher/`, `secretary/`, `human-resources/`, `profile/`, `users/`
 - **API base:** `http://localhost:3000/api` (`src/environments/environment*.ts`, dev file-replacement in `angular.json`)
 - **Proxy:** `proxy.conf.json` forwards `/api` → `http://localhost:3000` (dev server only)
 
@@ -59,6 +59,9 @@ SCSS styles; `src/styles.scss` imports `primeicons/primeicons.css` and `primefle
 - `CoordinatorService` — coordinator operations
 - `TeacherService` — teacher operations
 - `TreasuryService` — treasury operations
+- `SecretaryService` — secretary operations
+- `HumanResourcesService` — human resources operations
+- `InstitutionService` — institution config operations
 
 ## Models (`src/app/core/models/index.ts`)
 
@@ -68,7 +71,7 @@ Key types: `User`, `LoginResponse`, `AuthState`, `AppRole`, `PaginatedResponse<T
 
 - `ng test` runs Vitest via `@angular/build:unit-test` builder
 - `tsconfig.spec.json` has `types: ["vitest/globals"]`
-- No spec files currently exist; no snapshot testing
+- Only 1 spec exists: `src/app/features/auth/first-login/first-login.spec.ts`; no snapshot testing
 - Dependencies: `jsdom` for DOM emulation
 
 ## Conventions (target state for new code)

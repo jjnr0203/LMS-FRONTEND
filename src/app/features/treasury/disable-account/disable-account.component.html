@@ -1,46 +1,82 @@
 <p-toast />
 <p-confirmDialog />
-<div class="surface-ground min-h-screen">
-  <div class="bg-green-800 text-white p-5 mb-5 border-round-xl">
-    <h1 class="text-3xl font-semibold m-0 mb-2">Deshabilitar Cuenta</h1>
-    <p class="text-green-100 m-0">Bloquea el acceso al sistema para un estudiante.</p>
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Deshabilitar <span>Cuenta</span></h1>
+      <p class="description">
+        Estudiantes con cuotas vencidas según el período académico activo.
+      </p>
+    </div>
   </div>
-  <div class="flex justify-content-center">
-    <p-card styleClass="shadow-2" [style]="{ maxWidth: '1200px', width: '100%' }">
-      <div class="flex align-items-center gap-2 p-3 bg-yellow-50 border-1 border-yellow-300 border-round mb-4 text-sm text-700">
-        <i class="pi pi-exclamation-triangle text-yellow-500" style="font-size: 1.25rem"></i>
-        <span>Esta acción deshabilitará el acceso del estudiante al sistema. Solo funciona si la matrícula está en estado <strong>no paga</strong>.</span>
+
+  <div class="content-wrapper">
+    <div class="data-card">
+      <div class="flex flex-wrap justify-content-end align-items-center mb-4 gap-3">
+        <p-iconField iconPosition="left" styleClass="w-20rem">
+          <p-inputIcon styleClass="pi pi-search" />
+          <input pInputText type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" placeholder="Buscar por cédula o nombre..." class="w-full" />
+        </p-iconField>
       </div>
 
-      <form [formGroup]="form" (ngSubmit)="confirm()">
-        <div class="flex flex-column gap-2 mb-4">
-          <label class="font-semibold text-sm text-700" for="studentId">Seleccione el Estudiante</label>
-          <p-select
-            id="studentId"
-            [options]="students()"
-            formControlName="studentId"
-            optionLabel="fullName"
-            optionValue="id"
-            placeholder="Seleccione un estudiante"
-            [filter]="true"
-            filterBy="fullName"
-            [showClear]="true"
-          ></p-select>
-          @if (studentId.invalid && studentId.touched) {
-            <small class="p-error">Debe seleccionar un estudiante.</small>
-          }
-        </div>
-
-        <div class="flex justify-content-end mt-3">
-          <p-button
-            type="submit"
-            label="Deshabilitar"
-            severity="danger"
-            [loading]="loading()"
-            [disabled]="form.invalid"
-          />
-        </div>
-      </form>
-    </p-card>
+      <p-table
+        [value]="filteredStudents()"
+        [loading]="loading()"
+        [paginator]="true"
+        [rows]="15"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-sm p-datatable-striped"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Cédula</th>
+            <th>Nombre</th>
+            <th class="text-center">Cuotas Pagadas</th>
+            <th class="text-center">Esperadas</th>
+            <th class="text-center">Meses Atrasados</th>
+            <th class="text-center">Próximo Vencimiento</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-s>
+          <tr>
+            <td class="font-medium text-900">{{ s.studentId }}</td>
+            <td>{{ fullName(s) }}</td>
+            <td class="text-center">{{ s.paidInstallments }} / 4</td>
+            <td class="text-center">{{ s.expectedInstallments }} / 4</td>
+            <td class="text-center">
+              @if (s.overdueMonths > 0) {
+                <p-tag [value]="s.overdueMonths + ' mes(es)'" severity="danger" />
+              } @else {
+                <span class="text-500">—</span>
+              }
+            </td>
+            <td class="text-center">
+              @if (s.nextDueDate) {
+                <span class="text-700">{{ s.nextDueDate }}</span>
+              } @else {
+                <span class="text-500">—</span>
+              }
+            </td>
+            <td class="text-center">
+              <p-button
+                icon="pi pi-ellipsis-v"
+                [rounded]="true"
+                [text]="true"
+                size="small"
+                (onClick)="showMenu($event, menu, s)"
+              />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center p-4 text-500">No hay estudiantes con cuotas vencidas.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
   </div>
 </div>
+
+<p-menu #menu [model]="menuItems" [popup]="true" appendTo="body" [style]="{ width: '220px' }"></p-menu>
