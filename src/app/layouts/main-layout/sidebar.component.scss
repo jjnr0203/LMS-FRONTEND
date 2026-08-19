@@ -1,3 +1,4 @@
+
 .active {
   background: #064e3b !important;
   color: #ffffff !important;
@@ -6,10 +7,58 @@
 li.active {
   background: transparent !important;
   color: #064e3b !important;
-  font-weight: 600;
+  font-weight: 500;
 
   .w-1.h-1.border-circle {
     background: #064e3b !important;
     box-shadow: 0 0 0 2px rgba(6, 78, 59, 0.2);
+  }
+}
+
+/* Floating Sidebar Logic */
+@media (max-width: 768px) {
+  .mobile-nav-toggle {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1002;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    width: 40px;
+    height: 50px;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .mobile-nav-toggle.hidden-toggle {
+    transform: translateY(-50%) translateX(-100%);
+  }
+
+  aside {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1001;
+    transform: translateX(-100%);
+    width: 260px !important;
+    height: 100vh;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+  }
+
+  aside:not(.collapsed) {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-nav-toggle {
+    display: none !important;
+  }
+  aside {
+    position: relative !important;
+    transform: none !important;
+    z-index: auto !important;
+    box-shadow: none !important;
   }
 }

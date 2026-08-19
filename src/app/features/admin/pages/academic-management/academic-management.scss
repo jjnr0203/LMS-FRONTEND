@@ -64,3 +64,20 @@
 ::ng-deep .p-tabpanel {
   padding: 0 !important;
 }
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.8rem !important;
+  }
+  .content-wrapper {
+    padding: 0 1rem !important;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 1.5rem 2.5rem 3.5rem 2.5rem !important;
+  }
+}
+

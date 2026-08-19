@@ -1,7 +1,7 @@
 <div class="flex flex-column h-screen surface-ground">
-  <div class="flex flex-1 overflow-hidden">
-    <app-sidebar />
-    <main class="flex-1 p-3 overflow-y-auto" style="overflow-x: hidden">
+  <div class="flex flex-1 overflow-hidden relative">
+    <app-sidebar class="sidebar-wrapper" />
+    <main class="flex-1 p-3 overflow-y-auto main-content" style="overflow-x: hidden">
       <router-outlet />
     </main>
   </div>

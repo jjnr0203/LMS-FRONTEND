@@ -26,7 +26,7 @@ export class SidebarComponent {
   
   role = this.authService.role;
   user = this.authService.user;
-  isCollapsed = signal(false);
+  isCollapsed = signal(window.innerWidth <= 768);
   currentUrl = signal(this.router.url);
 
   constructor() {
@@ -183,12 +183,14 @@ export class SidebarComponent {
         item.expanded = true;
       } else if (item.route) {
         this.navigate(item.route);
+        if (window.innerWidth <= 768) this.isCollapsed.set(true);
       }
     } else {
       if (item.children) {
         item.expanded = !item.expanded;
       } else if (item.route) {
         this.navigate(item.route);
+        if (window.innerWidth <= 768) this.isCollapsed.set(true);
       }
     }
   }

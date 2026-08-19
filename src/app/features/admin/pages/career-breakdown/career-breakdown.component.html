@@ -1,4 +1,4 @@
-<div class="page-container">
+﻿<div class="page-container">
   <!-- Header -->
   <div class="page-header">
     <div class="header-content">
@@ -10,7 +10,7 @@
         <div class="career-info mt-3">
           <div class="career-title-row">
             <h1 style="color: white; margin: 0; font-size: 1.6rem;">{{ data.career.name }}</h1>
-            <p-badge [value]="data.career.code" severity="contrast"></p-badge>
+            <p-badge [value]="data.career.code" severity="secondary" [style]="{'font-weight': '500'}"></p-badge>
           </div>
           <div class="career-meta mt-2 flex gap-4 text-sm text-green-100">
             <span class="meta-item flex align-items-center gap-2">
@@ -24,7 +24,7 @@
             <span class="meta-item flex align-items-center gap-2">
               <i class="pi pi-tags"></i>
               @for (mod of data.career.modalityNames; track mod) {
-                <span class="modality-tag bg-white text-green-800 px-2 py-1 border-round-xl text-xs font-bold">{{ mod }}</span>
+                <p-tag [value]="mod" severity="secondary" [style]="{'color': '#064e3b', 'font-weight': '500'}"></p-tag>
               }
               @if (data.career.modalityNames.length === 0) {
                 <span class="text-500">Sin modalidades</span>
@@ -126,22 +126,24 @@
         @for (cur of data.curriculums; track cur.id) {
           <p-accordion-panel [value]="cur.id" class="malla-panel">
             <p-accordion-header [ngClass]="{'malla-active': expandedCurriculums().includes(cur.id)}">
-              <div class="flex align-items-center flex-wrap gap-3 w-full">
-                <i class="pi pi-sitemap text-xl icon-malla"></i>
-                <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
-                <span class="text-sm flex align-items-center gap-2 subtitle-malla">
-                  <span><i class="pi pi-book"></i> {{ cur.totalSubjects }} materias</span> &nbsp;|&nbsp; 
-                  <span><i class="pi pi-calendar"></i> {{ cur.totalSemesters }} semestres</span> &nbsp;|&nbsp; 
-                  <span><i class="pi pi-star"></i> {{ cur.totalCredits }} créditos</span>
-                </span>
-                <div class="ml-auto mr-4">
-                  @if (cur.isActive) {
-                    <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
-                  } @else {
-                    <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
-                  }
-                </div>
-              </div>
+              <div class="flex align-items-center flex-wrap w-full pr-3" style="column-gap: 1.5rem; row-gap: 0.5rem;">
+    <div class="flex align-items-center gap-2">
+      <i class="pi pi-sitemap text-xl icon-malla"></i>
+      <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
+    </div>
+    <div class="text-sm flex align-items-center gap-3 flex-wrap subtitle-malla">
+      <span class="white-space-nowrap"><i class="pi pi-book"></i> {{ cur.totalSubjects }} materias</span>  
+      <span class="white-space-nowrap"><i class="pi pi-calendar"></i> {{ cur.totalSemesters }} semestres</span>  
+      <span class="white-space-nowrap"><i class="pi pi-star"></i> {{ cur.totalCredits }} créditos</span>
+    </div>
+    <div class="ml-auto">
+      @if (cur.isActive) {
+        <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
+      } @else {
+        <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
+      }
+    </div>
+  </div>
             </p-accordion-header>
             <p-accordion-content>
               @if (cur.description) {
@@ -153,29 +155,29 @@
                   @for (sem of cur.semesters; track sem.semester) {
                     <p-accordion-panel [value]="sem.semester">
                       <p-accordion-header>
-                        <div class="flex align-items-center gap-3">
-                          
-                          <!-- Badge for Semestre -->
-                          <div class="flex align-items-center justify-content-center" 
-                               [ngStyle]="{'background-color': getSemesterColor(sem.semester)}"
-                               style="padding: 0.35rem 0.8rem; border-radius: 4px;">
-                            <span class="font-bold text-sm text-white m-0">Semestre {{ sem.semester }}</span>
+                        <div class="flex align-items-center gap-3 flex-wrap">
+                            <!-- Badge for Semestre -->
+                            <div class="flex align-items-center justify-content-center flex-shrink-0" 
+                                 [ngStyle]="{'background-color': getSemesterColor(sem.semester)}"
+                                 style="padding: 0.35rem 0.8rem; border-radius: 4px;">
+                              <span class="font-bold text-sm text-white m-0 white-space-nowrap">Semestre {{ sem.semester }}</span>
+                            </div>
+                            <!-- Info Text (Dark) -->
+                            <div class="text-700 text-sm font-medium flex flex-wrap gap-3 align-items-center">
+                              <span class="white-space-nowrap">{{ sem.subjects.length }} materias</span>
+                              <span class="white-space-nowrap">{{ sem.totalCredits }} créditos</span>
+                              <span class="white-space-nowrap"><i class="pi pi-clock mx-1"></i> {{ sem.totalHours }} horas</span>
+                            </div>
                           </div>
-                          
-                          <!-- Info Text (Dark) -->
-                          <span class="text-700 text-sm font-medium">
-                            {{ sem.subjects.length }} materias &nbsp;|&nbsp; {{ sem.totalCredits }} créditos &nbsp;|&nbsp; <i class="pi pi-clock mx-1"></i> {{ sem.totalHours }} horas
-                          </span>
-                          
-                        </div>
                       </p-accordion-header>
                       <p-accordion-content>
-                        <p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full" responsiveLayout="scroll">
-                          <ng-template pTemplate="header">
+                        <div class="table-scroll-wrapper">
+                          <p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table w-full" [scrollable]="true" [tableStyle]="{'min-width': '800px'}">
+                            <ng-template pTemplate="header">
                             <tr>
                               <th class="text-center font-bold text-900" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
                               <th class="font-bold text-900" style="width: 25%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Nombre</th>
-                              <th class="text-center font-bold text-900" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
+                              <th class="text-center font-bold text-900" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">créditos</th>
                               <th class="text-center font-bold text-900" style="width: 10%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
                               <th class="text-center font-bold text-900" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Sucesoras</th>
                               <th class="text-center font-bold text-900" style="width: 30%;" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-right-radius': '6px', 'border-bottom-right-radius': '6px'}">Docentes Asignados</th>
@@ -249,7 +251,8 @@
                               </td>
                             </tr>
                           </ng-template>
-                        </p-table>
+                          </p-table>
+                        </div>
                       </p-accordion-content>
                     </p-accordion-panel>
                   }

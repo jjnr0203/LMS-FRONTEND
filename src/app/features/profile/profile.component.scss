@@ -10,7 +10,7 @@
   background: #064e3b;
   color: #ffffff;
   border-bottom: none;
-  padding: 2.5rem 0 5rem 0;
+  padding: 2.5rem 2rem 5rem 2rem;
   min-height: 250px;
   box-sizing: border-box;
   display: flex;
@@ -401,7 +401,7 @@
 /* Certificates Grid */
 .certificates-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
   gap: 1.25rem;
   margin-top: 1rem;
 }
@@ -593,3 +593,21 @@
     color: #991b1b;
   }
 }
+
+@media (max-width: 768px) {
+  .certificates-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+  .certificate-card {
+    padding: 1rem;
+    align-items: center;
+  }
+  .cert-actions {
+    margin-left: auto !important;
+  }
+  .header-content h1 {
+    font-size: 1.8rem !important;
+  }
+}
+

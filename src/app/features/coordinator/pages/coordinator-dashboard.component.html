@@ -1,4 +1,4 @@
-<p-toast></p-toast>
+﻿<p-toast></p-toast>
 
 <div class="page-container">
   <!-- Dark Header -->
@@ -73,13 +73,15 @@
           <div class="career-grid">
             @for (career of careers(); track career.id) {
               <div class="career-card" (click)="goToCareer(career.id)">
-                <div class="career-card-header">
-                  <div class="career-card-title">
-                    <i class="pi pi-graduation-cap"></i>
-                    {{ career.name }}
-                  </div>
-                  <p-badge [value]="career.code" severity="contrast" />
-                </div>
+                <div class="career-card-header flex flex-wrap gap-2 justify-content-between align-items-center">
+  <div class="career-card-title flex-1 min-w-0">
+    <i class="pi pi-graduation-cap flex-shrink-0"></i>
+    <span>{{ career.name }}</span>
+  </div>
+  <div style="flex-shrink: 0; white-space: nowrap;">
+    <p-badge [value]="career.code" severity="secondary"></p-badge>
+  </div>
+</div>
                 
                 <div class="career-card-body">
                   <div class="career-detail-row">
@@ -118,3 +120,5 @@
     </div>
   </div>
 </div>
+
+

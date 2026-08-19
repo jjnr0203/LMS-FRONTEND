@@ -81,6 +81,7 @@
     .cert-details .cert-date { color: #d1fae5 !important; }
     .number-value { color: #ffffff !important; }
     .icon-bg { background-color: rgba(255, 255, 255, 0.2) !important; }
+    .cert-semester { color: #ffffff !important; }
     
     ::ng-deep .cv-action-btn {
       background: #ffffff !important;
@@ -107,6 +108,10 @@
       font-size: 0.95rem;
       font-weight: 600;
       color: #0f172a;
+    }
+
+    .cert-semester {
+      color: var(--text-color-secondary);
     }
 
     .cert-date {

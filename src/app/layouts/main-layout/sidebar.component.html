@@ -1,7 +1,16 @@
+<button
+  class="mobile-nav-toggle flex align-items-center justify-content-center border-1 border-left-none surface-border shadow-2 cursor-pointer transition-all"
+  (click)="toggleSidebar()"
+  [class.hidden-toggle]="!isCollapsed()"
+  title="Abrir menú"
+>
+  <i class="pi pi-bars text-xl" style="color: #064e3b"></i>
+</button>
+
 <aside
   class="flex flex-column surface-0 border-right-1 border-200"
   [class.collapsed]="isCollapsed()"
-  [style.width]="isCollapsed() ? '70px' : '260px'" style="height: 100vh; transition: width 0.3s ease"
+  [style.width]="isCollapsed() ? '70px' : '260px'" style="height: 100vh; transition: all 0.3s ease"
 >
   <div class="flex align-items-center" [class.justify-content-between]="!isCollapsed()" [class.justify-content-center]="isCollapsed()" [class.p-4]="!isCollapsed()" [class.p-3]="isCollapsed()" [class.flex-column]="isCollapsed()" [class.gap-3]="isCollapsed()">
     <div class="flex align-items-center gap-3 overflow-hidden">

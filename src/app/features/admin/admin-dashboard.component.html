@@ -1,4 +1,4 @@
-<div class="page-container">
+﻿<div class="page-container">
   <!-- Dark Header -->
   <div class="page-header">
     <div class="header-content">
@@ -209,14 +209,14 @@
 
         @if (selectedFacultyId()) {
           <!-- Filters Bar -->
-          <div class="filters-bar flex gap-3 mb-4 align-items-center">
-            <div class="flex-1">
+          <div class="filters-bar flex flex-column md:flex-row gap-3 mb-4 align-items-center">
+            <div class="flex-1 w-full">
               <p-iconField iconPosition="left" styleClass="w-full">
                 <p-inputIcon styleClass="pi pi-search" />
                 <input type="text" pInputText placeholder="Buscar carrera..." [ngModel]="filterCareer()" (ngModelChange)="filterCareer.set($event)" class="w-full" />
               </p-iconField>
             </div>
-            <div class="flex-1">
+            <div class="flex-1 w-full">
               <p-select [options]="availableModalities()" [ngModel]="filterModality()" (ngModelChange)="filterModality.set($event)" placeholder="Filtrar por modalidad" [showClear]="true" styleClass="w-full"></p-select>
             </div>
           </div>
@@ -268,7 +268,7 @@
                         <span>{{ career.name }}</span>
                       </div>
                       <div style="flex-shrink: 0; white-space: nowrap;">
-                        <p-badge [value]="career.code" severity="contrast"></p-badge>
+                        <p-badge [value]="career.code" severity="secondary"></p-badge>
                       </div>
                     </div>
 

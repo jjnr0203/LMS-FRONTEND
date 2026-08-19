@@ -143,7 +143,7 @@
 .career-title-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.25rem; flex-wrap: wrap;
 
   h1 {
     font-size: 1.6rem;
@@ -338,7 +338,7 @@
 .career-title-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.25rem; flex-wrap: wrap;
 
   h1 {
     font-size: 1.6rem;
@@ -505,7 +505,6 @@
 }
 
 ::ng-deep .fixed-layout-table table {
-  table-layout: fixed !important;
   width: 100% !important;
 }
 
@@ -575,7 +574,7 @@
 ::ng-deep .nested-accordion.p-accordion {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem; /* Tight, professional gap between semesters */
+  gap: 0.25rem; flex-wrap: wrap; /* Tight, professional gap between semesters */
   margin-top: 1.5rem; /* Breathing room from Malla header */
 }
 
@@ -612,3 +611,11 @@
   position: static !important;
   pointer-events: auto !important;
 }
+
+@media (max-width: 768px) {
+  .career-title-row h1 {
+    font-size: 1.3rem !important;
+    line-height: 1.2 !important;
+  }
+}
+

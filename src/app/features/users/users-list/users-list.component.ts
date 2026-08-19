@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, input, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, input, ChangeDetectorRef, ViewChild, ElementRef, computed } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -77,6 +77,26 @@ export class UsersListComponent implements OnInit, OnDestroy {
   displayProfileModal = signal(false);
   selectedUser: any = null;
   teacherStats = signal<{ totalHours: number; careers: any[]; subjects: any[] } | null>(null);
+  
+  groupedTeacherSubjects = computed(() => {
+    const stats = this.teacherStats();
+    if (!stats || !stats.subjects) return [];
+
+    const grouped = stats.subjects.reduce((acc, curr) => {
+      const careerName = curr.career_name || 'Sin Carrera Asignada';
+      if (!acc[careerName]) {
+        acc[careerName] = [];
+      }
+      acc[careerName].push(curr);
+      return acc;
+    }, {} as Record<string, any[]>);
+
+    return Object.keys(grouped).map(key => ({
+      careerName: key,
+      subjects: grouped[key]
+    }));
+  });
+
   showCareersModal = signal(false);
   showSubjectsModal = signal(false);
   activeTab: string = '0';

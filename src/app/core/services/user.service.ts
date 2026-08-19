@@ -19,19 +19,21 @@ export class UserService {
       params = params.set('search', search);
     }
 
+    if (facultyIds && facultyIds.length > 0) {
+      facultyIds.forEach(id => {
+        params = params.append('facultyIds', id);
+      });
+    }
+
     if (role === 'teacher') {
       return this.http.get<PaginatedResponse<User>>(`${environment.apiUrl}/teachers`, { params });
-    } else if (role === 'student') {
+    }
+    if (role === 'student') {
       return this.http.get<PaginatedResponse<User>>(`${environment.apiUrl}/students`, { params });
     }
 
     if (role) {
       params = params.set('role', role);
-    }
-    if (facultyIds && facultyIds.length > 0) {
-      facultyIds.forEach(id => {
-        params = params.append('facultyIds', id);
-      });
     }
 
     return this.http.get<PaginatedResponse<User>>(this.apiUrl, { params });

@@ -217,23 +217,26 @@
       @for (group of groupedSubjects; track group.semester) {
         <p-accordion-panel [value]="group.semester">
           <p-accordion-header>
-            <div class="flex align-items-center gap-3">
-              <!-- Badge for Semestre -->
-              <div class="flex align-items-center justify-content-center" 
-                   [ngStyle]="{'background-color': getSemesterColor(group.semester)}"
-                   style="padding: 0.35rem 0.8rem; border-radius: 4px;">
-                <span class="font-bold text-sm text-white m-0">Semestre {{ group.semester }}</span>
-              </div>
-              <!-- Info Text (Dark) -->
-              <span class="text-700 text-sm font-medium">
-                {{ group.subjects.length }} materias &nbsp;|&nbsp; {{ group.totalCredits }} créditos &nbsp;|&nbsp; <i class="pi pi-clock mx-1"></i> {{ group.totalHours }} horas
-              </span>
-            </div>
+            <div class="flex align-items-center gap-3 flex-wrap">
+                            <!-- Badge for Semestre -->
+                            <div class="flex align-items-center justify-content-center flex-shrink-0" 
+                                 [ngStyle]="{'background-color': getSemesterColor(group.semester)}"
+                                 style="padding: 0.35rem 0.8rem; border-radius: 4px;">
+                              <span class="font-bold text-sm text-white m-0 white-space-nowrap">Semestre {{ group.semester }}</span>
+                            </div>
+                            <!-- Info Text (Dark) -->
+                            <div class="text-700 text-sm font-medium flex flex-wrap gap-3 align-items-center">
+                              <span class="white-space-nowrap">{{ group.subjects.length }} materias</span>
+                              <span class="white-space-nowrap">{{ group.totalCredits }} créditos</span>
+                              <span class="white-space-nowrap"><i class="pi pi-clock mx-1"></i> {{ group.totalHours }} horas</span>
+                            </div>
+                          </div>
           </p-accordion-header>
           <p-accordion-content>
-            <p-table [value]="group.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full" responsiveLayout="scroll">
-              <ng-template pTemplate="header">
-                <tr>
+            <div class="table-scroll-wrapper">
+              <p-table [value]="group.subjects" styleClass="p-datatable-sm text-center-table w-full" [scrollable]="true" [tableStyle]="{'min-width': '800px'}">
+                <ng-template pTemplate="header">
+                  <tr>
                   <th class="text-center font-bold text-900" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
                   <th class="font-bold text-900" style="width: 40%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Materia</th>
                   <th class="text-center font-bold text-900" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Créditos</th>
@@ -274,7 +277,8 @@
                   </td>
                 </tr>
               </ng-template>
-            </p-table>
+              </p-table>
+            </div>
           </p-accordion-content>
         </p-accordion-panel>
       }

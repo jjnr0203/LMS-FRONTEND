@@ -239,3 +239,127 @@ html body .p-tooltip.small-tooltip .p-tooltip-text {
   padding: 0.25rem 0.5rem !important;
   font-weight: 500 !important;
 }
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  html, body {
+    font-size: 14px !important; /* Scale entire UI down proportionally but not too small */
+  }
+
+  .p-component {
+    font-size: 14px !important;
+  }
+
+  /* Headings proportionally larger now */
+  h1, .text-3xl { font-size: 1.8rem !important; }
+  h2, .text-2xl, .text-xl { font-size: 1.4rem !important; }
+  h3, .text-lg { font-size: 1.2rem !important; }
+  
+  /* Tables horizontally scrollable */
+  .p-datatable-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  
+  .p-datatable table {
+    min-width: 750px !important; /* Forces scroll, prevents column squishing */
+  }
+
+  .p-datatable .p-datatable-thead > tr > th,
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.65rem !important;
+    font-size: 0.9rem !important; /* Larger text inside tables */
+    white-space: normal; /* Allow some wrap if needed, but min-width mostly prevents it */
+  }
+
+  .p-tag {
+    font-size: 0.8rem !important;
+    padding: 0.2rem 0.5rem !important;
+  }
+  
+  .p-button {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 0.9rem !important;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .p-accordion-content {
+    overflow-x: auto !important;
+    padding: 0.5rem !important;
+  }
+}
+
+
+@media (max-width: 768px) {
+}
+
+
+.p-badge {
+  font-weight: 500 !important;
+}
+
+/* Make stats card text larger as requested */
+.stat-card .text-500 {
+  font-size: 1rem !important; /* The label (e.g. Total Docentes) */
+}
+.stat-card .text-900.text-2xl {
+  font-size: 2rem !important; /* The value */
+}
+
+
+@media (max-width: 768px) {
+  /* Fix accordion clipping horizontal scroll */
+  .p-toggleable-content,
+  .p-accordion-content,
+  .p-tabview-panels,
+  .p-tabpanel {
+    overflow: visible !important;
+    overflow-x: auto !important;
+  }
+  
+  .p-datatable-wrapper {
+    overflow-x: auto !important;
+    display: block !important;
+  }
+
+  /* Add padding to headers so they are not glued to the edge */
+  .page-header {
+    padding: 1.5rem 2.5rem 3.5rem 2.5rem !important;
+}
+
+@media (max-width: 768px) {
+  .data-card {
+    width: 100% !important;
+
+  }
+  .page-container {
+    overflow-x: hidden;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .p-accordion, .p-accordion-panel, .p-accordion-tab, .p-accordion-content, .p-toggleable-content {
+    width: 100% !important;
+    max-width: calc(100vw - 5.5rem) !important;
+    display: block !important;
+  }
+}
+
+}
+
+
+@media (max-width: 768px) {
+  .table-scroll-wrapper {
+    width: 100% !important;
+    max-width: calc(100vw - 5.5rem) !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+  }
+}
+

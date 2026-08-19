@@ -1,4 +1,4 @@
-<p-toast></p-toast>
+﻿<p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
 <div class="page-container">
@@ -91,22 +91,24 @@
             @for (cur of filteredCurriculums(); track cur.id) {
               <p-accordion-panel [value]="cur.id" class="malla-panel">
                 <p-accordion-header [ngClass]="{'malla-active': true}">
-                  <div class="flex align-items-center flex-wrap gap-3 w-full">
-                    <i class="pi pi-sitemap text-xl icon-malla"></i>
-                    <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
-                    <span class="text-sm flex align-items-center gap-2 subtitle-malla">
-                      <span><i class="pi pi-book"></i> {{ totalSubjects(cur) }} materias</span> &nbsp;|&nbsp; 
-                      <span><i class="pi pi-calendar"></i> {{ cur.semesters?.length || 0 }} semestres</span> &nbsp;|&nbsp;
-                      <span><i class="pi pi-star"></i> {{ totalCredits(cur) }} créditos</span>
-                    </span>
-                    <div class="ml-auto mr-4">
-                      @if (cur.isActive) {
-                        <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
-                      } @else {
-                        <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
-                      }
-                    </div>
-                  </div>
+                  <div class="flex align-items-center flex-wrap w-full pr-3" style="column-gap: 1.5rem; row-gap: 0.5rem;">
+    <div class="flex align-items-center gap-2">
+      <i class="pi pi-sitemap text-xl icon-malla"></i>
+      <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
+    </div>
+    <div class="text-sm flex align-items-center gap-3 flex-wrap subtitle-malla">
+      <span class="white-space-nowrap"><i class="pi pi-book"></i> {{ cur.totalSubjects }} materias</span>  
+      <span class="white-space-nowrap"><i class="pi pi-calendar"></i> {{ cur.totalSemesters }} semestres</span>  
+      <span class="white-space-nowrap"><i class="pi pi-star"></i> {{ cur.totalCredits }} créditos</span>
+    </div>
+    <div class="ml-auto">
+      @if (cur.isActive) {
+        <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
+      } @else {
+        <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
+      }
+    </div>
+  </div>
                 </p-accordion-header>
                 <p-accordion-content>
                   @if (cur.description) {
@@ -118,16 +120,18 @@
                       <p-accordion-panel [value]="sem.semester">
                         <p-accordion-header>
                           <div class="flex align-items-center justify-content-between w-full pr-3">
-                            <div class="flex align-items-center gap-3">
-                              <div class="flex align-items-center justify-content-center" 
-                                   [ngStyle]="{'background-color': getSemesterColor(sem.semester)}"
-                                   style="padding: 0.35rem 0.8rem; border-radius: 4px;">
-                                <span class="font-bold text-sm text-white m-0">Semestre {{ sem.semester }}</span>
-                              </div>
-                              <span class="text-700 text-sm font-medium ml-2">
-                                {{ sem.subjects.length }} materias &nbsp;|&nbsp; {{ semesterCredits(sem) }} créditos &nbsp;|&nbsp; <i class="pi pi-clock mx-1"></i> {{ semesterHours(sem) }} horas
-                              </span>
-                            </div>
+                            <div class="flex align-items-center gap-3 flex-wrap">
+  <div class="flex align-items-center justify-content-center flex-shrink-0" 
+       [ngStyle]="{'background-color': getSemesterColor(sem.semester)}"
+       style="padding: 0.35rem 0.8rem; border-radius: 4px;">
+    <span class="font-bold text-sm text-white m-0 white-space-nowrap">Semestre {{ sem.semester }}</span>
+  </div>
+  <div class="text-700 text-sm font-medium flex flex-wrap gap-3 align-items-center">
+    <span class="white-space-nowrap">{{ sem.subjects.length }} materias</span>
+    <span class="white-space-nowrap">{{ semesterCredits(sem) }} créditos</span>
+    <span class="white-space-nowrap"><i class="pi pi-clock mx-1"></i> {{ semesterHours(sem) }} horas</span>
+  </div>
+</div>
                             <p-button 
                               icon="pi pi-calendar-plus" 
                               label="Planificar Oferta" 
@@ -138,12 +142,12 @@
                           </div>
                         </p-accordion-header>
                         <p-accordion-content>
-                          <p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full">
+                          <div class="table-scroll-wrapper"><p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table w-full" [scrollable]="true" [tableStyle]="{'min-width': '800px'}">
                             <ng-template pTemplate="header">
                                 <tr>
-                                  <th class="text-center font-bold text-900" style="width: 8%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
-                                  <th class="font-bold text-900" style="width: 25%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Materia</th>
-                                  <th class="text-center font-bold text-900" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
+                                  <th class="text-center font-bold text-900" style="width: 12%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
+                                  <th class="font-bold text-900" style="width: 21%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Materia</th>
+                                  <th class="text-center font-bold text-900" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">créditos</th>
                                   <th class="text-center font-bold text-900" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
                                   <th class="text-center font-bold text-900" style="width: 15%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Sucesoras</th>
                                   <th class="text-center font-bold text-900" style="width: 28%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Docentes Asignados</th>
@@ -242,7 +246,7 @@
                                 </td>
                               </tr>
                             </ng-template>
-                          </p-table>
+                          </p-table></div>
                         </p-accordion-content>
                       </p-accordion-panel>
                     }
@@ -437,7 +441,7 @@
                       </div>
                     </p-accordion-header>
                     <p-accordion-content>
-                      <div class="calendar-container">
+                      <div class="table-scroll-wrapper"><div class="calendar-container">
                         <!-- Horas Eje Y -->
                         <div class="time-axis">
                           <div class="time-header" style="border: none; background: transparent;"></div>
@@ -480,6 +484,7 @@
                             </div>
                           }
                         </div>
+                      </div>
                       </div>
                     </p-accordion-content>
                   </p-accordion-panel>
@@ -742,3 +747,5 @@
 <!-- Global Teacher Menu -->
 <p-menu #globalSubjectMenu [model]="subjectMenuItems" [popup]="true" appendTo="body" styleClass="custom-action-menu" [style]="{ width: '220px' }"></p-menu>
 <p-menu #globalTeacherMenu [model]="teacherMenuItems" [popup]="true" appendTo="body" styleClass="custom-action-menu" [style]="{ width: '180px' }"></p-menu>
+
+
