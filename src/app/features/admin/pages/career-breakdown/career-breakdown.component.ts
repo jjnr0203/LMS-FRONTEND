@@ -59,17 +59,25 @@ import { SelectModule } from 'primeng/select';
 import { PopoverModule } from 'primeng/popover';
 import { TagModule } from 'primeng/tag';
 
+import { DialogModule } from 'primeng/dialog';
+import { MenuModule } from 'primeng/menu';
+import { MessageService } from 'primeng/api';
+
+import { TooltipModule } from 'primeng/tooltip';
+
 @Component({
   selector: 'app-career-breakdown',
   standalone: true,
-  imports: [CommonModule, AccordionModule, TableModule, BadgeModule, ButtonModule, SkeletonModule, InputTextModule, IconFieldModule, InputIconModule, FormsModule, MultiSelectModule, ColorPickerModule, RouterModule, SelectModule, PopoverModule, TagModule],
+  imports: [CommonModule, AccordionModule, TableModule, BadgeModule, ButtonModule, SkeletonModule, InputTextModule, IconFieldModule, InputIconModule, FormsModule, MultiSelectModule, ColorPickerModule, RouterModule, SelectModule, PopoverModule, TagModule, DialogModule, MenuModule, TooltipModule],
   templateUrl: './career-breakdown.component.html',
-  styleUrls: ['./career-breakdown.component.scss']
+  styleUrls: ['./career-breakdown.component.scss'],
+  providers: [MessageService]
 })
 export class CareerBreakdownComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private academicService = inject(AcademicService);
+  private messageService = inject(MessageService);
 
   breakdown = signal<CareerBreakdown | null>(null);
   loading = signal(true);
@@ -83,6 +91,11 @@ export class CareerBreakdownComponent implements OnInit {
   accordionEl = viewChild<ElementRef<HTMLElement>>('accordion');
 
   semesterColors = this.academicService.semesterColors;
+
+  selectedSubjectForPrerequisites: any = null;
+  possiblePrerequisites: any[] = [];
+  selectedPrerequisiteIds: string[] = [];
+  displayPrerequisitesDialog = false;
 
   predefinedColors = [
     { name: 'Índigo', value: '#312e81' },
@@ -177,10 +190,46 @@ export class CareerBreakdownComponent implements OnInit {
         // Map assignments to groupedAssignments
         if (data.curriculums) {
           data.curriculums = data.curriculums.map((cur: any) => {
+            const allSubjectsMap = new Map<string, any>();
+            if (cur.semesters) {
+              cur.semesters.forEach((sem: any) => {
+                if (sem.subjects) {
+                  sem.subjects.forEach((sub: any) => allSubjectsMap.set(sub.id, sub));
+                }
+              });
+            }
+
             if (cur.semesters) {
               cur.semesters = cur.semesters.map((sem: any) => {
                 if (sem.subjects) {
                   sem.subjects = sem.subjects.map((sub: any) => {
+                    sub.successors = [];
+                    return sub;
+                  });
+                }
+                return sem;
+              });
+
+              // Second pass: map prerequisites to successors
+              cur.semesters.forEach((sem: any) => {
+                if (sem.subjects) {
+                  sem.subjects.forEach((sub: any) => {
+                    if (sub.prerequisiteIds && sub.prerequisiteIds.length > 0) {
+                      sub.prerequisiteIds.forEach((preId: string) => {
+                        const prerequisite = allSubjectsMap.get(preId);
+                        if (prerequisite) {
+                          prerequisite.successors.push(sub);
+                        }
+                      });
+                    }
+                  });
+                }
+              });
+
+              cur.semesters = cur.semesters.map((sem: any) => {
+                if (sem.subjects) {
+                  sem.subjects = sem.subjects.map((sub: any) => {
+
                     if (sub.assignments && sub.assignments.length > 0) {
                       const groups = new Map<string, any>();
                       for (const assign of sub.assignments) {
@@ -283,5 +332,31 @@ export class CareerBreakdownComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/admin']);
+  }
+
+  openPrerequisitesDialog(subject: any, curriculumId: string) {
+    this.selectedSubjectForPrerequisites = subject;
+    // We are managing SUCCESSORS. Pre-select current successors.
+    this.selectedPrerequisiteIds = subject.successors ? subject.successors.map((s: any) => s.relationId) : [];
+    this.displayPrerequisitesDialog = true;
+    this.academicService.getPossiblePrerequisites(curriculumId, subject.id).subscribe({
+      next: (res) => {
+        // Only show subjects from later semesters as possible successors
+        this.possiblePrerequisites = res.filter((p: any) => p.semester > subject.semester);
+      },
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las posibles sucesoras' })
+    });
+  }
+
+  savePrerequisites() {
+    if (!this.selectedSubjectForPrerequisites) return;
+    this.academicService.updateSubjectSuccessors(this.selectedSubjectForPrerequisites.id, this.selectedPrerequisiteIds).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Sucesoras actualizadas correctamente' });
+        this.displayPrerequisitesDialog = false;
+        this.ngOnInit();
+      },
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron actualizar las sucesoras' })
+    });
   }
 }

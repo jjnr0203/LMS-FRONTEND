@@ -141,12 +141,13 @@
                           <p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full">
                             <ng-template pTemplate="header">
                                 <tr>
-                                  <th class="text-center" style="width: 8%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
-                                  <th style="width: 25%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Materia</th>
-                                  <th class="text-center" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
-                                  <th class="text-center" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
-                                  <th style="width: 43%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Docentes Asignados</th>
-                                  <th class="text-center" style="width: 10%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-right-radius': '6px', 'border-bottom-right-radius': '6px'}">Acciones</th>
+                                  <th class="text-center font-bold text-900" style="width: 8%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
+                                  <th class="font-bold text-900" style="width: 25%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Materia</th>
+                                  <th class="text-center font-bold text-900" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Créditos</th>
+                                  <th class="text-center font-bold text-900" style="width: 7%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Horas</th>
+                                  <th class="text-center font-bold text-900" style="width: 15%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Sucesoras</th>
+                                  <th class="text-center font-bold text-900" style="width: 28%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A'}">Docentes Asignados</th>
+                                  <th class="text-center font-bold text-900" style="width: 10%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-right-radius': '6px', 'border-bottom-right-radius': '6px'}">Acciones</th>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-sub>
@@ -157,12 +158,23 @@
                                 <td class="font-medium text-left">{{ sub.name }}</td>
                                 <td class="text-center"><span class="font-semibold text-600">{{ sub.credits }}</span></td>
                                 <td class="text-center"><span class="font-semibold text-600">{{ sub.credits * 48 }}h</span></td>
+                                <td class="text-center">
+                                  @if (sub.successors && sub.successors.length > 0) {
+                                    <div class="flex flex-wrap justify-content-center gap-1">
+                                      @for (suc of sub.successors; track suc.id) {
+                                        <p-tag [value]="suc.code" [pTooltip]="suc.name + ' (Sem ' + suc.semester + ')'" tooltipStyleClass="small-tooltip" tooltipPosition="top" styleClass="soft-tag text-xs px-2 py-1 cursor-pointer" [style]="{'background-color': getSemesterColor(suc.semester) + '22', 'color': getSemesterColor(suc.semester)}"></p-tag>
+                                      }
+                                    </div>
+                                  } @else {
+                                    <span class="text-400">-</span>
+                                  }
+                                </td>
                                 <td>
                                   @if (sub.groupedAssignments && sub.groupedAssignments.length > 0) {
-                                    <div class="flex flex-column gap-1 align-items-start">
+                                    <div class="flex flex-column gap-1 align-items-center">
                                       <!-- Docente Principal -->
                                       <div class="flex align-items-center justify-content-between gap-2 bg-green-50 p-2 border-round" 
-                                           style="width: 100%; border-left: 4px solid #10b981;">
+                                           style="width: 100%; margin: 0 auto; border-left: 4px solid #10b981;">
                                         <div class="flex flex-column text-left">
                                           <span class="text-900 font-medium text-xs">{{ sub.groupedAssignments[0].teacherName }}</span>
                                           <span class="text-600" style="font-size: 0.65rem">
@@ -175,7 +187,7 @@
                                       </div>
 
                                       @if (sub.groupedAssignments.length > 1) {
-                                        <details class="w-full">
+                                        <details style="width: 100%; margin: 0 auto;">
                                           <summary class="text-xs text-500 hover:text-700 cursor-pointer p-0 m-0 mt-1 select-none hide-marker">
                                             Ver más...
                                           </summary>
@@ -205,15 +217,7 @@
                                 </td>
                                 <td class="text-center">
                                   <div class="flex justify-content-center gap-1">
-                                    <button type="button" 
-                                            class="border-round cursor-pointer border-none flex align-items-center justify-content-center transition-duration-200 hover:shadow-2" 
-                                            [ngStyle]="{'background-color': (subjectColorsMap().get(sub.subjectId || sub.id) || '#64748b') + '1A', 'color': subjectColorsMap().get(sub.subjectId || sub.id) || '#64748b'}" 
-                                            style="width: 2.5rem; height: 2.5rem; padding: 0;" 
-                                            (click)="colorPanel.toggle($event)" 
-                                            pTooltip="Personalizar Color" 
-                                            tooltipPosition="top">
-                                      <i class="pi pi-palette text-xl"></i>
-                                    </button>
+                                    <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="showSubjectMenu($event, globalSubjectMenu, sub, cur.id, colorPanel); $event.stopPropagation()"></p-button>
                                     <p-popover #colorPanel>
                                       <div class="flex flex-column gap-2 p-2" style="width: 220px;">
                                         <span class="font-bold text-sm mb-1 text-center">Elegir Color</span>
@@ -227,18 +231,6 @@
                                         </div>
                                       </div>
                                     </p-popover>
-                                    @if (sub.assignments && sub.assignments.length > 0) {
-                                      <p-button
-                                        icon="pi pi-trash"
-                                        severity="danger"
-                                        [rounded]="true"
-                                        [style]="{ width: '2.5rem', height: '2.5rem', padding: '0' }"
-                                        (click)="removeTeacher(sub.id, cur.id)"
-                                        pTooltip="Limpiar todas las asignaciones"
-                                        tooltipPosition="top"
-                                        [loading]="removingSubjectId() === sub.id"
-                                      />
-                                    }
                                   </div>
                                 </td>
                               </tr>
@@ -653,7 +645,6 @@
     <div class="w-full flex justify-content-between align-items-center">
       <span class="text-500 text-sm italic">Recuerda: se crearán combinaciones por cada modalidad y jornada elegida.</span>
       <div class="flex gap-2">
-        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (click)="closeOfferModal()" />
         <p-button label="Guardar Oferta" icon="pi pi-save" (click)="saveBulkOffer()" [loading]="assigning()" />
       </div>
     </div>
@@ -667,7 +658,7 @@
   (visibleChange)="displayScheduleModal.set($event)"
   [modal]="true"
   [style]="{width: '35vw', minWidth: '400px'}" 
-  [draggable]="false"
+  [draggable]="true"
   [resizable]="false"
   (onHide)="closeScheduleModal()">
   
@@ -744,10 +735,10 @@
   }
 
   <ng-template pTemplate="footer">
-    <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (click)="closeScheduleModal()" />
     <p-button label="Guardar Horarios" severity="success" icon="pi pi-check" (click)="saveSchedules()" />
   </ng-template>
 </p-dialog>
 
 <!-- Global Teacher Menu -->
+<p-menu #globalSubjectMenu [model]="subjectMenuItems" [popup]="true" appendTo="body" styleClass="custom-action-menu" [style]="{ width: '220px' }"></p-menu>
 <p-menu #globalTeacherMenu [model]="teacherMenuItems" [popup]="true" appendTo="body" styleClass="custom-action-menu" [style]="{ width: '180px' }"></p-menu>

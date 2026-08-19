@@ -92,24 +92,24 @@ body {
   margin: 0 !important;
 }
 
-/* Make dialog close icon red globally */
+/* Make dialog close icon transparent globally with red hover */
 html body .p-dialog .p-dialog-header .p-dialog-close-button,
 html body .p-dialog .p-dialog-header button[aria-label="Close"],
 html body .p-dialog .p-dialog-header .p-dialog-header-icon.p-dialog-header-close,
 html body .p-dialog-header-close {
-  background-color: #dc2626 !important;
-  color: #ffffff !important;
-  border-color: #dc2626 !important;
+  background-color: transparent !important;
+  border: none !important;
   opacity: 1 !important;
+  color: #64748b !important;
+  transition: all 0.2s ease !important;
 }
 
 html body .p-dialog .p-dialog-header .p-dialog-close-button:hover,
 html body .p-dialog .p-dialog-header button[aria-label="Close"]:hover,
 html body .p-dialog .p-dialog-header .p-dialog-header-icon.p-dialog-header-close:hover,
 html body .p-dialog-header-close:hover {
-  background-color: #b91c1c !important;
-  color: #ffffff !important;
-  border-color: #b91c1c !important;
+  background-color: transparent !important;
+  color: #dc2626 !important;
 }
 
 /* For SVG icons inside the close button */
@@ -119,9 +119,10 @@ html body .p-dialog .p-dialog-header .p-dialog-header-icon.p-dialog-header-close
 html body .p-dialog-header-close svg,
 html body .p-dialog-header-close span,
 html body .p-dialog .p-dialog-header .p-dialog-header-close-icon {
-  color: #ffffff !important;
-  stroke: #ffffff !important;
-  fill: #ffffff !important;
+  color: inherit !important;
+  stroke: inherit !important;
+  fill: inherit !important;
+  transition: all 0.2s ease !important;
 }
 
 /* Custom Action Menu (Users List) */
@@ -225,9 +226,16 @@ html body .p-dialog {
 }
 html body .p-dialog .p-dialog-header {
   background-color: #ffffff;
-  border-bottom: 1px solid #f1f5f9 !important;
+  border-bottom: none !important;
 }
 html body .p-dialog.profile-modal .p-dialog-header {
   border-bottom: none !important;
   padding-bottom: 0 !important;
+}
+
+/* Small tooltip override */
+html body .p-tooltip.small-tooltip .p-tooltip-text {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  font-weight: 500 !important;
 }

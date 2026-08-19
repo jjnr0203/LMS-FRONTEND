@@ -11,6 +11,10 @@ export interface User {
   phone?: string;
   avatarUrl?: string;
   faculties?: any[];
+  address?: string;
+  linkedIn?: string;
+  cvUrl?: string;
+  certificates?: string[];
   createdAt: string;
   updatedAt?: string;
   requiresPasswordChange?: boolean;

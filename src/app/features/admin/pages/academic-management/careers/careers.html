@@ -234,11 +234,12 @@
             <p-table [value]="group.subjects" styleClass="p-datatable-sm text-center-table fixed-layout-table w-full" responsiveLayout="scroll">
               <ng-template pTemplate="header">
                 <tr>
-                  <th class="text-center" style="width: 20%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
-                  <th style="width: 40%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Materia</th>
-                  <th class="text-center" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Créditos</th>
-                  <th class="text-center" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Horas</th>
-                  <th class="text-center" style="width: 110px" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A', 'border-top-right-radius': '6px', 'border-bottom-right-radius': '6px'}">Acciones</th>
+                  <th class="text-center font-bold text-900" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
+                  <th class="font-bold text-900" style="width: 40%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Materia</th>
+                  <th class="text-center font-bold text-900" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Créditos</th>
+                  <th class="text-center font-bold text-900" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Horas</th>
+                  <th class="text-center font-bold text-900" style="width: 15%;" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A'}">Sucesoras</th>
+                  <th class="text-center font-bold text-900" style="width: 110px" [ngStyle]="{'background-color': getSemesterColor(group.semester) + '1A', 'border-top-right-radius': '6px', 'border-bottom-right-radius': '6px'}">Acciones</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-s>
@@ -246,13 +247,26 @@
                   <td class="text-center">
                     <p-tag [value]="s.code" styleClass="soft-tag text-xs px-2 py-1" [style]="{'background-color': getSemesterColor(group.semester) + '22', 'color': getSemesterColor(group.semester), 'white-space': 'nowrap'}"></p-tag>
                   </td>
-                  <td class="font-medium text-slate-800">{{ s.name }}</td>
-                  <td class="text-center"><span class="font-semibold text-600">{{ s.credits }}</span></td>
+                  <td class="font-medium text-left">{{ s.name }}</td>
+                  <td class="text-center">
+                    <span class="font-semibold text-600">{{ s.credits }}</span>
+                  </td>
                   <td class="text-center">
                     @if (s.hours) {
-                      <span class="font-semibold text-600">{{ s.hours }}</span>
+                      <span class="font-semibold text-600">{{ s.hours }}h</span>
                     } @else {
-                      <span class="text-slate-400">-</span>
+                      <span class="text-400">-</span>
+                    }
+                  </td>
+                  <td class="text-center">
+                    @if (s.successors && s.successors.length > 0) {
+                      <div class="flex flex-wrap justify-content-center gap-1">
+                        @for (suc of s.successors; track suc.id) {
+                          <p-tag [value]="suc.code" [pTooltip]="suc.name + ' (Sem ' + suc.semester + ')'" tooltipStyleClass="small-tooltip" tooltipPosition="top" styleClass="soft-tag text-xs px-2 py-1 cursor-pointer" [style]="{'background-color': getSemesterColor(suc.semester) + '22', 'color': getSemesterColor(suc.semester)}"></p-tag>
+                        }
+                      </div>
+                    } @else {
+                      <span class="text-400">-</span>
                     }
                   </td>
                   <td class="text-center">
@@ -409,10 +423,24 @@
       </div>
       <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
         <label class="font-semibold text-sm text-slate-700">Semestre <span class="text-red-500">*</span></label>
-        <p-select formControlName="semester" [options]="subjectSemesters" placeholder="Seleccione el semestre" [showClear]="true" styleClass="w-full">
+        <p-select formControlName="semester" [options]="subjectSemesters" placeholder="Seleccione el semestre" [showClear]="true" styleClass="w-full" appendTo="body" (onChange)="subjectForm.get('successorIds')?.setValue([])">
           <ng-template let-sem pTemplate="item">Semestre {{ sem }}</ng-template>
           <ng-template let-sem pTemplate="selectedItem">{{ sem ? 'Semestre ' + sem : 'Seleccione el semestre' }}</ng-template>
         </p-select>
+      </div></div>
+      <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
+        <label class="font-semibold text-sm text-slate-700">Sucesoras</label>
+        <p-multiSelect 
+          formControlName="successorIds"
+          [options]="possibleSuccessors"
+          optionLabel="name"
+          optionValue="relationId"
+          placeholder="Seleccione sucesoras"
+          [filter]="true"
+          styleClass="w-full"
+          emptyMessage="Seleccione un semestre menor a las sucesoras"
+          appendTo="body"
+        ></p-multiSelect>
       </div></div>
 
       <div class="col-12"><div class="flex flex-column gap-2 mb-3">
@@ -467,4 +495,33 @@
       </div>
     }
   </div>
+</p-dialog>
+
+<!-- Manage Prerequisites Dialog -->
+<p-dialog header="Vincular Sucesora" [(visible)]="displayPrerequisitesDialog" [modal]="true" [style]="{width: '450px'}" [draggable]="true" [resizable]="false">
+  <div class="flex flex-column gap-3 mt-3">
+    @if (selectedSubjectForPrerequisites) {
+      <div>
+        <label class="font-semibold block mb-2">Materia Actual:</label>
+        <span class="text-700">{{ selectedSubjectForPrerequisites.name }} ({{ selectedSubjectForPrerequisites.code }})</span>
+      </div>
+      <div>
+        <label class="font-semibold block mb-2">Seleccionar Sucesoras:</label>
+        <p-multiSelect 
+          [options]="filteredPossiblePrerequisites" 
+          [(ngModel)]="selectedPrerequisiteIds" 
+          optionLabel="name" 
+          optionValue="relationId" 
+          placeholder="Seleccione sucesoras"
+          [filter]="true"
+          styleClass="w-full"
+          emptyMessage="No hay sucesoras disponibles"
+          appendTo="body"
+        ></p-multiSelect>
+      </div>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Guardar" icon="pi pi-check" (onClick)="savePrerequisites()" [disabled]="!selectedSubjectForPrerequisites"></p-button>
+  </ng-template>
 </p-dialog>

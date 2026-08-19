@@ -108,38 +108,42 @@
         <div class="section-header">
           <h3 class="m-0 text-900 text-xl font-bold">Hoja de Vida (CV)</h3>
         </div>
-        @if (u.cvUrl) {
-          <div class="certificate-card group relative" style="max-width: 480px; align-items: center;">
-            <i class="pi pi-file-pdf cert-icon" style="margin-top: 0;"></i>
-            <div class="cert-details flex-1" style="margin-right: 1rem;">
-              <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden block" [title]="getFileName(u.cvUrl, 0)">{{ getFileName(u.cvUrl, 0) }}</span>
-              <span class="cert-date">Documento PDF</span>
-            </div>
-            <div class="flex flex-column gap-2 flex-shrink-0" style="width: 110px;">
-              <p-button label="Ver" icon="pi pi-eye" size="small" styleClass="w-full cv-action-btn" (onClick)="viewCv(u.cvUrl)"></p-button>
-              <p-button label="Eliminar" icon="pi pi-trash" severity="danger" size="small" styleClass="w-full" (onClick)="onDeleteCv()" [loading]="deletingCv()"></p-button>
-            </div>
-          </div>
-        } @else {
-          <div class="document-upload-area" 
-               [class.drag-over]="isDragOver()"
-               (dragover)="onDragOver($event)"
-               (dragleave)="onDragLeave($event)"
-               (drop)="onDrop($event)">
-            <div class="doc-preview">
-              <div class="doc-placeholder">
-                <i class="pi pi-file"></i>
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            @if (u.cvUrl) {
+              <div class="certificate-card group relative">
+                <i class="pi pi-file-pdf cert-icon"></i>
+                <div class="cert-details">
+                  <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden block" [title]="getFileName(u.cvUrl, 0)">{{ getFileName(u.cvUrl, 0) }}</span>
+                  <span class="cert-date">Documento PDF</span>
+                </div>
+                <div class="cert-actions">
+                  <p-menu #cvMenu [model]="getCvMenu(u.cvUrl)" [popup]="true" appendTo="body"></p-menu>
+                  <button type="button" class="menu-dots-btn" (click)="cvMenu.toggle($event)"><i class="pi pi-ellipsis-v"></i></button>
+                </div>
               </div>
-            </div>
-            <div class="doc-actions flex-1 overflow-hidden">
-              <div class="doc-info mb-2">
-                <span>No has subido tu hoja de vida aún. Puedes arrastrar tu PDF aquí.</span>
+            } @else {
+              <div class="document-upload-area" 
+                   [class.drag-over]="isDragOver()"
+                   (dragover)="onDragOver($event)"
+                   (dragleave)="onDragLeave($event)"
+                   (drop)="onDrop($event)">
+                <div class="doc-preview">
+                  <div class="doc-placeholder">
+                    <i class="pi pi-file"></i>
+                  </div>
+                </div>
+                <div class="doc-actions overflow-hidden text-center">
+                  <div class="doc-info mb-2">
+                    <span>No has subido tu hoja de vida aún. Puedes arrastrar tu PDF aquí.</span>
+                  </div>
+                  <input type="file" #cvInput accept=".pdf" class="hidden" (change)="onCvSelected($event)" />
+                  <p-button label="Subir Archivo" icon="pi pi-upload" severity="success" size="small" [loading]="uploadingCv()" (onClick)="cvInput.click()"></p-button>
+                </div>
               </div>
-              <input type="file" #cvInput accept=".pdf" class="hidden" (change)="onCvSelected($event)" />
-              <p-button label="Subir Archivo" icon="pi pi-upload" severity="success" size="small" [loading]="uploadingCv()" (onClick)="cvInput.click()"></p-button>
-            </div>
+            }
           </div>
-        }
+        </div>
       </div>
 
       <!-- Card 4: Certificados (JSONB) -->

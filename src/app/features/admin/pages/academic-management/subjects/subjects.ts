@@ -62,6 +62,7 @@ export class Subjects implements OnInit {
   curriculums: Curriculum[] = [];
   availableModalities: Modality[] = [];
   availableSemesters: number[] = [];
+  possiblePrerequisites: any[] = [];
   displayDialog = false;
   displayBulkDialog = false;
   selectedFile: File | null = null;
@@ -90,6 +91,7 @@ export class Subjects implements OnInit {
       curriculumId: [{ value: null, disabled: true }],
       modalityIds: [{ value: [], disabled: true }],
       semester: [{ value: null, disabled: true }],
+      prerequisiteIds: [[]],
       description: [''],
     });
 
@@ -115,6 +117,23 @@ export class Subjects implements OnInit {
           this.form.get('curriculumId')?.disable();
         }
       },
+    });
+  }
+
+  onCurriculumChange() {
+    const curId = this.form.get('curriculumId')?.value;
+    const subId = this.isEdit ? this.currentId : undefined;
+    if (curId) {
+      this.loadPossiblePrerequisites(curId, subId || undefined);
+    } else {
+      this.possiblePrerequisites = [];
+    }
+  }
+
+  loadPossiblePrerequisites(curriculumId: string, excludeId?: string) {
+    this.academicService.getPossiblePrerequisites(curriculumId, excludeId).subscribe({
+      next: (res) => this.possiblePrerequisites = res,
+      error: () => console.error('Error loading possible prerequisites')
     });
   }
 
@@ -205,6 +224,11 @@ export class Subjects implements OnInit {
       this.form.get('semester')?.setValue(s.semester);
       if (s.curriculumId) {
         this.form.get('curriculumId')?.setValue(s.curriculumId);
+        this.loadPossiblePrerequisites(s.curriculumId, s.id);
+      }
+      const sub = s as any;
+      if (sub.prerequisiteIds) {
+        this.form.get('prerequisiteIds')?.setValue(sub.prerequisiteIds);
       }
       this.form.get('careerId')?.disable();
     } else {
@@ -227,6 +251,7 @@ export class Subjects implements OnInit {
       modalityIds: raw.modalityIds,
       careerId: raw.careerId,
       semester: raw.semester,
+      prerequisiteIds: raw.prerequisiteIds || [],
     };
     if (raw.curriculumId) data.curriculumId = raw.curriculumId;
 

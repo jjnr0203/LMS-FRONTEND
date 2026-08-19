@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, input, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, input, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -84,6 +84,15 @@ export class UsersListComponent implements OnInit, OnDestroy {
   menuItems: MenuItem[] = [];
   selectedUserForMenu: any = null;
 
+  @ViewChild('cvInput') cvInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('certInput') certInput!: ElementRef<HTMLInputElement>;
+
+  isUploadingCv = signal(false);
+  isUploadingCert = signal(false);
+
+  private cvMenuCache = new Map<string, MenuItem[]>();
+  private certMenuCache = new Map<string, MenuItem[]>();
+
   mode = input<'admin' | 'hr'>('admin');
   roleFilter: string = '';
   isStudentList = false;
@@ -117,6 +126,34 @@ export class UsersListComponent implements OnInit, OnDestroy {
     birthDate: [''],
     facultyIds: [[] as string[]],
   });
+
+  contactForm = this.formBuilder.group({
+    address: [''],
+    linkedIn: ['']
+  });
+  isEditingAddress = signal(false);
+  isEditingLinkedIn = signal(false);
+  savingContact = signal(false);
+
+  addressMenu = [
+    {
+      label: 'Editar',
+      icon: 'pi pi-pencil',
+      command: () => {
+        this.isEditingAddress.set(true);
+      }
+    }
+  ];
+
+  linkedInMenu = [
+    {
+      label: 'Editar',
+      icon: 'pi pi-pencil',
+      command: () => {
+        this.isEditingLinkedIn.set(true);
+      }
+    }
+  ];
 
   ngOnInit() {
     this.academicService.getFaculties().subscribe({
@@ -248,6 +285,141 @@ export class UsersListComponent implements OnInit, OnDestroy {
     }
   }
 
+  // --- Document Upload / HR Methods ---
+  triggerCvUpload() {
+    this.cvInput.nativeElement.click();
+  }
+
+  onCvFileSelected(event: Event) {
+    if (!this.selectedUser) return;
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.isUploadingCv.set(true);
+      this.hrService.uploadUserCv(this.selectedUser.id, file).subscribe({
+        next: (res) => {
+          this.selectedUser.cvUrl = res.cvUrl;
+          this.isUploadingCv.set(false);
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Hoja de vida subida' });
+        },
+        error: () => {
+          this.isUploadingCv.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo subir la hoja de vida' });
+        }
+      });
+    }
+  }
+
+  triggerCertUpload() {
+    this.certInput.nativeElement.click();
+  }
+
+  onCertFileSelected(event: Event) {
+    if (!this.selectedUser) return;
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.isUploadingCert.set(true);
+      this.hrService.uploadUserCertificate(this.selectedUser.id, file).subscribe({
+        next: (res) => {
+          if (!this.selectedUser.certificates) this.selectedUser.certificates = [];
+          this.selectedUser.certificates.push(res.certificateUrl);
+          this.isUploadingCert.set(false);
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Certificado subido' });
+        },
+        error: () => {
+          this.isUploadingCert.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo subir el certificado' });
+        }
+      });
+    }
+  }
+
+  getCvMenu(cvUrl: string): MenuItem[] {
+    if (this.cvMenuCache.has(cvUrl)) {
+      return this.cvMenuCache.get(cvUrl)!;
+    }
+    const menu: MenuItem[] = [
+      {
+        label: 'Ver Documento',
+        icon: 'pi pi-eye',
+        command: () => window.open(cvUrl, '_blank')
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        command: () => this.onDeleteCv()
+      }
+    ];
+    this.cvMenuCache.set(cvUrl, menu);
+    return menu;
+  }
+
+  getCertMenu(certUrl: string): MenuItem[] {
+    if (this.certMenuCache.has(certUrl)) {
+      return this.certMenuCache.get(certUrl)!;
+    }
+    const menu = [
+      {
+        label: 'Ver Documento',
+        icon: 'pi pi-eye',
+        command: () => window.open(certUrl, '_blank')
+      },
+      {
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        command: () => this.onDeleteCert(certUrl)
+      }
+    ];
+    this.certMenuCache.set(certUrl, menu);
+    return menu;
+  }
+
+  private onDeleteCv() {
+    if (!this.selectedUser) return;
+    this.confirmationService.confirm({
+      message: '¿Estás seguro de que quieres eliminar la hoja de vida de este usuario?',
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, Eliminar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.hrService.deleteUserCv(this.selectedUser.id).subscribe({
+          next: () => {
+            this.selectedUser.cvUrl = null;
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Hoja de vida eliminada' });
+          },
+          error: () => {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' });
+          }
+        });
+      }
+    });
+  }
+
+  private onDeleteCert(certUrl: string) {
+    if (!this.selectedUser) return;
+    this.confirmationService.confirm({
+      message: '¿Estás seguro de que quieres eliminar este certificado?',
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, Eliminar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.hrService.deleteUserCertificate(this.selectedUser.id, certUrl).subscribe({
+          next: () => {
+            this.selectedUser.certificates = this.selectedUser.certificates.filter((c: string) => c !== certUrl);
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Certificado eliminado' });
+          },
+          error: () => {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' });
+          }
+        });
+      }
+    });
+  }
+
+
   translateRole(roleName?: string): string {
     if (!roleName) return '';
     switch (roleName.toLowerCase()) {
@@ -290,6 +462,27 @@ export class UsersListComponent implements OnInit, OnDestroy {
       facultyIds: user.faculties ? user.faculties.map((f: any) => f.id) : [],
     });
     this.editDialogVisible = true;
+  }
+
+  onSaveContact() {
+    if (!this.selectedUser) return;
+    this.savingContact.set(true);
+    const updates = this.contactForm.value;
+    
+    this.userService.updateUser(this.selectedUser.id, updates as Partial<User>, this.selectedUser.roleName).subscribe({
+      next: () => {
+        this.selectedUser.address = updates.address;
+        this.selectedUser.linkedIn = updates.linkedIn;
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Datos de contacto actualizados' });
+        this.savingContact.set(false);
+        this.isEditingAddress.set(false);
+        this.isEditingLinkedIn.set(false);
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar los datos' });
+        this.savingContact.set(false);
+      }
+    });
   }
 
   onSaveEdit() {
@@ -354,6 +547,12 @@ export class UsersListComponent implements OnInit, OnDestroy {
   openProfileModal(user: any) {
     this.selectedUser = user;
     this.activeTab = '0'; // Reset to "Resumen" tab
+    this.isEditingAddress.set(false);
+    this.isEditingLinkedIn.set(false);
+    this.contactForm.patchValue({
+      address: user.address || '',
+      linkedIn: user.linkedIn || ''
+    });
     this.profileModalVisible = true;
     
     if (user.roleName === 'teacher' || user.roleName === 'Docente') {
