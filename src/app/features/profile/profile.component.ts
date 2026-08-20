@@ -8,7 +8,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DividerModule } from 'primeng/divider';
@@ -16,6 +16,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { MessageModule } from 'primeng/message';
+import { DialogModule } from 'primeng/dialog';
+import { PasswordModule } from 'primeng/password';
 
 @Component({
   selector: 'app-profile',
@@ -31,6 +33,8 @@ import { MessageModule } from 'primeng/message';
     ConfirmDialogModule,
     MenuModule,
     MessageModule,
+    DialogModule,
+    PasswordModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './profile.component.html',
@@ -333,7 +337,56 @@ export class ProfileComponent implements OnInit {
     window.open(url, '_blank');
   }
 
-  goChangePassword() {
-    this.router.navigate(['/perfil/cambiar-password']);
+  showPasswordDialog = signal(false);
+  changingPassword = signal(false);
+
+  passwordForm = this.formBuilder.group({
+    currentPassword: ['', Validators.required],
+    newPassword: ['', [Validators.required, Validators.minLength(6)]],
+  });
+
+  get currentPassword() {
+    return this.passwordForm.controls.currentPassword;
+  }
+  get newPassword() {
+    return this.passwordForm.controls.newPassword;
+  }
+
+  openPasswordDialog() {
+    this.passwordForm.reset();
+    this.showPasswordDialog.set(true);
+  }
+
+  cancelPasswordDialog() {
+    this.showPasswordDialog.set(false);
+  }
+
+  onChangePassword() {
+    if (this.passwordForm.invalid) {
+      this.passwordForm.markAllAsTouched();
+      return;
+    }
+
+    this.changingPassword.set(true);
+    this.userService.changePassword(this.passwordForm.value as any).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Contraseña actualizada' });
+        this.changingPassword.set(false);
+        this.showPasswordDialog.set(false);
+        setTimeout(() => {
+          this.authService.logout().subscribe({
+            next: () => this.router.navigate(['/login']),
+            error: () => {
+              this.authService.clearSession();
+              this.router.navigate(['/login']);
+            }
+          });
+        }, 1000);
+      },
+      error: (err) => {
+        this.changingPassword.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message ?? 'Error al cambiar contraseña' });
+      }
+    });
   }
 }

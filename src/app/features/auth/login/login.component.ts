@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
@@ -31,6 +31,7 @@ import { CarouselModule } from 'primeng/carousel';
     InputGroupAddonModule,
     DividerModule,
     CarouselModule,
+    RouterLink,
   ],
   providers: [MessageService],
   templateUrl: 'login.component.html',

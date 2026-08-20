@@ -476,23 +476,31 @@
   </div>
 </p-dialog>
 
-<p-dialog [(visible)]="showSubjectsModal" [header]="'Materias Asignadas'" [modal]="true" [style]="{ width: '450px' }">
-  <div class="grid mt-2">
-    @if (teacherStats() && teacherStats()!.subjects.length > 0) {
-      @for (sub of teacherStats()!.subjects; track sub.id) {
-        <div class="col-12" [ngClass]="{'md:col-6': teacherStats()!.subjects.length > 1}">
-          <div class="certificate-card border-round h-full flex align-items-center" style="padding: 0.5rem 0.75rem; gap: 0.5rem;">
-            <i class="pi pi-book cert-icon" style="font-size: 1.2rem;"></i>
-            <div class="cert-details flex-grow-1">
-              <span class="cert-name text-sm">{{ sub.name }}</span>
-            </div>
+<p-dialog [(visible)]="showSubjectsModal" [header]="'Materias Asignadas'" [modal]="true" [style]="{ width: '500px' }">
+  <div class="flex flex-column gap-3 mt-2">
+    @if (groupedTeacherSubjects() && groupedTeacherSubjects().length > 0) {
+      @for (group of groupedTeacherSubjects(); track group.careerName) {
+        <div class="flex flex-column gap-2 mb-2">
+          <h4 class="m-0 text-700 font-medium border-bottom-1 border-300 pb-2"><i class="pi pi-graduation-cap mr-2"></i>{{ group.careerName }}</h4>
+          <div class="grid m-0">
+            @for (sub of group.subjects; track sub.id) {
+              <div class="col-12" [ngClass]="{'md:col-6': group.subjects.length > 1}">
+                <div class="certificate-card border-round h-full flex align-items-center" style="padding: 0.5rem 0.75rem; gap: 0.5rem;">
+                  <i class="pi pi-book cert-icon" style="font-size: 1.2rem;"></i>
+                  <div class="cert-details flex-grow-1">
+                    <span class="cert-name text-sm font-medium">{{ sub.name }}</span>
+                    @if (sub.semester) {
+                      <span class="cert-semester text-xs ml-1">(Sem {{ sub.semester }})</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
       }
     } @else {
-      <div class="col-12">
-        <p class="text-500 text-center py-4 m-0">No tiene materias asignadas.</p>
-      </div>
+      <p class="text-500 text-center py-4 m-0">No tiene materias asignadas.</p>
     }
   </div>
 </p-dialog>

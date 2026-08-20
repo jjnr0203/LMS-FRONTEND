@@ -286,7 +286,7 @@ export class Careers implements OnInit {
     this.academicService.getJornadas().subscribe({
       next: (data) => {
         this.jornadas = data.filter((j) => j.isActive);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => console.error('Error al cargar jornadas'),
     });
@@ -294,26 +294,37 @@ export class Careers implements OnInit {
 
   loadCareers() {
     this.academicService.getCareers().subscribe((data) => {
-      this.careers = data;
+      setTimeout(() => {
+        this.careers = data;
+        this.cdr.markForCheck();
+      });
     });
     this.academicService.getModalities().subscribe((data) => {
-      this.modalities = data.filter(m => m.isActive);
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.modalities = data.filter(m => m.isActive);
+        this.cdr.markForCheck();
+      });
     });
     this.academicService.getFaculties().subscribe((data) => {
-      this.faculties = data.filter(f => f.isActive);
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.faculties = data.filter(f => f.isActive);
+        this.cdr.markForCheck();
+      });
     });
     this.userService.getUsers(1, 100, 'coordinator').subscribe((res) => {
-      this.coordinators = res.data;
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.coordinators = res.data;
+        this.cdr.markForCheck();
+      });
     });
   }
 
   loadCurriculums(careerId: string) {
     this.academicService.getCurriculumsByCareer(careerId).subscribe((data) => {
-      this.curriculums = data;
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.curriculums = data;
+        this.cdr.markForCheck();
+      });
     });
   }
 
@@ -383,7 +394,7 @@ export class Careers implements OnInit {
       });
 
       this.subjects = flatSubjects;
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 
@@ -422,12 +433,16 @@ export class Careers implements OnInit {
     this.careerForm.reset({ isActive: true, durationSemesters: 1 });
     this.loadJornadas();
     this.academicService.getModalities().subscribe((data) => {
-      this.modalities = data.filter(m => m.isActive);
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.modalities = data.filter(m => m.isActive);
+        this.cdr.markForCheck();
+      });
     });
     this.academicService.getFaculties().subscribe((data) => {
-      this.faculties = data.filter(f => f.isActive);
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.faculties = data.filter(f => f.isActive);
+        this.cdr.markForCheck();
+      });
     });
     this.submittedCareer.set(false);
     this.displayCareerDialog = true;
@@ -439,12 +454,16 @@ export class Careers implements OnInit {
     this.careerForm.patchValue(c);
     this.loadJornadas();
     this.academicService.getModalities().subscribe((data) => {
-      this.modalities = data.filter(m => m.isActive);
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.modalities = data.filter(m => m.isActive);
+        this.cdr.markForCheck();
+      });
     });
     this.academicService.getFaculties().subscribe((data) => {
-      this.faculties = data.filter(f => f.isActive);
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.faculties = data.filter(f => f.isActive);
+        this.cdr.markForCheck();
+      });
     });
     this.submittedCareer.set(false);
     this.displayCareerDialog = true;
@@ -689,7 +708,7 @@ export class Careers implements OnInit {
             this.subjects = [];
             this.deletingAllSubjects = false;
             this.loadCurriculums(this.selectedCareer!.id);
-            this.cdr.detectChanges();
+            this.cdr.markForCheck();
           },
           error: (err) => {
             this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudieron eliminar las materias' });
@@ -885,9 +904,9 @@ export class Careers implements OnInit {
   showCareerMenu(event: Event, menu: any, career: any) {
     this.selectedCareerForMenu = career;
     this.careerMenuItems = [
-      { label: 'Ver Mallas', icon: 'pi pi-eye', styleClass: 'action-view', command: () => this.selectCareer(this.selectedCareerForMenu) },
-      { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => this.editCareer(this.selectedCareerForMenu) },
-      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => this.deleteCareer(this.selectedCareerForMenu.id) }
+      { label: 'Ver Mallas', icon: 'pi pi-eye', styleClass: 'action-view', command: () => setTimeout(() => this.selectCareer(this.selectedCareerForMenu)) },
+      { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => setTimeout(() => this.editCareer(this.selectedCareerForMenu)) },
+      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => setTimeout(() => this.deleteCareer(this.selectedCareerForMenu.id)) }
     ];
     menu.toggle(event);
   }
@@ -895,9 +914,9 @@ export class Careers implements OnInit {
   showCurriculumMenu(event: Event, menu: any, curriculum: any) {
     this.selectedCurriculumForMenu = curriculum;
     this.curriculumMenuItems = [
-      { label: 'Ver Materias', icon: 'pi pi-eye', styleClass: 'action-view', command: () => this.selectCurriculum(this.selectedCurriculumForMenu) },
-      { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => this.editCurriculum(this.selectedCurriculumForMenu) },
-      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => this.deleteCurriculum(this.selectedCurriculumForMenu.id) }
+      { label: 'Ver Materias', icon: 'pi pi-eye', styleClass: 'action-view', command: () => setTimeout(() => this.selectCurriculum(this.selectedCurriculumForMenu)) },
+      { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => setTimeout(() => this.editCurriculum(this.selectedCurriculumForMenu)) },
+      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => setTimeout(() => this.deleteCurriculum(this.selectedCurriculumForMenu.id)) }
     ];
     menu.toggle(event);
   }
@@ -905,9 +924,9 @@ export class Careers implements OnInit {
   showSubjectMenu(event: Event, menu: any, subject: any) {
     this.selectedSubjectForMenu = subject;
     menu.model = [
-      { label: 'Vincular Sucesora', icon: 'pi pi-link', styleClass: 'action-view', command: () => this.openPrerequisitesDialog(this.selectedSubjectForMenu) },
-      { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => this.editSubject(this.selectedSubjectForMenu) },
-      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => this.deleteSubject(this.selectedSubjectForMenu.id) }
+      { label: 'Vincular Sucesora', icon: 'pi pi-link', styleClass: 'action-view', command: () => setTimeout(() => this.openPrerequisitesDialog(this.selectedSubjectForMenu)) },
+      { label: 'Editar', icon: 'pi pi-pencil', styleClass: 'action-edit', command: () => setTimeout(() => this.editSubject(this.selectedSubjectForMenu)) },
+      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'action-delete', command: () => setTimeout(() => this.deleteSubject(this.selectedSubjectForMenu.id)) }
     ];
     menu.toggle(event);
   }
@@ -919,10 +938,13 @@ export class Careers implements OnInit {
     this.selectedPrerequisiteIds = subject.successors ? subject.successors.map((s: any) => s.relationId) : [];
     this.displayPrerequisitesDialog = true;
     this.academicService.getPossiblePrerequisites(this.selectedCurriculum.id, subject.id).subscribe({
-      next: (res) => {
-        this.possiblePrerequisites = res;
-        this.filteredPossiblePrerequisites = res.filter((p: any) => p.semester > subject.semester);
-      },
+        next: (res) => {
+          setTimeout(() => {
+            this.possiblePrerequisites = res;
+            this.filteredPossiblePrerequisites = res.filter((p: any) => p.semester > subject.semester);
+            this.cdr.markForCheck();
+          });
+        },
       error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las posibles sucesoras' })
     });
   }

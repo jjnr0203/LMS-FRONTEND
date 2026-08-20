@@ -39,7 +39,9 @@ export class UserService {
     return this.http.get<PaginatedResponse<User>>(this.apiUrl, { params });
   }
 
-  getUser(id: string): Observable<User> {
+  getUser(id: string, role?: string): Observable<User> {
+    if (role === 'teacher' || role === 'Docente') return this.http.get<User>(`${environment.apiUrl}/teachers/${id}`);
+    if (role === 'student' || role === 'Estudiante') return this.http.get<User>(`${environment.apiUrl}/students/${id}`);
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 

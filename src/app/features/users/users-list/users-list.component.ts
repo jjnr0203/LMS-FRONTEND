@@ -583,7 +583,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
       });
     }
 
-    this.userService.getUser(user.id).subscribe({
+    this.userService.getUser(user.id, user.roleName).subscribe({
       next: (fullUser) => {
         if (this.selectedUser && this.selectedUser.id === fullUser.id) {
           this.selectedUser = { ...this.selectedUser, ...fullUser };

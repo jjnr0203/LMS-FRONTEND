@@ -186,7 +186,7 @@
 
       <!-- Footer Buttons -->
       <div class="mt-4 mb-6 flex justify-content-end">
-        <p-button label="Cambiar Contraseña" icon="pi pi-key" severity="info" (onClick)="goChangePassword()"></p-button>
+        <p-button label="Cambiar Contraseña" icon="pi pi-key" severity="info" (onClick)="openPasswordDialog()"></p-button>
       </div>
 
     } @else {
@@ -196,3 +196,26 @@
     }
     </div>
   </div>
+
+  <p-dialog header="Cambiar Contraseña" [visible]="showPasswordDialog()" (visibleChange)="showPasswordDialog.set($event)" [modal]="true" [style]="{ width: '400px' }" [draggable]="true" [resizable]="false">
+    <p class="text-600 mb-4 mt-0">Actualiza tu contraseña de acceso.</p>
+    <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+      <div class="flex flex-column gap-2 mb-4">
+        <label for="currentPassword" class="font-semibold text-sm text-700">Contraseña Actual</label>
+        <p-password id="currentPassword" formControlName="currentPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full"></p-password>
+        @if (currentPassword.invalid && currentPassword.touched) {
+          <small class="p-error">Requerida.</small>
+        }
+      </div>
+      <div class="flex flex-column gap-2 mb-4">
+        <label for="newPassword" class="font-semibold text-sm text-700">Nueva Contraseña</label>
+        <p-password id="newPassword" formControlName="newPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full"></p-password>
+        @if (newPassword.invalid && newPassword.touched) {
+          <small class="p-error">Mínimo 6 caracteres.</small>
+        }
+      </div>
+      <div class="flex justify-content-end gap-2 mt-4">
+        <p-button type="submit" label="Guardar" [loading]="changingPassword()" [disabled]="passwordForm.invalid"></p-button>
+      </div>
+    </form>
+  </p-dialog>

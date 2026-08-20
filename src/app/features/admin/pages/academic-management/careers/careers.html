@@ -49,7 +49,7 @@
           <div class="flex gap-1 flex-wrap align-items-center">
             @let modNames = getModalityList(c.modalityIds);
             @if (modNames.length > 0) {
-              @for (m of modNames; track m) {
+              @for (m of modNames; track $index) {
                 <p-tag [value]="m" severity="success" styleClass="soft-tag text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag>
               }
             } @else {
@@ -60,7 +60,7 @@
         <td>
           <div class="flex gap-1 flex-wrap align-items-center">
             @if (c.jornadaIds && c.jornadaIds.length > 0) {
-              @for (j of c.jornadaIds; track j) {
+              @for (j of c.jornadaIds; track $index) {
                 <p-tag [value]="getJornadaName(j)" severity="warn" styleClass="soft-tag text-xs px-2 py-1" [style]="{'white-space': 'nowrap'}"></p-tag>
               }
             } @else {
