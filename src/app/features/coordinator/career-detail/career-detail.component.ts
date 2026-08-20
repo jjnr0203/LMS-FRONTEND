@@ -634,7 +634,19 @@ export class CareerDetailComponent implements OnInit {
             }
 
             const curriculums = careerDetailRes.curriculums.map((cur: any) => {
+              let totalSubjects = 0;
+              let totalCredits = 0;
               if (cur.semesters) {
+                cur.semesters.forEach((sem: any) => {
+                  totalSubjects += sem.subjects?.length || 0;
+                  sem.subjects?.forEach((sub: any) => {
+                    totalCredits += sub.credits || 0;
+                  });
+                });
+                cur.totalSubjects = totalSubjects;
+                cur.totalCredits = totalCredits;
+                cur.totalSemesters = cur.semesters.length;
+                
                 cur.semesters = cur.semesters.map((sem: any) => {
                   if (sem.subjects) {
                     sem.subjects = sem.subjects.map((sub: any) => {

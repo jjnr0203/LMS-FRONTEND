@@ -619,3 +619,22 @@
   }
 }
 
+
+
+/* Hide scrollbar for stats row but allow scrolling */
+::ng-deep .subtitle-malla {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+::ng-deep .subtitle-malla::-webkit-scrollbar {
+  display: none;
+}
+
+
+::ng-deep .hide-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+::ng-deep .hide-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}

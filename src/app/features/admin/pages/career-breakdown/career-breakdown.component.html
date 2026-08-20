@@ -126,24 +126,26 @@
         @for (cur of data.curriculums; track cur.id) {
           <p-accordion-panel [value]="cur.id" class="malla-panel">
             <p-accordion-header [ngClass]="{'malla-active': expandedCurriculums().includes(cur.id)}">
-              <div class="flex align-items-center flex-wrap w-full pr-3" style="column-gap: 1.5rem; row-gap: 0.5rem;">
-    <div class="flex align-items-center gap-2">
-      <i class="pi pi-sitemap text-xl icon-malla"></i>
-      <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
-    </div>
-    <div class="text-sm flex align-items-center gap-3 flex-wrap subtitle-malla">
-      <span class="white-space-nowrap"><i class="pi pi-book"></i> {{ cur.totalSubjects }} materias</span>  
-      <span class="white-space-nowrap"><i class="pi pi-calendar"></i> {{ cur.totalSemesters }} semestres</span>  
-      <span class="white-space-nowrap"><i class="pi pi-star"></i> {{ cur.totalCredits }} créditos</span>
-    </div>
-    <div class="ml-auto">
-      @if (cur.isActive) {
-        <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
-      } @else {
-        <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
-      }
-    </div>
+              <div class="flex align-items-center flex-wrap w-full pr-4" style="column-gap: 1.5rem; row-gap: 0.5rem;">
+  <div class="flex align-items-center gap-2 flex-order-0">
+    <i class="pi pi-sitemap text-xl icon-malla"></i>
+    <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
   </div>
+  
+  <div class="text-sm flex align-items-center gap-2 flex-nowrap overflow-x-auto hide-scrollbar flex-order-2 md:flex-order-1 w-full md:w-auto subtitle-malla" style="white-space: nowrap;">
+    <span class="white-space-nowrap"><i class="pi pi-book"></i> {{ cur.totalSubjects }} materias</span>
+    <span class="white-space-nowrap"><i class="pi pi-calendar"></i> {{ cur.semesters?.length || cur.totalSemesters }} semestres</span>
+    <span class="white-space-nowrap"><i class="pi pi-star"></i> {{ cur.totalCredits }} créditos</span>
+  </div>
+  
+  <div class="ml-auto flex-order-1 md:flex-order-2 flex align-items-center">
+    @if (cur.isActive) {
+      <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
+    } @else {
+      <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
+    }
+  </div>
+</div>
             </p-accordion-header>
             <p-accordion-content>
               @if (cur.description) {

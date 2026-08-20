@@ -91,24 +91,26 @@
             @for (cur of filteredCurriculums(); track cur.id) {
               <p-accordion-panel [value]="cur.id" class="malla-panel">
                 <p-accordion-header [ngClass]="{'malla-active': true}">
-                  <div class="flex align-items-center flex-wrap w-full pr-3" style="column-gap: 1.5rem; row-gap: 0.5rem;">
-    <div class="flex align-items-center gap-2">
-      <i class="pi pi-sitemap text-xl icon-malla"></i>
-      <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
-    </div>
-    <div class="text-sm flex align-items-center gap-3 flex-wrap subtitle-malla">
-      <span class="white-space-nowrap"><i class="pi pi-book"></i> {{ cur.totalSubjects }} materias</span>  
-      <span class="white-space-nowrap"><i class="pi pi-calendar"></i> {{ cur.totalSemesters }} semestres</span>  
-      <span class="white-space-nowrap"><i class="pi pi-star"></i> {{ cur.totalCredits }} créditos</span>
-    </div>
-    <div class="ml-auto">
-      @if (cur.isActive) {
-        <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
-      } @else {
-        <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
-      }
-    </div>
+                  <div class="flex align-items-center flex-wrap w-full pr-4" style="column-gap: 1.5rem; row-gap: 0.5rem;">
+  <div class="flex align-items-center gap-2 flex-order-0">
+    <i class="pi pi-sitemap text-xl icon-malla"></i>
+    <h2 class="text-xl font-bold m-0 title-malla">{{ cur.name }}</h2>
   </div>
+  
+  <div class="text-sm flex align-items-center gap-2 flex-nowrap overflow-x-auto hide-scrollbar flex-order-2 md:flex-order-1 w-full md:w-auto subtitle-malla" style="white-space: nowrap;">
+    <span class="white-space-nowrap"><i class="pi pi-book"></i> {{ cur.totalSubjects }} materias</span>
+    <span class="white-space-nowrap"><i class="pi pi-calendar"></i> {{ cur.semesters?.length || cur.totalSemesters }} semestres</span>
+    <span class="white-space-nowrap"><i class="pi pi-star"></i> {{ cur.totalCredits }} créditos</span>
+  </div>
+  
+  <div class="ml-auto flex-order-1 md:flex-order-2 flex align-items-center">
+    @if (cur.isActive) {
+      <p-badge value="Activa" severity="success" styleClass="badge-malla"></p-badge>
+    } @else {
+      <p-badge value="Inactiva" severity="warn" styleClass="badge-malla"></p-badge>
+    }
+  </div>
+</div>
                 </p-accordion-header>
                 <p-accordion-content>
                   @if (cur.description) {
@@ -119,30 +121,46 @@
                     @for (sem of cur.semesters; track sem.semester) {
                       <p-accordion-panel [value]="sem.semester">
                         <p-accordion-header>
-                          <div class="flex align-items-center justify-content-between w-full pr-3">
-                            <div class="flex align-items-center gap-3 flex-wrap">
-  <div class="flex align-items-center justify-content-center flex-shrink-0" 
-       [ngStyle]="{'background-color': getSemesterColor(sem.semester)}"
-       style="padding: 0.35rem 0.8rem; border-radius: 4px;">
-    <span class="font-bold text-sm text-white m-0 white-space-nowrap">Semestre {{ sem.semester }}</span>
+                          <div class="flex flex-column md:flex-row align-items-start md:align-items-center w-full pr-5 gap-2 md:gap-3">
+  <div class="flex align-items-center gap-3">
+    <div class="flex align-items-center justify-content-center flex-shrink-0" 
+         [ngStyle]="{'background-color': getSemesterColor(sem.semester)}"
+         style="padding: 0.35rem 0.8rem; border-radius: 4px;">
+      <span class="font-bold text-sm text-white m-0 white-space-nowrap">Semestre {{ sem.semester }}</span>
+    </div>
+
+    <div class="block md:hidden">
+      <p-button 
+        icon="pi pi-calendar-plus" 
+        label="Planificar Oferta" 
+        severity="success" 
+        size="small"
+        styleClass="p-button-sm text-xs px-2 py-1 white-space-nowrap"
+        (click)="$event.stopPropagation(); openBulkOfferModal(sem.semester, sem.subjects, cur.id)"
+      />
+    </div>
   </div>
-  <div class="text-700 text-sm font-medium flex flex-wrap gap-3 align-items-center">
+
+  <div class="text-700 text-sm font-medium flex flex-nowrap align-items-center gap-2 overflow-x-auto hide-scrollbar w-full md:w-auto" style="white-space: nowrap;">
     <span class="white-space-nowrap">{{ sem.subjects.length }} materias</span>
     <span class="white-space-nowrap">{{ semesterCredits(sem) }} créditos</span>
     <span class="white-space-nowrap"><i class="pi pi-clock mx-1"></i> {{ semesterHours(sem) }} horas</span>
   </div>
+
+  <div class="hidden md:block md:ml-auto">
+    <p-button 
+      icon="pi pi-calendar-plus" 
+      label="Planificar Oferta" 
+      severity="success" 
+      size="small"
+      styleClass="p-button-sm text-sm px-3 py-2 white-space-nowrap"
+      (click)="$event.stopPropagation(); openBulkOfferModal(sem.semester, sem.subjects, cur.id)"
+    />
+  </div>
 </div>
-                            <p-button 
-                              icon="pi pi-calendar-plus" 
-                              label="Planificar Oferta" 
-                              severity="success" 
-                              size="small"
-                              (click)="$event.stopPropagation(); openBulkOfferModal(sem.semester, sem.subjects, cur.id)"
-                            />
-                          </div>
                         </p-accordion-header>
                         <p-accordion-content>
-                          <div class="table-scroll-wrapper"><p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table w-full" [scrollable]="true" [tableStyle]="{'min-width': '800px'}">
+                          <div class="w-full overflow-x-auto" style="max-width: 100%;"><p-table [value]="sem.subjects" styleClass="p-datatable-sm text-center-table w-full" [scrollable]="true" [tableStyle]="{'min-width': '800px'}">
                             <ng-template pTemplate="header">
                                 <tr>
                                   <th class="text-center font-bold text-900" style="width: 12%" [ngStyle]="{'background-color': getSemesterColor(sem.semester) + '1A', 'border-top-left-radius': '6px', 'border-bottom-left-radius': '6px'}">Código</th>
@@ -429,19 +447,22 @@
                 @for (semData of calendarDataBySemester(); track semData.semester) {
                   <p-accordion-panel [value]="semData.semesterName">
                     <p-accordion-header>
-                      <div class="flex align-items-center gap-3 w-full pr-3">
-                        <div class="flex align-items-center justify-content-center" 
-                             [ngStyle]="{'background-color': getSemesterColor(semData.semester)}"
-                             style="padding: 0.35rem 0.8rem; border-radius: 4px;">
-                          <span class="font-bold text-sm text-white m-0">{{ semData.semesterName }}</span>
-                        </div>
-                        <span class="text-700 text-sm font-medium ml-2">
-                          <i class="pi pi-calendar mr-1"></i> {{ semData.events.length }} eventos programados
-                        </span>
-                      </div>
+                      <div class="flex flex-column md:flex-row align-items-start md:align-items-center w-full pr-5 gap-2 md:gap-3">
+  <div class="flex align-items-center gap-3">
+    <div class="flex align-items-center justify-content-center flex-shrink-0" 
+         [ngStyle]="{'background-color': getSemesterColor(semData.semester)}"
+         style="padding: 0.35rem 0.8rem; border-radius: 4px;">
+      <span class="font-bold text-sm text-white m-0 white-space-nowrap">{{ semData.semesterName }}</span>
+    </div>
+  </div>
+
+  <div class="text-700 text-sm font-medium flex flex-nowrap align-items-center gap-2 overflow-x-auto hide-scrollbar w-full md:w-auto" style="white-space: nowrap;">
+    <span class="white-space-nowrap"><i class="pi pi-calendar mr-1"></i> {{ semData.events.length }} eventos programados</span>
+  </div>
+</div>
                     </p-accordion-header>
                     <p-accordion-content>
-                      <div class="table-scroll-wrapper"><div class="calendar-container">
+                      <div class="w-full overflow-x-auto" style="max-width: 100%;"><div class="calendar-container">
                         <!-- Horas Eje Y -->
                         <div class="time-axis">
                           <div class="time-header" style="border: none; background: transparent;"></div>

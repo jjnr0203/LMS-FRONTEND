@@ -239,6 +239,10 @@
 ::ng-deep .nested-accordion .p-accordioncontent-content {
   padding: 0 !important;
   margin: 0 !important;
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  max-width: 100%;
   border: none !important;
 }
 
@@ -248,6 +252,8 @@
 ::ng-deep .nested-accordion table {
   width: 100% !important;
   margin: 0 !important;
+  overflow-x: auto !important;
+  max-width: 100%;
 }
 
 ::ng-deep .nested-accordion.p-accordion {
@@ -473,3 +479,39 @@ details.teacher-details summary {
   }
 }
 
+
+
+  /* Fix p-tabs causing flexbox blowout on mobile */
+::ng-deep p-tabs,
+::ng-deep .p-tabs,
+::ng-deep p-tabpanels,
+::ng-deep .p-tabpanels {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+::ng-deep .p-tabpanels {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
+
+
+/* Hide scrollbar for stats row but allow scrolling */
+::ng-deep .subtitle-malla {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+::ng-deep .subtitle-malla::-webkit-scrollbar {
+  display: none;
+}
+
+
+::ng-deep .hide-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+::ng-deep .hide-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
