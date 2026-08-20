@@ -26,4 +26,10 @@ export class AdminService {
     }
     return this.http.post<{ message: string; user: User }>(`${this.apiUrl}/users`, data);
   }
+
+  downloadBackup(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/backups/download`, {
+      responseType: 'blob'
+    });
+  }
 }

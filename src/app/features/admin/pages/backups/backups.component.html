@@ -1,0 +1,45 @@
+<p-toast />
+
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Respaldos del Sistema</h1>
+      <p class="description">Genera y descarga un respaldo completo de la base de datos en formato SQL.</p>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="data-card">
+      <div class="backup-info">
+        <div class="backup-icon">
+          <i class="pi pi-database"></i>
+        </div>
+        <div class="backup-text">
+          <h3>Respaldo de Base de Datos</h3>
+          <p>
+            Al generar un respaldo se creará un archivo <strong>.sql</strong> con toda la información
+            actual del sistema: usuarios, docentes, estudiantes, matrículas, materias y configuraciones.
+            Este proceso puede tardar unos segundos dependiendo del volumen de datos.
+          </p>
+          <ul class="backup-features">
+            <li><i class="pi pi-check-circle text-green-600 mr-2"></i>Incluye estructura y datos completos</li>
+            <li><i class="pi pi-check-circle text-green-600 mr-2"></i>Compatible con PostgreSQL para restauración</li>
+            <li><i class="pi pi-check-circle text-green-600 mr-2"></i>Archivo con fecha y hora del momento del respaldo</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="my-4" style="border-color: #e2e8f0;" />
+
+      <div class="flex justify-content-center">
+        <p-button
+          label="Generar y Descargar Respaldo"
+          icon="pi pi-download"
+          [loading]="isDownloading()"
+          (onClick)="downloadBackup()"
+          size="large"
+        />
+      </div>
+    </div>
+  </div>
+</div>

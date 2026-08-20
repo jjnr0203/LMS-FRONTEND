@@ -93,6 +93,18 @@ export class SidebarComponent {
       roles: ['admin'],
     },
     {
+      label: 'Auditoría',
+      icon: 'pi pi-history',
+      route: '/admin/auditoria',
+      roles: ['admin'],
+    },
+    {
+      label: 'Respaldos',
+      icon: 'pi pi-save',
+      route: '/admin/respaldos',
+      roles: ['admin'],
+    },
+    {
       label: 'Estudiantes',
       icon: 'pi pi-users',
       route: '/treasury/estudiantes-list',

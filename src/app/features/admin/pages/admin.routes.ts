@@ -41,6 +41,16 @@ export default [
             (m) => m.InstitutionSettingsComponent,
           ),
       },
+      {
+        path: 'auditoria',
+        loadComponent: () =>
+          import('./audit/audit.component').then((m) => m.AuditComponent),
+      },
+      {
+        path: 'respaldos',
+        loadComponent: () =>
+          import('./backups/backups.component').then((m) => m.BackupsComponent),
+      },
     ],
   },
 ] as Routes;

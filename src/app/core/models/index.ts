@@ -214,3 +214,18 @@ export interface Certificate {
   generatedAt: string;
   createdAt: string;
 }
+
+export interface AuditLog {
+  id: string;
+  userId: string;
+  userEmail?: string;
+  userName?: string;
+  action: string;
+  entityName: string;
+  entityId: string;
+  oldValues: any;
+  newValues: any;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt: string;
+}
