@@ -22,7 +22,7 @@ export class SecretaryDashboardComponent implements OnInit {
   user = this.authService.user;
   totalInscriptions = signal(0);
   pendingInscriptions = signal(0);
-  totalCertificates = signal(0);
+  totalEnrollments = signal(0);
   loading = signal(false);
 
   modules = [
@@ -41,7 +41,7 @@ export class SecretaryDashboardComponent implements OnInit {
       next: (res) => {
         this.totalInscriptions.set(res.totalInscriptions);
         this.pendingInscriptions.set(res.pendingInscriptions);
-        this.totalCertificates.set(res.totalCertificates);
+        this.totalEnrollments.set(res.totalEnrollments ?? 0);
         this.loading.set(false);
       },
       error: () => {

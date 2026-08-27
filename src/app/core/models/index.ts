@@ -18,6 +18,8 @@ export interface User {
   createdAt: string;
   updatedAt?: string;
   requiresPasswordChange?: boolean;
+  tuitionStatus?: string | null;
+  paidInstallments?: number | null;
 }
 
 export interface Tuition {
@@ -111,7 +113,14 @@ export interface AuthState {
   isLoggedIn: boolean;
 }
 
-export type AppRole = 'admin' | 'coordinator' | 'treasury' | 'teacher' | 'student' | 'secretary' | 'human_resources';
+export type AppRole =
+  | 'admin'
+  | 'coordinator'
+  | 'treasury'
+  | 'teacher'
+  | 'student'
+  | 'secretary'
+  | 'human_resources';
 
 export interface AcademicTerm {
   id: string;

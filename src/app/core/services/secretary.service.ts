@@ -10,7 +10,12 @@ export class SecretaryService {
 
   constructor(private http: HttpClient) {}
 
-  getDashboard(): Observable<{ totalInscriptions: number; pendingInscriptions: number; totalCertificates: number }> {
+  getDashboard(): Observable<{
+    totalInscriptions: number;
+    pendingInscriptions: number;
+    totalEnrollments: number;
+    totalCertificates: number;
+  }> {
     return this.http.get<any>(`${this.apiUrl}/dashboard`);
   }
 
@@ -31,6 +36,10 @@ export class SecretaryService {
     let url = `${this.apiUrl}/students?page=${params.page}&limit=${params.limit}`;
     if (params.search) url += `&search=${encodeURIComponent(params.search)}`;
     return this.http.get<any>(url);
+  }
+
+  enrollStudent(studentId: string): Observable<{ message: string; tuition: any }> {
+    return this.http.post<any>(`${this.apiUrl}/enroll-student`, { studentId });
   }
 
   createEnrollment(data: {

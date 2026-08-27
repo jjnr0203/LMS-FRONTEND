@@ -1,10 +1,23 @@
-import { Component, inject, OnInit, OnDestroy, signal, input, ChangeDetectorRef, ViewChild, ElementRef, computed } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+  signal,
+  input,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
+  computed,
+} from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
 import { HumanResourcesService } from '../../../core/services/human-resources.service';
+import { TreasuryService } from '../../../core/services/treasury.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -52,7 +65,7 @@ import { MenuItem } from 'primeng/api';
     TooltipModule,
     MenuModule,
     DatePipe,
-    CommonModule
+    CommonModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './users-list.component.html',
@@ -61,6 +74,8 @@ import { MenuItem } from 'primeng/api';
 export class UsersListComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private hrService = inject(HumanResourcesService);
+  private treasuryService = inject(TreasuryService);
+  private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
@@ -73,34 +88,37 @@ export class UsersListComponent implements OnInit, OnDestroy {
   totalRecords = signal(0);
   loading = signal(false);
   faculties = signal<any[]>([]);
-  
+
   displayProfileModal = signal(false);
   selectedUser: any = null;
   teacherStats = signal<{ totalHours: number; careers: any[]; subjects: any[] } | null>(null);
-  
+
   groupedTeacherSubjects = computed(() => {
     const stats = this.teacherStats();
     if (!stats || !stats.subjects) return [];
 
-    const grouped = stats.subjects.reduce((acc, curr) => {
-      const careerName = curr.career_name || 'Sin Carrera Asignada';
-      if (!acc[careerName]) {
-        acc[careerName] = [];
-      }
-      acc[careerName].push(curr);
-      return acc;
-    }, {} as Record<string, any[]>);
+    const grouped = stats.subjects.reduce(
+      (acc, curr) => {
+        const careerName = curr.career_name || 'Sin Carrera Asignada';
+        if (!acc[careerName]) {
+          acc[careerName] = [];
+        }
+        acc[careerName].push(curr);
+        return acc;
+      },
+      {} as Record<string, any[]>,
+    );
 
-    return Object.keys(grouped).map(key => ({
+    return Object.keys(grouped).map((key) => ({
       careerName: key,
-      subjects: grouped[key]
+      subjects: grouped[key],
     }));
   });
 
   showCareersModal = signal(false);
   showSubjectsModal = signal(false);
   activeTab: string = '0';
-  
+
   menuItems: MenuItem[] = [];
   selectedUserForMenu: any = null;
 
@@ -149,7 +167,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   contactForm = this.formBuilder.group({
     address: [''],
-    linkedIn: ['']
+    linkedIn: [''],
   });
   isEditingAddress = signal(false);
   isEditingLinkedIn = signal(false);
@@ -161,8 +179,8 @@ export class UsersListComponent implements OnInit, OnDestroy {
       icon: 'pi pi-pencil',
       command: () => {
         this.isEditingAddress.set(true);
-      }
-    }
+      },
+    },
   ];
 
   linkedInMenu = [
@@ -171,8 +189,8 @@ export class UsersListComponent implements OnInit, OnDestroy {
       icon: 'pi pi-pencil',
       command: () => {
         this.isEditingLinkedIn.set(true);
-      }
-    }
+      },
+    },
   ];
 
   ngOnInit() {
@@ -203,19 +221,15 @@ export class UsersListComponent implements OnInit, OnDestroy {
     this.roleFilter = this.route.snapshot.data['roleFilter'] || '';
     this.isStudentList = this.roleFilter === 'student';
 
-    this.route.queryParams.subscribe(params => {
-      if (params['role']) {
-        this.selectedRole = params['role'];
-      }
+    this.route.queryParams.subscribe(() => {
       this.loadUsers(1, 10);
     });
 
-    this.searchSubscription = this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(() => {
-      this.loadUsers(1, 10);
-    });
+    this.searchSubscription = this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
+        this.loadUsers(1, 10);
+      });
   }
 
   ngOnDestroy() {
@@ -226,10 +240,11 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   loadUsers(page: number, limit: number) {
     this.loading.set(true);
-    const roleToFilter = this.isStudentList ? 'student' : (this.selectedRole || '');
-    const req = this.mode() === 'hr'
-      ? this.hrService.getStaff({ page, limit, role: roleToFilter, search: this.searchQuery })
-      : this.userService.getUsers(page, limit, roleToFilter, this.searchQuery);
+    const roleToFilter = this.isStudentList ? 'student' : this.selectedRole || '';
+    const req =
+      this.mode() === 'hr'
+        ? this.hrService.getStaff({ page, limit, role: roleToFilter, search: this.searchQuery })
+        : this.userService.getUsers(page, limit, roleToFilter, this.searchQuery);
 
     req.subscribe({
       next: (res: any) => {
@@ -238,7 +253,11 @@ export class UsersListComponent implements OnInit, OnDestroy {
         this.loading.set(false);
       },
       error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los usuarios' });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudieron cargar los usuarios',
+        });
         this.loading.set(false);
       },
     });
@@ -279,7 +298,11 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   onUserCreated() {
     this.createDialogVisible = false;
-    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado correctamente' });
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Usuario creado correctamente',
+    });
     this.loadUsers(1, 10);
   }
 
@@ -319,12 +342,20 @@ export class UsersListComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.selectedUser.cvUrl = res.cvUrl;
           this.isUploadingCv.set(false);
-          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Hoja de vida subida' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Hoja de vida subida',
+          });
         },
         error: () => {
           this.isUploadingCv.set(false);
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo subir la hoja de vida' });
-        }
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo subir la hoja de vida',
+          });
+        },
       });
     }
   }
@@ -343,12 +374,20 @@ export class UsersListComponent implements OnInit, OnDestroy {
           if (!this.selectedUser.certificates) this.selectedUser.certificates = [];
           this.selectedUser.certificates.push(res.certificateUrl);
           this.isUploadingCert.set(false);
-          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Certificado subido' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Certificado subido',
+          });
         },
         error: () => {
           this.isUploadingCert.set(false);
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo subir el certificado' });
-        }
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo subir el certificado',
+          });
+        },
       });
     }
   }
@@ -361,13 +400,13 @@ export class UsersListComponent implements OnInit, OnDestroy {
       {
         label: 'Ver Documento',
         icon: 'pi pi-eye',
-        command: () => window.open(cvUrl, '_blank')
+        command: () => window.open(cvUrl, '_blank'),
       },
       {
         label: 'Eliminar',
         icon: 'pi pi-trash',
-        command: () => this.onDeleteCv()
-      }
+        command: () => this.onDeleteCv(),
+      },
     ];
     this.cvMenuCache.set(cvUrl, menu);
     return menu;
@@ -381,13 +420,13 @@ export class UsersListComponent implements OnInit, OnDestroy {
       {
         label: 'Ver Documento',
         icon: 'pi pi-eye',
-        command: () => window.open(certUrl, '_blank')
+        command: () => window.open(certUrl, '_blank'),
       },
       {
         label: 'Eliminar',
         icon: 'pi pi-trash',
-        command: () => this.onDeleteCert(certUrl)
-      }
+        command: () => this.onDeleteCert(certUrl),
+      },
     ];
     this.certMenuCache.set(certUrl, menu);
     return menu;
@@ -406,13 +445,21 @@ export class UsersListComponent implements OnInit, OnDestroy {
         this.hrService.deleteUserCv(this.selectedUser.id).subscribe({
           next: () => {
             this.selectedUser.cvUrl = null;
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Hoja de vida eliminada' });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Hoja de vida eliminada',
+            });
           },
           error: () => {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' });
-          }
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo eliminar',
+            });
+          },
         });
-      }
+      },
     });
   }
 
@@ -428,29 +475,46 @@ export class UsersListComponent implements OnInit, OnDestroy {
       accept: () => {
         this.hrService.deleteUserCertificate(this.selectedUser.id, certUrl).subscribe({
           next: () => {
-            this.selectedUser.certificates = this.selectedUser.certificates.filter((c: string) => c !== certUrl);
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Certificado eliminado' });
+            this.selectedUser.certificates = this.selectedUser.certificates.filter(
+              (c: string) => c !== certUrl,
+            );
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Certificado eliminado',
+            });
           },
           error: () => {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' });
-          }
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo eliminar',
+            });
+          },
         });
-      }
+      },
     });
   }
-
 
   translateRole(roleName?: string): string {
     if (!roleName) return '';
     switch (roleName.toLowerCase()) {
-      case 'admin': return 'Administrador';
-      case 'coordinator': return 'Coordinador';
-      case 'teacher': return 'Docente';
-      case 'student': return 'Estudiante';
-      case 'treasury': return 'Tesorería';
-      case 'secretary': return 'Secretaría';
-      case 'human_resources': return 'Recursos Humanos';
-      default: return roleName;
+      case 'admin':
+        return 'Administrador';
+      case 'coordinator':
+        return 'Coordinador';
+      case 'teacher':
+        return 'Docente';
+      case 'student':
+        return 'Estudiante';
+      case 'treasury':
+        return 'Tesorería';
+      case 'secretary':
+        return 'Secretaría';
+      case 'human_resources':
+        return 'Recursos Humanos';
+      default:
+        return roleName;
     }
   }
 
@@ -488,21 +552,31 @@ export class UsersListComponent implements OnInit, OnDestroy {
     if (!this.selectedUser) return;
     this.savingContact.set(true);
     const updates = this.contactForm.value;
-    
-    this.userService.updateUser(this.selectedUser.id, updates as Partial<User>, this.selectedUser.roleName).subscribe({
-      next: () => {
-        this.selectedUser.address = updates.address;
-        this.selectedUser.linkedIn = updates.linkedIn;
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Datos de contacto actualizados' });
-        this.savingContact.set(false);
-        this.isEditingAddress.set(false);
-        this.isEditingLinkedIn.set(false);
-      },
-      error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar los datos' });
-        this.savingContact.set(false);
-      }
-    });
+
+    this.userService
+      .updateUser(this.selectedUser.id, updates as Partial<User>, this.selectedUser.roleName)
+      .subscribe({
+        next: () => {
+          this.selectedUser.address = updates.address;
+          this.selectedUser.linkedIn = updates.linkedIn;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Datos de contacto actualizados',
+          });
+          this.savingContact.set(false);
+          this.isEditingAddress.set(false);
+          this.isEditingLinkedIn.set(false);
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo actualizar los datos',
+          });
+          this.savingContact.set(false);
+        },
+      });
   }
 
   onSaveEdit() {
@@ -513,27 +587,43 @@ export class UsersListComponent implements OnInit, OnDestroy {
       delete payload.birthDate;
     }
     delete payload.id;
-    
-    this.userService.updateUser(this.selectedUserId, payload, this.selectedUserRoleName || this.selectedRole || '').subscribe({
-      next: (res) => {
-        this.users.update((users) =>
-          users.map((u) => {
-            if (u.id === this.selectedUserId) {
-              const cleanedResUser = Object.fromEntries(Object.entries(res.user).filter(([_, v]) => v !== undefined));
-              return { ...u, ...cleanedResUser };
-            }
-            return u;
-          })
-        );
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario actualizado' });
-        this.editDialogVisible = false;
-        this.loading.set(false);
-      },
-      error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar' });
-        this.loading.set(false);
-      },
-    });
+
+    this.userService
+      .updateUser(
+        this.selectedUserId,
+        payload,
+        this.selectedUserRoleName || this.selectedRole || '',
+      )
+      .subscribe({
+        next: (res) => {
+          this.users.update((users) =>
+            users.map((u) => {
+              if (u.id === this.selectedUserId) {
+                const cleanedResUser = Object.fromEntries(
+                  Object.entries(res.user).filter(([_, v]) => v !== undefined),
+                );
+                return { ...u, ...cleanedResUser };
+              }
+              return u;
+            }),
+          );
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Usuario actualizado',
+          });
+          this.editDialogVisible = false;
+          this.loading.set(false);
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo actualizar',
+          });
+          this.loading.set(false);
+        },
+      });
   }
 
   confirmDelete(user: User, event?: Event) {
@@ -552,11 +642,19 @@ export class UsersListComponent implements OnInit, OnDestroy {
         this.userService.deleteUser(user.id, user.roleName || this.selectedRole || '').subscribe({
           next: () => {
             this.users.update((users) => users.filter((u) => u.id !== user.id));
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario eliminado' });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Usuario eliminado',
+            });
             this.loading.set(false);
           },
           error: () => {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' });
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo eliminar',
+            });
             this.loading.set(false);
           },
         });
@@ -571,15 +669,15 @@ export class UsersListComponent implements OnInit, OnDestroy {
     this.isEditingLinkedIn.set(false);
     this.contactForm.patchValue({
       address: user.address || '',
-      linkedIn: user.linkedIn || ''
+      linkedIn: user.linkedIn || '',
     });
     this.profileModalVisible = true;
-    
+
     if (user.roleName === 'teacher' || user.roleName === 'Docente') {
       this.teacherStats.set(null);
       this.teacherService.getTeacherStats(user.id).subscribe({
         next: (stats) => this.teacherStats.set(stats),
-        error: (err) => console.error('Error fetching teacher stats', err)
+        error: (err) => console.error('Error fetching teacher stats', err),
       });
     }
 
@@ -590,7 +688,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
           this.cdr.detectChanges(); // Force UI update so image loads immediately
         }
-      }
+      },
     });
   }
 
@@ -614,32 +712,64 @@ export class UsersListComponent implements OnInit, OnDestroy {
     this.selectedUserForMenu = user;
     this.menuItems = [
       {
-        label: 'Ver Perfil',
-        icon: 'pi pi-eye',
-        styleClass: 'action-view',
-        command: () => this.openProfileModal(this.selectedUserForMenu)
-      },
-      {
         label: 'Editar',
         icon: 'pi pi-pencil',
         styleClass: 'action-edit',
-        command: () => this.openEditDialog(this.selectedUserForMenu)
-      },
-      {
-        separator: true
+        command: () => this.openEditDialog(this.selectedUserForMenu),
       },
       {
         label: 'Eliminar',
         icon: 'pi pi-trash',
         styleClass: 'action-delete',
-        command: () => this.confirmDelete(this.selectedUserForMenu)
-      }
+        command: () => this.confirmDelete(this.selectedUserForMenu),
+      },
+      {
+        label: 'Ver Perfil',
+        icon: 'pi pi-eye',
+        styleClass: 'action-view',
+        command: () => this.openProfileModal(this.selectedUserForMenu),
+      },
     ];
     menu.toggle(event);
   }
+
+  canMatricular(user: any): boolean {
+    return (
+      this.authService.role() === 'treasury' && user.roleName === 'student' && !user.tuitionStatus
+    );
+  }
+
+  confirmMatricular(user: any) {
+    this.confirmationService.confirm({
+      message: `¿Matricular a ${user.firstName} ${user.lastName}? Se creará su matrícula.`,
+      header: 'Confirmar Matrícula',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, Matricular',
+      rejectLabel: 'Cancelar',
+      accept: () => this.matricularEstudiante(user),
+    });
+  }
+
+  matricularEstudiante(user: any) {
+    this.loading.set(true);
+    this.treasuryService.enrollStudent(user.id).subscribe({
+      next: (res) => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: res.message ?? 'Estudiante matriculado correctamente',
+        });
+        this.loadUsers(1, 10);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error?.message ?? 'No se pudo matricular al estudiante',
+        });
+      },
+    });
+  }
 }
-
-
-
-
-

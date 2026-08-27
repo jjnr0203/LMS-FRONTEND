@@ -21,21 +21,8 @@ export default [
       {
         path: 'estudiantes-list',
         loadComponent: () =>
-          import('../../users/users-list/users-list.component').then((m) => m.UsersListComponent),
-        data: { roleFilter: 'student' },
-      },
-      {
-        path: 'abonos',
-        loadComponent: () =>
-          import('../register-payment/register-payment.component').then(
-            (m) => m.RegisterPaymentComponent,
-          ),
-      },
-      {
-        path: 'deshabilitar',
-        loadComponent: () =>
-          import('../disable-account/disable-account.component').then(
-            (m) => m.DisableAccountComponent,
+          import('../students-list/students-list.component').then(
+            (m) => m.TreasuryStudentsListComponent,
           ),
       },
     ],

@@ -5,7 +5,13 @@
   <div class="page-header">
     <div class="header-content">
       <h1 class="title">{{ isStudentList ? 'Lista de Estudiantes' : 'Lista de Usuarios' }}</h1>
-      <p class="description">{{ isStudentList ? 'Administra a todos los estudiantes registrados en la institución.' : 'Gestiona los accesos y roles de los usuarios de la plataforma.' }}</p>
+      <p class="description">
+        {{
+          isStudentList
+            ? 'Administra a todos los estudiantes registrados en la institución.'
+            : 'Gestiona los accesos y roles de los usuarios de la plataforma.'
+        }}
+      </p>
     </div>
   </div>
   <div class="content-wrapper">
@@ -13,14 +19,29 @@
       <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div class="flex align-items-center gap-3">
           @if (!isStudentList) {
-            <p-button label="Crear Usuario" icon="pi pi-plus" (click)="openCreateDialog()" severity="success" size="small"></p-button>
+            <p-button
+              label="Crear Usuario"
+              icon="pi pi-plus"
+              (click)="openCreateDialog()"
+              severity="success"
+              size="small"
+            ></p-button>
           }
         </div>
 
-        <div class="flex flex-column md:flex-row align-items-stretch md:align-items-center gap-2 w-full md:w-auto">
+        <div
+          class="flex flex-column md:flex-row align-items-stretch md:align-items-center gap-2 w-full md:w-auto"
+        >
           <p-iconField iconPosition="left" styleClass="w-full md:w-20rem">
             <p-inputIcon styleClass="pi pi-search" />
-            <input pInputText type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Buscar por cédula o nombre..." class="w-full" />
+            <input
+              pInputText
+              type="text"
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="onSearchChange($event)"
+              placeholder="Buscar por cédula o nombre..."
+              class="w-full"
+            />
           </p-iconField>
           @if (!isStudentList) {
             <p-select
@@ -37,53 +58,65 @@
         </div>
       </div>
 
-      <div class="table-scroll-wrapper"><p-table
-        [value]="users()"
-        [paginator]="true"
-        [rows]="10"
-        [totalRecords]="totalRecords()"
-        [lazy]="true"
-        (onLazyLoad)="onPageChange($event)"
-        [loading]="loading()"
-        [tableStyle]="{ 'min-width': '50rem' }"
-        styleClass="p-datatable-sm interactive-table"
-      >
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Cédula</th>
-            <th>Nombre Completo</th>
-            <th>Correo</th>
-            <th>Rol</th>
-            <th class="text-center">Acciones</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-user>
-          <tr (click)="openProfileModal(user)">
-            <td class="font-medium text-900">{{ user.id }}</td>
-            <td>{{ user.firstName }} {{ user.lastName }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-              <p-tag [value]="translateRole(user.roleName)" [severity]="getRoleSeverity(user.roleName)" styleClass="soft-tag"></p-tag>
-            </td>
-            <td class="text-center">
-              <p-button
-                icon="pi pi-ellipsis-v"
-                [rounded]="true"
-                [text]="true"
-                styleClass="action-menu-btn"
-                size="small"
-                (onClick)="$event.stopPropagation(); showMenu($event, menu, user)"
-              />
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="6" class="text-center p-4 text-500">No se encontraron registros.</td>
-          </tr>
-        </ng-template>
-      </p-table></div>
-      <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body" [style]="{ width: '125px' }" styleClass="custom-action-menu"></p-menu>
+      <div class="table-scroll-wrapper">
+        <p-table
+          [value]="users()"
+          [paginator]="true"
+          [rows]="10"
+          [totalRecords]="totalRecords()"
+          [lazy]="true"
+          (onLazyLoad)="onPageChange($event)"
+          [loading]="loading()"
+          [tableStyle]="{ 'min-width': '50rem' }"
+          styleClass="p-datatable-sm interactive-table"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Cédula</th>
+              <th>Nombre Completo</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-user>
+            <tr>
+              <td class="font-medium text-900">{{ user.id }}</td>
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <p-tag
+                  [value]="translateRole(user.roleName)"
+                  [severity]="getRoleSeverity(user.roleName)"
+                />
+              </td>
+              <td class="text-center">
+                <p-button
+                  icon="pi pi-ellipsis-v"
+                  [rounded]="true"
+                  [text]="true"
+                  styleClass="action-menu-btn"
+                  size="small"
+                  (onClick)="$event.stopPropagation(); showMenu($event, menu, user)"
+                />
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="5" class="text-center p-4 text-500">No se encontraron registros.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+      <p-menu
+        #menu
+        [model]="menuItems"
+        [popup]="true"
+        appendTo="body"
+        [style]="{ width: '125px' }"
+        styleClass="custom-action-menu"
+      ></p-menu>
     </div>
   </div>
 </div>
@@ -177,26 +210,41 @@
 >
   @if (selectedUser) {
     <div class="relative px-2">
-      
       <div class="flex align-items-center gap-4 mb-4">
         @if (selectedUser.avatarUrl) {
-          <img [src]="selectedUser.avatarUrl" alt="Avatar" class="w-6rem h-6rem border-circle shadow-2 object-cover" />
+          <img
+            [src]="selectedUser.avatarUrl"
+            alt="Avatar"
+            class="w-6rem h-6rem border-circle shadow-2 object-cover"
+          />
         } @else {
-          <div class="w-6rem h-6rem border-circle shadow-2 flex justify-content-center align-items-center bg-gray-50 border-1 border-gray-200">
+          <div
+            class="w-6rem h-6rem border-circle shadow-2 flex justify-content-center align-items-center bg-gray-50 border-1 border-gray-200"
+          >
             <i class="pi pi-user text-4xl" style="color: #064e3b"></i>
           </div>
         }
         <div>
-          <h2 class="m-0 text-xl font-bold text-900">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h2>
-          <div class="flex flex-column md:flex-row align-items-stretch md:align-items-center gap-2 w-full md:w-auto mt-2">
+          <h2 class="m-0 text-xl font-bold text-900">
+            {{ selectedUser.firstName }} {{ selectedUser.lastName }}
+          </h2>
+          <div
+            class="flex flex-column md:flex-row align-items-stretch md:align-items-center gap-2 w-full md:w-auto mt-2"
+          >
             <span class="custom-badge">{{ translateRole(selectedUser.roleName) }}</span>
             <span class="custom-badge">{{ selectedUser.isActive ? 'Activo' : 'Inactivo' }}</span>
           </div>
         </div>
       </div>
     </div>
-    
-    <p-tabs [(value)]="activeTab" [ngClass]="{'hide-tab-arrows': selectedUser.roleName !== 'teacher' && selectedUser.roleName !== 'Docente'}">
+
+    <p-tabs
+      [(value)]="activeTab"
+      [ngClass]="{
+        'hide-tab-arrows':
+          selectedUser.roleName !== 'teacher' && selectedUser.roleName !== 'Docente',
+      }"
+    >
       <p-tablist>
         <p-tab value="0">Resumen</p-tab>
         @if (selectedUser.roleName !== 'student' && selectedUser.roleName !== 'Estudiante') {
@@ -207,20 +255,20 @@
           <p-tab value="3">Información Académica</p-tab>
         }
       </p-tablist>
-      
+
       <p-tabpanels>
         <p-tabpanel value="0">
           <div class="flex flex-column gap-3 py-3">
             <div class="grid">
               <div class="col-5 font-semibold text-700">Cédula:</div>
               <div class="col-7">{{ selectedUser.id }}</div>
-              
+
               <div class="col-5 font-semibold text-700">Correo Electrónico:</div>
               <div class="col-7">{{ selectedUser.email }}</div>
-              
+
               <div class="col-5 font-semibold text-700">Ingreso a la Institución:</div>
-              <div class="col-7">{{ selectedUser.createdAt | date:'longDate' }}</div>
-              
+              <div class="col-7">{{ selectedUser.createdAt | date: 'longDate' }}</div>
+
               <div class="col-5 font-semibold text-700">Fin de Contrato:</div>
               <div class="col-7 text-500">No registrado</div>
             </div>
@@ -230,59 +278,123 @@
         @if (selectedUser.roleName !== 'student' && selectedUser.roleName !== 'Estudiante') {
           <!-- Contacto y Detalles -->
           <p-tabpanel value="1">
-              <div class="flex flex-column gap-3 py-3">
-                <div class="grid relative">
-                  <div class="col-4 font-semibold text-700 flex align-items-center">Teléfono:</div>
+            <div class="flex flex-column gap-3 py-3">
+              <div class="grid relative">
+                <div class="col-4 font-semibold text-700 flex align-items-center">Teléfono:</div>
                 <div class="col-8">{{ selectedUser.phone || 'No registrado' }}</div>
-                
+
                 <div class="col-4 font-semibold text-700">Fecha de Nacimiento:</div>
                 <div class="col-8">
                   @if (selectedUser.birthDate) {
-                    {{ selectedUser.birthDate | date:'longDate' }} ({{ calculateAge(selectedUser.birthDate) }} años)
+                    {{ selectedUser.birthDate | date: 'longDate' }} ({{
+                      calculateAge(selectedUser.birthDate)
+                    }}
+                    años)
                   } @else {
                     No registrado
                   }
                 </div>
-                
+
                 <div class="col-4 font-semibold text-700 flex align-items-center">Dirección:</div>
                 <div class="col-8">
                   @if (mode() === 'hr' && isEditingAddress()) {
                     <div class="flex gap-2">
-                      <input type="text" pInputText [formControl]="contactForm.controls.address" class="w-full" placeholder="Ej. Calle Principal 123" />
-                      <button pButton icon="pi pi-check" class="p-button-rounded p-button-success p-button-text p-button-sm p-0 m-0" (click)="onSaveContact()"></button>
-                      <button pButton icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text p-button-sm p-0 m-0" (click)="isEditingAddress.set(false)"></button>
+                      <input
+                        type="text"
+                        pInputText
+                        [formControl]="contactForm.controls.address"
+                        class="w-full"
+                        placeholder="Ej. Calle Principal 123"
+                      />
+                      <button
+                        pButton
+                        icon="pi pi-check"
+                        class="p-button-rounded p-button-success p-button-text p-button-sm p-0 m-0"
+                        (click)="onSaveContact()"
+                      ></button>
+                      <button
+                        pButton
+                        icon="pi pi-times"
+                        class="p-button-rounded p-button-danger p-button-text p-button-sm p-0 m-0"
+                        (click)="isEditingAddress.set(false)"
+                      ></button>
                     </div>
                   } @else {
                     <div class="flex align-items-center justify-content-between">
                       <span>{{ $any(selectedUser)?.address || 'No registrado' }}</span>
                       @if (mode() === 'hr') {
-                        <p-menu #menuAddress [popup]="true" [model]="addressMenu" appendTo="body"></p-menu>
-                        <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="menuAddress.toggle($event)"></p-button>
+                        <p-menu
+                          #menuAddress
+                          [popup]="true"
+                          [model]="addressMenu"
+                          appendTo="body"
+                        ></p-menu>
+                        <p-button
+                          icon="pi pi-ellipsis-v"
+                          [rounded]="true"
+                          [text]="true"
+                          styleClass="action-menu-btn"
+                          size="small"
+                          (onClick)="menuAddress.toggle($event)"
+                        ></p-button>
                       }
                     </div>
                   }
                 </div>
-                
+
                 <div class="col-4 font-semibold text-700 flex align-items-center">LinkedIn:</div>
                 <div class="col-8">
                   @if (mode() === 'hr' && isEditingLinkedIn()) {
                     <div class="flex gap-2">
-                      <input type="text" pInputText [formControl]="contactForm.controls.linkedIn" class="w-full" placeholder="Ej. https://linkedin.com/in/usuario" />
-                      <button pButton icon="pi pi-check" class="p-button-rounded p-button-success p-button-text p-button-sm p-0 m-0" (click)="onSaveContact()"></button>
-                      <button pButton icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text p-button-sm p-0 m-0" (click)="isEditingLinkedIn.set(false)"></button>
+                      <input
+                        type="text"
+                        pInputText
+                        [formControl]="contactForm.controls.linkedIn"
+                        class="w-full"
+                        placeholder="Ej. https://linkedin.com/in/usuario"
+                      />
+                      <button
+                        pButton
+                        icon="pi pi-check"
+                        class="p-button-rounded p-button-success p-button-text p-button-sm p-0 m-0"
+                        (click)="onSaveContact()"
+                      ></button>
+                      <button
+                        pButton
+                        icon="pi pi-times"
+                        class="p-button-rounded p-button-danger p-button-text p-button-sm p-0 m-0"
+                        (click)="isEditingLinkedIn.set(false)"
+                      ></button>
                     </div>
                   } @else {
                     <div class="flex align-items-center justify-content-between w-full">
                       <div>
                         @if ($any(selectedUser)?.linkedIn) {
-                          <a [href]="$any(selectedUser).linkedIn" target="_blank" class="text-green-600 font-medium no-underline hover:underline">Ver Perfil <i class="pi pi-external-link text-xs"></i></a>
+                          <a
+                            [href]="$any(selectedUser).linkedIn"
+                            target="_blank"
+                            class="text-green-600 font-medium no-underline hover:underline"
+                            >Ver Perfil <i class="pi pi-external-link text-xs"></i
+                          ></a>
                         } @else {
                           <span class="text-500">No registrado</span>
                         }
                       </div>
                       @if (mode() === 'hr') {
-                        <p-menu #menuLinkedIn [popup]="true" [model]="linkedInMenu" appendTo="body"></p-menu>
-                        <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" styleClass="action-menu-btn" size="small" (onClick)="menuLinkedIn.toggle($event)"></p-button>
+                        <p-menu
+                          #menuLinkedIn
+                          [popup]="true"
+                          [model]="linkedInMenu"
+                          appendTo="body"
+                        ></p-menu>
+                        <p-button
+                          icon="pi pi-ellipsis-v"
+                          [rounded]="true"
+                          [text]="true"
+                          styleClass="action-menu-btn"
+                          size="small"
+                          (onClick)="menuLinkedIn.toggle($event)"
+                        ></p-button>
                       }
                     </div>
                   }
@@ -294,17 +406,39 @@
           <!-- Documentos -->
           <p-tabpanel value="2">
             <!-- Hidden inputs for HR -->
-            <input type="file" #cvInput accept="application/pdf" style="display: none;" (change)="onCvFileSelected($event)">
-            <input type="file" #certInput accept="application/pdf" style="display: none;" (change)="onCertFileSelected($event)">
-            
+            <input
+              type="file"
+              #cvInput
+              accept="application/pdf"
+              style="display: none"
+              (change)="onCvFileSelected($event)"
+            />
+            <input
+              type="file"
+              #certInput
+              accept="application/pdf"
+              style="display: none"
+              (change)="onCertFileSelected($event)"
+            />
+
             <div class="py-4">
               <h3 class="m-0 mb-3 text-900">Hoja de Vida</h3>
               @if ($any(selectedUser)?.cvUrl) {
-                <div class="certificate-card border-round flex align-items-center mb-4" style="padding: 1rem 1.25rem; gap: 1rem;">
-                  <div class="flex-grow-1 flex align-items-center gap-3 cursor-pointer" style="min-width: 0;" (click)="viewCv($any(selectedUser).cvUrl)">
+                <div
+                  class="certificate-card border-round flex align-items-center mb-4"
+                  style="padding: 1rem 1.25rem; gap: 1rem"
+                >
+                  <div
+                    class="flex-grow-1 flex align-items-center gap-3 cursor-pointer"
+                    style="min-width: 0"
+                    (click)="viewCv($any(selectedUser).cvUrl)"
+                  >
                     <i class="pi pi-file-pdf cert-icon text-2xl"></i>
-                    <div class="cert-details flex flex-column gap-1" style="min-width: 0; flex: 1;">
-                      <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden text-900 font-semibold" [title]="getFileName($any(selectedUser).cvUrl, 0)">
+                    <div class="cert-details flex flex-column gap-1" style="min-width: 0; flex: 1">
+                      <span
+                        class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden text-900 font-semibold"
+                        [title]="getFileName($any(selectedUser).cvUrl, 0)"
+                      >
                         {{ getFileName($any(selectedUser).cvUrl, 0) }}
                       </span>
                       <span class="cert-date text-500 text-sm">Hoja de Vida (CV)</span>
@@ -312,22 +446,41 @@
                   </div>
                   @if (mode() === 'hr') {
                     <div class="cert-actions flex-shrink-0">
-                      <p-menu #menuCv [popup]="true" [model]="getCvMenu($any(selectedUser).cvUrl)" appendTo="body"></p-menu>
-                      <button type="button" class="menu-dots-btn" (click)="menuCv.toggle($event); $event.stopPropagation()"><i class="pi pi-ellipsis-v"></i></button>
+                      <p-menu
+                        #menuCv
+                        [popup]="true"
+                        [model]="getCvMenu($any(selectedUser).cvUrl)"
+                        appendTo="body"
+                      ></p-menu>
+                      <button
+                        type="button"
+                        class="menu-dots-btn"
+                        (click)="menuCv.toggle($event); $event.stopPropagation()"
+                      >
+                        <i class="pi pi-ellipsis-v"></i>
+                      </button>
                     </div>
                   }
                 </div>
               } @else {
-                <div class="text-center py-4 mb-4 bg-gray-50 border-round border-1 border-300 transition-colors transition-duration-200" 
-                     [ngClass]="{'cursor-pointer hover:bg-gray-100 hover:border-green-400': mode() === 'hr'}"
-                     (click)="mode() === 'hr' && triggerCvUpload()">
+                <div
+                  class="text-center py-4 mb-4 bg-gray-50 border-round border-1 border-300 transition-colors transition-duration-200"
+                  [ngClass]="{
+                    'cursor-pointer hover:bg-gray-100 hover:border-green-400': mode() === 'hr',
+                  }"
+                  (click)="mode() === 'hr' && triggerCvUpload()"
+                >
                   @if (isUploadingCv()) {
                     <i class="pi pi-spin pi-spinner text-green-500 text-4xl mb-2"></i>
                     <p class="text-500 m-0">Subiendo hoja de vida...</p>
                   } @else {
                     <i class="pi pi-folder-open text-300 text-4xl mb-2"></i>
                     <p class="text-500 m-0">
-                      {{ mode() === 'hr' ? 'Haz clic para subir la hoja de vida (PDF)' : 'Este usuario aún no ha subido su hoja de vida.' }}
+                      {{
+                        mode() === 'hr'
+                          ? 'Haz clic para subir la hoja de vida (PDF)'
+                          : 'Este usuario aún no ha subido su hoja de vida.'
+                      }}
                     </p>
                   }
                 </div>
@@ -338,11 +491,24 @@
                 <div class="grid">
                   @for (cert of $any(selectedUser).certificates; track cert; let i = $index) {
                     <div class="col-12 md:col-6">
-                      <div class="certificate-card border-round flex align-items-center" style="padding: 1rem 1.25rem; gap: 1rem;">
-                        <div class="flex-grow-1 flex align-items-center gap-3 cursor-pointer" style="min-width: 0;" (click)="viewCv(cert)">
+                      <div
+                        class="certificate-card border-round flex align-items-center"
+                        style="padding: 1rem 1.25rem; gap: 1rem"
+                      >
+                        <div
+                          class="flex-grow-1 flex align-items-center gap-3 cursor-pointer"
+                          style="min-width: 0"
+                          (click)="viewCv(cert)"
+                        >
                           <i class="pi pi-file-pdf cert-icon text-2xl"></i>
-                          <div class="cert-details flex flex-column gap-1" style="min-width: 0; flex: 1;">
-                            <span class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden text-900 font-semibold" [title]="getFileName(cert, i)">
+                          <div
+                            class="cert-details flex flex-column gap-1"
+                            style="min-width: 0; flex: 1"
+                          >
+                            <span
+                              class="cert-name text-overflow-ellipsis white-space-nowrap overflow-hidden text-900 font-semibold"
+                              [title]="getFileName(cert, i)"
+                            >
                               {{ getFileName(cert, i) }}
                             </span>
                             <span class="cert-date text-500 text-sm">Certificado PDF</span>
@@ -350,8 +516,19 @@
                         </div>
                         @if (mode() === 'hr') {
                           <div class="cert-actions flex-shrink-0">
-                            <p-menu #menuCert [popup]="true" [model]="getCertMenu(cert)" appendTo="body"></p-menu>
-                            <button type="button" class="menu-dots-btn" (click)="menuCert.toggle($event); $event.stopPropagation()"><i class="pi pi-ellipsis-v"></i></button>
+                            <p-menu
+                              #menuCert
+                              [popup]="true"
+                              [model]="getCertMenu(cert)"
+                              appendTo="body"
+                            ></p-menu>
+                            <button
+                              type="button"
+                              class="menu-dots-btn"
+                              (click)="menuCert.toggle($event); $event.stopPropagation()"
+                            >
+                              <i class="pi pi-ellipsis-v"></i>
+                            </button>
                           </div>
                         }
                       </div>
@@ -360,9 +537,11 @@
                   @if (mode() === 'hr') {
                     <!-- Botón Extra para RRHH para añadir más certificados si ya hay algunos -->
                     <div class="col-12 md:col-6">
-                      <div class="flex align-items-center justify-content-center bg-gray-50 border-round border-1 border-300 border-dashed cursor-pointer hover:bg-gray-100 transition-colors transition-duration-200" 
-                           style="padding: 1rem 1.25rem; min-height: 72px;"
-                           (click)="triggerCertUpload()">
+                      <div
+                        class="flex align-items-center justify-content-center bg-gray-50 border-round border-1 border-300 border-dashed cursor-pointer hover:bg-gray-100 transition-colors transition-duration-200"
+                        style="padding: 1rem 1.25rem; min-height: 72px"
+                        (click)="triggerCertUpload()"
+                      >
                         @if (isUploadingCert()) {
                           <div class="flex flex-column align-items-center gap-1">
                             <i class="pi pi-spin pi-spinner text-green-500 text-xl"></i>
@@ -379,15 +558,23 @@
                   }
                 </div>
               } @else {
-                <div class="text-center py-4 bg-gray-50 border-round border-1 border-300 transition-colors transition-duration-200"
-                     [ngClass]="{'cursor-pointer hover:bg-gray-100 hover:border-green-400': mode() === 'hr'}"
-                     (click)="mode() === 'hr' && triggerCertUpload()">
+                <div
+                  class="text-center py-4 bg-gray-50 border-round border-1 border-300 transition-colors transition-duration-200"
+                  [ngClass]="{
+                    'cursor-pointer hover:bg-gray-100 hover:border-green-400': mode() === 'hr',
+                  }"
+                  (click)="mode() === 'hr' && triggerCertUpload()"
+                >
                   @if (isUploadingCert()) {
                     <i class="pi pi-spin pi-spinner text-green-500 text-4xl mb-2"></i>
                     <p class="text-500 m-0">Subiendo certificado...</p>
                   } @else {
                     <p class="text-500 m-0">
-                      {{ mode() === 'hr' ? 'Haz clic para subir certificados (PDF)' : 'No hay certificados adicionales registrados.' }}
+                      {{
+                        mode() === 'hr'
+                          ? 'Haz clic para subir certificados (PDF)'
+                          : 'No hay certificados adicionales registrados.'
+                      }}
                     </p>
                   }
                 </div>
@@ -400,48 +587,133 @@
           <p-tabpanel value="3">
             <div class="py-4">
               <h3 class="m-0 mb-3 text-900">Resumen Académico</h3>
-                 <div class="grid">
+              <div class="grid">
                 <!-- Horas Asignadas -->
                 <div class="col-12 md:col-4 mb-2">
-                  <div class="certificate-card border-round h-full flex flex-column align-items-center justify-content-center py-3 px-2 w-full">
-                    <div class="flex flex-column align-items-center justify-content-center w-full" style="gap: 0px;">
-                      <div class="flex align-items-center justify-content-center gap-2" style="margin-bottom: 6px; position: relative; z-index: 2;">
-                        <div class="flex align-items-center justify-content-center bg-green-50 border-round icon-bg" style="width: 2.5rem; height: 2.5rem; flex-shrink: 0; border-radius: 8px !important;">
+                  <div
+                    class="certificate-card border-round h-full flex flex-column align-items-center justify-content-center py-3 px-2 w-full"
+                  >
+                    <div
+                      class="flex flex-column align-items-center justify-content-center w-full"
+                      style="gap: 0px"
+                    >
+                      <div
+                        class="flex align-items-center justify-content-center gap-2"
+                        style="margin-bottom: 6px; position: relative; z-index: 2"
+                      >
+                        <div
+                          class="flex align-items-center justify-content-center bg-green-50 border-round icon-bg"
+                          style="
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            flex-shrink: 0;
+                            border-radius: 8px !important;
+                          "
+                        >
                           <i class="pi pi-clock cert-icon text-lg"></i>
                         </div>
-                        <span class="font-bold text-3xl text-900 number-value line-height-1 m-0">{{ teacherStats() ? (teacherStats()!.totalHours | number:'1.0-1') : '...' }}h</span>
+                        <span class="font-bold text-3xl text-900 number-value line-height-1 m-0"
+                          >{{
+                            teacherStats() ? (teacherStats()!.totalHours | number: '1.0-1') : '...'
+                          }}h</span
+                        >
                       </div>
-                      <span class="cert-name text-900 font-medium text-sm text-center w-full m-0" style="letter-spacing: 0.5px; line-height: 1; position: relative; z-index: 1;">Horas semana</span>
+                      <span
+                        class="cert-name text-900 font-medium text-sm text-center w-full m-0"
+                        style="
+                          letter-spacing: 0.5px;
+                          line-height: 1;
+                          position: relative;
+                          z-index: 1;
+                        "
+                        >Horas semana</span
+                      >
                     </div>
                   </div>
                 </div>
 
                 <!-- Carreras -->
                 <div class="col-12 md:col-4 mb-2">
-                  <div class="certificate-card border-round h-full flex flex-column align-items-center justify-content-center py-3 px-2 w-full cursor-pointer" (click)="openCareersList()">
-                    <div class="flex flex-column align-items-center justify-content-center w-full" style="gap: 0px;">
-                      <div class="flex align-items-center justify-content-center gap-2" style="margin-bottom: 6px; position: relative; z-index: 2;">
-                        <div class="flex align-items-center justify-content-center bg-green-50 border-round icon-bg" style="width: 2.5rem; height: 2.5rem; flex-shrink: 0; border-radius: 8px !important;">
+                  <div
+                    class="certificate-card border-round h-full flex flex-column align-items-center justify-content-center py-3 px-2 w-full cursor-pointer"
+                    (click)="openCareersList()"
+                  >
+                    <div
+                      class="flex flex-column align-items-center justify-content-center w-full"
+                      style="gap: 0px"
+                    >
+                      <div
+                        class="flex align-items-center justify-content-center gap-2"
+                        style="margin-bottom: 6px; position: relative; z-index: 2"
+                      >
+                        <div
+                          class="flex align-items-center justify-content-center bg-green-50 border-round icon-bg"
+                          style="
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            flex-shrink: 0;
+                            border-radius: 8px !important;
+                          "
+                        >
                           <i class="pi pi-graduation-cap cert-icon text-lg"></i>
                         </div>
-                        <span class="font-bold text-3xl text-900 number-value line-height-1 m-0">{{ teacherStats() ? teacherStats()!.careers.length : '...' }}</span>
+                        <span class="font-bold text-3xl text-900 number-value line-height-1 m-0">{{
+                          teacherStats() ? teacherStats()!.careers.length : '...'
+                        }}</span>
                       </div>
-                      <span class="cert-name text-900 font-medium text-sm text-center w-full m-0" style="letter-spacing: 0.5px; line-height: 1; position: relative; z-index: 1;">Carreras</span>
+                      <span
+                        class="cert-name text-900 font-medium text-sm text-center w-full m-0"
+                        style="
+                          letter-spacing: 0.5px;
+                          line-height: 1;
+                          position: relative;
+                          z-index: 1;
+                        "
+                        >Carreras</span
+                      >
                     </div>
                   </div>
                 </div>
 
                 <!-- Materias -->
                 <div class="col-12 md:col-4 mb-2">
-                  <div class="certificate-card border-round h-full flex flex-column align-items-center justify-content-center py-3 px-2 w-full cursor-pointer" (click)="openSubjectsList()">
-                    <div class="flex flex-column align-items-center justify-content-center w-full" style="gap: 0px;">
-                      <div class="flex align-items-center justify-content-center gap-2" style="margin-bottom: 6px; position: relative; z-index: 2;">
-                        <div class="flex align-items-center justify-content-center bg-green-50 border-round icon-bg" style="width: 2.5rem; height: 2.5rem; flex-shrink: 0; border-radius: 8px !important;">
+                  <div
+                    class="certificate-card border-round h-full flex flex-column align-items-center justify-content-center py-3 px-2 w-full cursor-pointer"
+                    (click)="openSubjectsList()"
+                  >
+                    <div
+                      class="flex flex-column align-items-center justify-content-center w-full"
+                      style="gap: 0px"
+                    >
+                      <div
+                        class="flex align-items-center justify-content-center gap-2"
+                        style="margin-bottom: 6px; position: relative; z-index: 2"
+                      >
+                        <div
+                          class="flex align-items-center justify-content-center bg-green-50 border-round icon-bg"
+                          style="
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            flex-shrink: 0;
+                            border-radius: 8px !important;
+                          "
+                        >
                           <i class="pi pi-book cert-icon text-lg"></i>
                         </div>
-                        <span class="font-bold text-3xl text-900 number-value line-height-1 m-0">{{ teacherStats() ? teacherStats()!.subjects.length : '...' }}</span>
+                        <span class="font-bold text-3xl text-900 number-value line-height-1 m-0">{{
+                          teacherStats() ? teacherStats()!.subjects.length : '...'
+                        }}</span>
                       </div>
-                      <span class="cert-name text-900 font-medium text-sm text-center w-full m-0" style="letter-spacing: 0.5px; line-height: 1; position: relative; z-index: 1;">Materias</span>
+                      <span
+                        class="cert-name text-900 font-medium text-sm text-center w-full m-0"
+                        style="
+                          letter-spacing: 0.5px;
+                          line-height: 1;
+                          position: relative;
+                          z-index: 1;
+                        "
+                        >Materias</span
+                      >
                     </div>
                   </div>
                 </div>
@@ -455,13 +727,21 @@
 </p-dialog>
 
 <!-- Modals for Careers and Subjects -->
-<p-dialog [(visible)]="showCareersModal" [header]="'Carreras Asignadas'" [modal]="true" [style]="{ width: '450px' }">
+<p-dialog
+  [(visible)]="showCareersModal"
+  [header]="'Carreras Asignadas'"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+>
   <div class="grid mt-2">
     @if (teacherStats() && teacherStats()!.careers.length > 0) {
       @for (career of teacherStats()!.careers; track career.id) {
-        <div class="col-12" [ngClass]="{'md:col-6': teacherStats()!.careers.length > 1}">
-          <div class="certificate-card border-round h-full flex align-items-center" style="padding: 0.5rem 0.75rem; gap: 0.5rem;">
-            <i class="pi pi-graduation-cap cert-icon" style="font-size: 1.2rem;"></i>
+        <div class="col-12" [ngClass]="{ 'md:col-6': teacherStats()!.careers.length > 1 }">
+          <div
+            class="certificate-card border-round h-full flex align-items-center"
+            style="padding: 0.5rem 0.75rem; gap: 0.5rem"
+          >
+            <i class="pi pi-graduation-cap cert-icon" style="font-size: 1.2rem"></i>
             <div class="cert-details flex-grow-1">
               <span class="cert-name text-sm">{{ career.name }}</span>
             </div>
@@ -476,17 +756,27 @@
   </div>
 </p-dialog>
 
-<p-dialog [(visible)]="showSubjectsModal" [header]="'Materias Asignadas'" [modal]="true" [style]="{ width: '500px' }">
+<p-dialog
+  [(visible)]="showSubjectsModal"
+  [header]="'Materias Asignadas'"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+>
   <div class="flex flex-column gap-3 mt-2">
     @if (groupedTeacherSubjects() && groupedTeacherSubjects().length > 0) {
       @for (group of groupedTeacherSubjects(); track group.careerName) {
         <div class="flex flex-column gap-2 mb-2">
-          <h4 class="m-0 text-700 font-medium border-bottom-1 border-300 pb-2"><i class="pi pi-graduation-cap mr-2"></i>{{ group.careerName }}</h4>
+          <h4 class="m-0 text-700 font-medium border-bottom-1 border-300 pb-2">
+            <i class="pi pi-graduation-cap mr-2"></i>{{ group.careerName }}
+          </h4>
           <div class="grid m-0">
             @for (sub of group.subjects; track sub.id) {
-              <div class="col-12" [ngClass]="{'md:col-6': group.subjects.length > 1}">
-                <div class="certificate-card border-round h-full flex align-items-center" style="padding: 0.5rem 0.75rem; gap: 0.5rem;">
-                  <i class="pi pi-book cert-icon" style="font-size: 1.2rem;"></i>
+              <div class="col-12" [ngClass]="{ 'md:col-6': group.subjects.length > 1 }">
+                <div
+                  class="certificate-card border-round h-full flex align-items-center"
+                  style="padding: 0.5rem 0.75rem; gap: 0.5rem"
+                >
+                  <i class="pi pi-book cert-icon" style="font-size: 1.2rem"></i>
                   <div class="cert-details flex-grow-1">
                     <span class="cert-name text-sm font-medium">{{ sub.name }}</span>
                     @if (sub.semester) {
@@ -504,4 +794,3 @@
     }
   </div>
 </p-dialog>
-

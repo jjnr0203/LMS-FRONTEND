@@ -47,20 +47,14 @@ export class TreasuryService {
     message: string;
     tuition: Tuition;
   }> {
-    return this.http.post<any>(
-      `${this.apiUrl}/matriculas/${studentId}/pago-completo`,
-      {},
-    );
+    return this.http.post<any>(`${this.apiUrl}/matriculas/${studentId}/pago-completo`, {});
   }
 
   createConvenio(studentId: string): Observable<{
     message: string;
     tuition: Tuition;
   }> {
-    return this.http.post<any>(
-      `${this.apiUrl}/matriculas/${studentId}/convenio`,
-      {},
-    );
+    return this.http.post<any>(`${this.apiUrl}/matriculas/${studentId}/convenio`, {});
   }
 
   enrollStudent(studentId: string): Observable<{
@@ -68,6 +62,13 @@ export class TreasuryService {
     tuition: Tuition;
   }> {
     return this.http.post<any>(`${this.apiUrl}/matricular`, { studentId });
+  }
+
+  matricular(studentId: string): Observable<{
+    message: string;
+    tuition: Tuition;
+  }> {
+    return this.http.post<any>(`${this.apiUrl}/matriculas/${studentId}/matricular`, {});
   }
 
   disableAccount(studentId: string): Observable<{
@@ -85,9 +86,9 @@ export class TreasuryService {
 
 export interface TreasuryDashboardStats {
   total: number;
+  matriculados: number;
+  pendientes: number;
   pagoTotal: number;
-  pendiente: number;
-  noPaga: number;
   cuotasPagadas: number;
 }
 

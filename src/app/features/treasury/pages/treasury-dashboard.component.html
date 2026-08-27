@@ -2,17 +2,16 @@
   <!-- Dark Header -->
   <div class="page-header">
     <div class="header-content">
-      <h1 class="title">Bienvenido de nuevo, <span>{{ user()?.firstName }}</span></h1>
-      <p class="description">
-        Aquí puedes ver el resumen de matrículas y pagos de la institución.
-      </p>
+      <h1 class="title">
+        Bienvenido de nuevo, <span>{{ user()?.firstName }}</span>
+      </h1>
+      <p class="description">Aquí puedes ver el resumen de matrículas y pagos de la institución.</p>
     </div>
   </div>
 
   <!-- Main Content Card -->
   <div class="content-wrapper">
     <div class="data-card">
-
       @if (!stats()) {
         <div class="flex justify-content-center p-6">
           <i class="pi pi-spin pi-spinner text-4xl text-emerald-500"></i>
@@ -20,7 +19,7 @@
       } @else {
         <!-- Stats Grid -->
         <div class="stats-grid">
-          <!-- Total Matrículas -->
+          <!-- Total Estudiantes -->
           <div class="stat-card clickable" (click)="goTo('matriculas')">
             <div class="stat-icon total-icon">
               <i class="pi pi-file"></i>
@@ -29,23 +28,23 @@
               <h3>
                 <span translate="no">{{ stats()?.total || 0 }}</span>
               </h3>
-              <p>Total Matrículas</p>
+              <p>Total Estudiantes</p>
             </div>
             <div class="action-arrow">
               <i class="pi pi-arrow-right"></i>
             </div>
           </div>
 
-          <!-- Pagado Total -->
+          <!-- Matriculados -->
           <div class="stat-card clickable" (click)="goTo('matriculas')">
             <div class="stat-icon paid-icon">
               <i class="pi pi-check-circle"></i>
             </div>
             <div class="stat-info">
               <h3>
-                <span translate="no">{{ stats()?.pagoTotal || 0 }}</span>
+                <span translate="no">{{ stats()?.matriculados || 0 }}</span>
               </h3>
-              <p>Pagado Total</p>
+              <p>Matriculados</p>
             </div>
             <div class="action-arrow">
               <i class="pi pi-arrow-right"></i>
@@ -59,7 +58,7 @@
             </div>
             <div class="stat-info">
               <h3>
-                <span translate="no">{{ stats()?.pendiente || 0 }}</span>
+                <span translate="no">{{ stats()?.pendientes || 0 }}</span>
               </h3>
               <p>Pendientes</p>
             </div>
@@ -68,16 +67,16 @@
             </div>
           </div>
 
-          <!-- No Paga -->
-          <div class="stat-card clickable" (click)="goTo('matriculas')">
-            <div class="stat-icon nopay-icon">
-              <i class="pi pi-times-circle"></i>
+          <!-- Colegiatura Completa -->
+          <div class="stat-card clickable" (click)="goTo('abonos')">
+            <div class="stat-icon paid-total-icon">
+              <i class="pi pi-verified"></i>
             </div>
             <div class="stat-info">
               <h3>
-                <span translate="no">{{ stats()?.noPaga || 0 }}</span>
+                <span translate="no">{{ stats()?.pagoTotal || 0 }}</span>
               </h3>
-              <p>No Paga</p>
+              <p>Colegiatura Completa</p>
             </div>
             <div class="action-arrow">
               <i class="pi pi-arrow-right"></i>
@@ -93,13 +92,12 @@
               <h3>
                 <span translate="no">{{ stats()?.cuotasPagadas || 0 }}</span>
               </h3>
-              <p>Cuotas Pagadas</p>
+              <p>Abonos</p>
             </div>
             <div class="action-arrow">
               <i class="pi pi-arrow-right"></i>
             </div>
           </div>
-
         </div>
       }
     </div>

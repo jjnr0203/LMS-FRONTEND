@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { Component, inject, OnInit, signal, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SecretaryService } from '../../../core/services/secretary.service';
 import { MessageService } from 'primeng/api';
@@ -13,6 +14,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
   selector: 'app-matricula',
   imports: [
     ReactiveFormsModule,
+    NgTemplateOutlet,
     ToastModule,
     CardModule,
     InputTextModule,
@@ -29,6 +31,10 @@ export class MatriculaComponent implements OnInit {
   private secretaryService = inject(SecretaryService);
   private messageService = inject(MessageService);
 
+  isModal = input<boolean>(false);
+  student = input<any>(null);
+  enrollmentCreated = output<void>();
+
   careers = signal<any[]>([]);
   terms = signal<any[]>([]);
   semesters = signal<any[]>([]);
@@ -36,6 +42,8 @@ export class MatriculaComponent implements OnInit {
   loading = signal(false);
   loadingSubjects = signal(false);
   studentNotFound = signal(false);
+
+  private prefillApplied = false;
 
   form = this.formBuilder.group({
     studentId: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
@@ -47,11 +55,26 @@ export class MatriculaComponent implements OnInit {
 
   ngOnInit() {
     this.secretaryService.getCareers().subscribe({
-      next: (data) => this.careers.set(data),
+      next: (data) => {
+        this.careers.set(data);
+        this.applyPreselectedStudent();
+      },
     });
     this.secretaryService.getTerms().subscribe({
-      next: (data) => this.terms.set(data),
+      next: (data) => {
+        this.terms.set(data);
+        this.applyPreselectedStudent();
+      },
     });
+  }
+
+  private applyPreselectedStudent() {
+    const student = this.student();
+    if (!student || this.prefillApplied) return;
+    if (this.careers().length === 0 || this.terms().length === 0) return;
+    this.prefillApplied = true;
+    this.form.controls.studentId.setValue(student.id);
+    this.autofillFromStudent(student);
   }
 
   get studentId() {
@@ -172,12 +195,16 @@ export class MatriculaComponent implements OnInit {
             summary: 'Éxito',
             detail: 'Matrícula generada correctamente',
           });
+          this.loading.set(false);
+          if (this.isModal()) {
+            this.enrollmentCreated.emit();
+            return;
+          }
           this.form.reset({ semester: null, subjectIds: [] });
           this.form.controls.semester.disable();
           this.form.controls.subjectIds.disable();
           this.semesters.set([]);
           this.subjects.set([]);
-          this.loading.set(false);
         },
         error: (err) => {
           this.loading.set(false);

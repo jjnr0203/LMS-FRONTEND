@@ -51,5 +51,48 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   max-width: 1200px;
   margin: 0 auto;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+::ng-deep .action-menu-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #064e3b !important;
+  transition: all 0.2s ease !important;
+
+  &:hover {
+    background: rgba(6, 78, 59, 0.08) !important;
+    color: #064e3b !important;
+  }
+}
+
+:host ::ng-deep .matricular-tag {
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #064e3b !important;
+    color: #ffffff !important;
+  }
+}
+
+.custom-badge {
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #064e3b;
+  color: #ffffff;
+  display: inline-block;
+}
+
+::ng-deep .profile-modal .p-dialog-header {
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
+::ng-deep .profile-modal .p-dialog-content {
+  padding-top: 0 !important;
 }

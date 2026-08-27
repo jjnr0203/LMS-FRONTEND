@@ -46,7 +46,7 @@ export class TuitionListComponent implements OnInit {
   statusOptions = [
     { label: 'Todos', value: 'all' },
     { label: 'Matriculado', value: 'matriculado' },
-    { label: 'Pendiente', value: 'pendiente' },
+    { label: 'Sin Matricular', value: 'pendiente' },
   ];
 
   filteredTuitions = computed(() => {
@@ -104,7 +104,7 @@ export class TuitionListComponent implements OnInit {
   }
 
   statusLabel(enrolled: boolean): string {
-    return enrolled ? 'Matriculado' : 'Pendiente';
+    return enrolled ? 'Matriculado' : 'Sin Matricular';
   }
 
   statusSeverity(enrolled: boolean): 'success' | 'warn' {

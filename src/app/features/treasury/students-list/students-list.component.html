@@ -1,0 +1,239 @@
+<p-toast />
+
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">Lista de Estudiantes</h1>
+      <p class="description">
+        Listado de todos los estudiantes registrados en la institución.
+      </p>
+    </div>
+  </div>
+  <div class="content-wrapper">
+    <div class="data-card">
+      <div class="flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div class="flex align-items-center gap-3">
+          <span class="text-900 font-semibold">Estudiantes</span>
+        </div>
+
+        <div class="flex align-items-center gap-2">
+          <p-iconField iconPosition="left" styleClass="w-20rem">
+            <p-inputIcon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange($event)"
+              placeholder="Buscar por cédula o nombre..."
+              class="w-full"
+            />
+          </p-iconField>
+        </div>
+      </div>
+
+      <p-table
+        [value]="filteredStudents()"
+        [paginator]="true"
+        [rows]="10"
+        [loading]="loading()"
+        [tableStyle]="{ width: '100%', 'table-layout': 'fixed' }"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th [style]="{ width: '16%' }">Cédula</th>
+            <th [style]="{ width: '20%' }">Nombre Completo</th>
+            <th [style]="{ width: '14%' }" class="pago-col text-center">Pago</th>
+            <th [style]="{ width: '14%' }" class="cuotas-col text-center">Cuotas</th>
+            <th [style]="{ width: '18%' }" class="estado-col text-center">Estado</th>
+            <th [style]="{ width: '18%' }" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-student>
+          <tr>
+            <td class="font-medium text-900">{{ student.studentId }}</td>
+            <td>{{ fullName(student) }}</td>
+            <td class="pago-col text-center">
+              <p-tag
+                [value]="getPagoLabel(student.enrolled, student.status, student.paidInstallments)"
+                [severity]="getPagoSeverity(student.enrolled, student.status, student.paidInstallments)"
+              />
+            </td>
+            <td class="cuotas-col text-center">
+              @if (!student.enrolled || student.paidInstallments === 0) {
+                -
+              } @else {
+                {{ student.paidInstallments }}/4
+              }
+            </td>
+            <td class="estado-col text-center">
+              <p-tag
+                [value]="getStatusLabel(student.enrolled, student.status)"
+                [severity]="getStatusSeverity(student.enrolled, student.status)"
+              />
+            </td>
+            <td class="text-center">
+              @if (student.enrolled) {
+                <p-button
+                  icon="pi pi-ellipsis-v"
+                  [rounded]="true"
+                  [text]="true"
+                  styleClass="action-menu-btn"
+                  size="small"
+                  (onClick)="showMenu($event, menu, student)"
+                />
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center p-4 text-500">No se encontraron registros.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <p-menu
+        #menu
+        [model]="menuItems"
+        [popup]="true"
+        appendTo="body"
+        [style]="{ width: '200px' }"
+        styleClass="custom-action-menu"
+      ></p-menu>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  header=""
+  [(visible)]="profileModalVisible"
+  [modal]="true"
+  [style]="{ width: '600px', 'max-width': '95vw' }"
+  [closable]="true"
+  styleClass="profile-modal"
+>
+  @if (selectedStudent) {
+    <div class="flex align-items-center gap-4 mb-4">
+      @if (selectedStudent.avatarUrl) {
+        <img
+          [src]="selectedStudent.avatarUrl"
+          alt="avatar"
+          class="profile-avatar"
+          onerror="this.style.display='none'"
+        />
+      } @else {
+        <div class="profile-avatar-placeholder flex align-items-center justify-content-center">
+          <i class="pi pi-user"></i>
+        </div>
+      }
+      <div>
+        <h2 class="profile-name m-0">{{ selectedStudent.firstName }} {{ selectedStudent.lastName }}</h2>
+        <div class="flex align-items-center gap-2 mt-2">
+          <p-tag
+            [value]="selectedStudent.enrolled ? 'Matriculado' : 'Sin Matricular'"
+            [severity]="selectedStudent.enrolled ? 'success' : 'warn'"
+          />
+          <span class="custom-badge">{{ selectedStudent.isActive ? 'Activo' : 'Inactivo' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid m-0">
+      <div class="col-12 md:col-6 profile-field">
+        <span class="profile-label">Cédula</span>
+        <span class="profile-value">{{ selectedStudent.id ?? selectedStudent.studentId }}</span>
+      </div>
+      <div class="col-12 md:col-6 profile-field">
+        <span class="profile-label">Correo</span>
+        <span class="profile-value">{{ selectedStudent.email || '—' }}</span>
+      </div>
+      <div class="col-12 md:col-6 profile-field">
+        <span class="profile-label">Teléfono</span>
+        <span class="profile-value">{{ selectedStudent.phone || '—' }}</span>
+      </div>
+      <div class="col-12 md:col-6 profile-field">
+        <span class="profile-label">Fecha de nacimiento</span>
+        <span class="profile-value">
+          {{ selectedStudent.birthDate ? (selectedStudent.birthDate | date: 'dd/MM/yyyy') : '—' }}
+          @if (calculateAge(selectedStudent.birthDate) !== null) {
+            <span class="text-500">({{ calculateAge(selectedStudent.birthDate) }} años)</span>
+          }
+        </span>
+      </div>
+      <div class="col-12 md:col-6 profile-field">
+        <span class="profile-label">Dirección</span>
+        <span class="profile-value">{{ selectedStudent.address || '—' }}</span>
+      </div>
+      <div class="col-12 md:col-6 profile-field">
+        <span class="profile-label">Carrera</span>
+        <span class="profile-value">{{ selectedStudent.careerName || '—' }}</span>
+      </div>
+      <div class="col-12 md:col-6 profile-field">
+        <span class="profile-label">Fecha de ingreso</span>
+        <span class="profile-value">
+          {{ selectedStudent.createdAt ? (selectedStudent.createdAt | date: 'dd/MM/yyyy') : '—' }}
+        </span>
+      </div>
+    </div>
+  }
+</p-dialog>
+
+<p-dialog
+  header="Registrar Pago"
+  [(visible)]="paymentModalVisible"
+  [modal]="true"
+  [style]="{ width: '450px', 'max-width': '95vw' }"
+  [closable]="true"
+>
+  @if (selectedRow) {
+    <p class="m-0 mb-4 text-900">
+      Seleccione el tipo de pago para <strong>{{ fullName(selectedRow) }}</strong>:
+    </p>
+    <div class="flex flex-column gap-3">
+      <p-button
+        label="Convenio (4 cuotas)"
+        icon="pi pi-calendar"
+        styleClass="w-full"
+        (onClick)="payByConvenio()"
+      />
+      <p-button
+        label="Pago Total"
+        icon="pi pi-check-circle"
+        severity="success"
+        styleClass="w-full"
+        (onClick)="payTotal()"
+      />
+    </div>
+  }
+</p-dialog>
+
+<p-dialog
+  header="Generar Certificado"
+  [(visible)]="certificateModalVisible"
+  [modal]="true"
+  [style]="{ width: '450px', 'max-width': '95vw' }"
+  [closable]="true"
+>
+  @if (selectedRow) {
+    <p class="m-0 mb-4 text-900">
+      Seleccione el tipo de certificado para <strong>{{ fullName(selectedRow) }}</strong>:
+    </p>
+    <div class="flex flex-column gap-3">
+      <p-button
+        label="Certificado de Matrícula"
+        icon="pi pi-file-pdf"
+        styleClass="w-full"
+        (onClick)="generateCertificateByType('matricula')"
+      />
+      <p-button
+        label="Certificado de Pago"
+        icon="pi pi-credit-card"
+        severity="info"
+        styleClass="w-full"
+        (onClick)="generateCertificateByType('pago')"
+      />
+    </div>
+  }
+</p-dialog>
+
+<p-confirmDialog />

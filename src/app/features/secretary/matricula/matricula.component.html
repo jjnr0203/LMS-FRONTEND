@@ -1,136 +1,144 @@
 ﻿<p-toast />
 
-<div class="page-container">
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="title">Matrícula</h1>
-      <p class="description">
-        Selecciona período, carrera, semestre y materias para generar la matrícula.
-      </p>
+@if (!isModal()) {
+  <div class="page-container">
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="title">Matrícula</h1>
+        <p class="description">
+          Selecciona período, carrera, semestre y materias para generar la matrícula.
+        </p>
+      </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="data-card">
+        <ng-container *ngTemplateOutlet="matriculaForm" />
+      </div>
     </div>
   </div>
+} @else {
+  <ng-container *ngTemplateOutlet="matriculaForm" />
+}
 
-  <div class="content-wrapper">
-    <div class="data-card">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="grid">
-          <div class="col-12 md:col-6">
-            <div class="flex flex-column gap-2 mb-3">
-              <label for="studentId" class="font-semibold text-sm text-700"
-                >Cédula del Estudiante <span class="text-red-500">*</span></label
-              >
-              <input
-                id="studentId"
-                pInputText
-                formControlName="studentId"
-                maxlength="10"
-                (input)="filterNumbers($event, 'studentId'); onStudentIdChange()"
-                placeholder="10 dígitos"
-              />
-              @if (studentNotFound()) {
-                <small class="p-error text-red-500">Estudiante no encontrado.</small>
-              }
-              @if (studentId.touched) {
-                @if (studentId.errors?.['required']) {
-                  <small class="p-error text-red-500">Este campo es requerido.</small>
-                } @else if (studentId.invalid) {
-                  <small class="p-error text-red-500">Cédula inválida.</small>
-                }
-              }
-            </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="flex flex-column gap-2 mb-3">
-              <label for="academicTermId" class="font-semibold text-sm text-700"
-                >Período Académico <span class="text-red-500">*</span></label
-              >
-              <p-select
-                id="academicTermId"
-                formControlName="academicTermId"
-                [options]="terms()"
-                optionLabel="name"
-                optionValue="id"
-                placeholder="Seleccione período"
-                styleClass="w-full"
-                appendTo="body"
-              />
-              @if (academicTermId.invalid && academicTermId.touched) {
-                <small class="p-error text-red-500">Este campo es requerido.</small>
-              }
-            </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="flex flex-column gap-2 mb-3">
-              <label for="careerId" class="font-semibold text-sm text-700"
-                >Carrera <span class="text-red-500">*</span></label
-              >
-              <p-select
-                id="careerId"
-                formControlName="careerId"
-                [options]="careers()"
-                optionLabel="name"
-                optionValue="id"
-                placeholder="Seleccione carrera"
-                styleClass="w-full"
-                appendTo="body"
-                (onChange)="onCareerChange($event.value)"
-              />
-              @if (careerId.invalid && careerId.touched) {
-                <small class="p-error text-red-500">Este campo es requerido.</small>
-              }
-            </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="flex flex-column gap-2 mb-3">
-              <label for="semester" class="font-semibold text-sm text-700"
-                >Semestre <span class="text-red-500">*</span></label
-              >
-              <p-select
-                id="semester"
-                formControlName="semester"
-                [options]="semesters()"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Seleccione semestre"
-                styleClass="w-full"
-                appendTo="body"
-                (onChange)="onSemesterChange($event.value)"
-              />
-              @if (semester.touched && !semester.value) {
-                <small class="p-error text-red-500">Este campo es requerido.</small>
-              }
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="flex flex-column gap-2 mb-3">
-              <label for="subjectIds" class="font-semibold text-sm text-700"
-                >Materias del Semestre</label
-              >
-              <p-multiSelect
-                id="subjectIds"
-                formControlName="subjectIds"
-                [options]="subjects()"
-                optionLabel="name"
-                optionValue="id"
-                placeholder="Seleccione materias"
-                styleClass="w-full"
-                display="chip"
-                appendTo="body"
-                [loading]="loadingSubjects()"
-              />
-            </div>
-          </div>
+<ng-template #matriculaForm>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="studentId" class="font-semibold text-sm text-700"
+            >Cédula del Estudiante <span class="text-red-500">*</span></label
+          >
+          <input
+            id="studentId"
+            pInputText
+            formControlName="studentId"
+            maxlength="10"
+            (input)="filterNumbers($event, 'studentId'); onStudentIdChange()"
+            placeholder="10 dígitos"
+          />
+          @if (studentNotFound()) {
+            <small class="p-error text-red-500">Estudiante no encontrado.</small>
+          }
+          @if (studentId.touched) {
+            @if (studentId.errors?.['required']) {
+              <small class="p-error text-red-500">Este campo es requerido.</small>
+            } @else if (studentId.invalid) {
+              <small class="p-error text-red-500">Cédula inválida.</small>
+            }
+          }
         </div>
-        <div class="mt-4 flex justify-content-end">
-          <p-button
-            label="Generar Matrícula"
-            icon="pi pi-check"
-            type="submit"
-            [loading]="loading()"
-            severity="success"
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="academicTermId" class="font-semibold text-sm text-700"
+            >Período Académico <span class="text-red-500">*</span></label
+          >
+          <p-select
+            id="academicTermId"
+            formControlName="academicTermId"
+            [options]="terms()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Seleccione período"
+            styleClass="w-full"
+            appendTo="body"
+          />
+          @if (academicTermId.invalid && academicTermId.touched) {
+            <small class="p-error text-red-500">Este campo es requerido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="careerId" class="font-semibold text-sm text-700"
+            >Carrera <span class="text-red-500">*</span></label
+          >
+          <p-select
+            id="careerId"
+            formControlName="careerId"
+            [options]="careers()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Seleccione carrera"
+            styleClass="w-full"
+            appendTo="body"
+            (onChange)="onCareerChange($event.value)"
+          />
+          @if (careerId.invalid && careerId.touched) {
+            <small class="p-error text-red-500">Este campo es requerido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12 md:col-6">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="semester" class="font-semibold text-sm text-700"
+            >Semestre <span class="text-red-500">*</span></label
+          >
+          <p-select
+            id="semester"
+            formControlName="semester"
+            [options]="semesters()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccione semestre"
+            styleClass="w-full"
+            appendTo="body"
+            (onChange)="onSemesterChange($event.value)"
+          />
+          @if (semester.touched && !semester.value) {
+            <small class="p-error text-red-500">Este campo es requerido.</small>
+          }
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="flex flex-column gap-2 mb-3">
+          <label for="subjectIds" class="font-semibold text-sm text-700"
+            >Materias del Semestre</label
+          >
+          <p-multiSelect
+            id="subjectIds"
+            formControlName="subjectIds"
+            [options]="subjects()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Seleccione materias"
+            styleClass="w-full"
+            display="chip"
+            appendTo="body"
+            [loading]="loadingSubjects()"
           />
         </div>
-      </form>
+      </div>
     </div>
-  </div>
-</div>
+    <div class="mt-4 flex justify-content-end">
+      <p-button
+        label="Generar Matrícula"
+        icon="pi pi-check"
+        type="submit"
+        [loading]="loading()"
+        severity="success"
+      />
+    </div>
+  </form>
+</ng-template>

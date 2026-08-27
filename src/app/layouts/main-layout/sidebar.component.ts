@@ -111,25 +111,6 @@ export class SidebarComponent {
       roles: ['treasury'],
     },
     {
-      label: 'Pagos',
-      icon: 'pi pi-credit-card',
-      roles: ['treasury'],
-      expanded: false,
-      children: [
-        { label: 'Matrículas', icon: '', route: '/treasury/matriculas', roles: ['treasury'] },
-        { label: 'Registrar Abono', icon: '', route: '/treasury/abonos', roles: ['treasury'] },
-      ]
-    },
-    {
-      label: 'Seguridad',
-      icon: 'pi pi-shield',
-      roles: ['treasury'],
-      expanded: false,
-      children: [
-        { label: 'Deshabilitar Cuenta', icon: '', route: '/treasury/deshabilitar', roles: ['treasury'] },
-      ]
-    },
-    {
       label: 'Gestión Académica',
       icon: 'pi pi-graduation-cap',
       roles: ['teacher'],
@@ -152,18 +133,6 @@ export class SidebarComponent {
       route: '/secretary/estudiantes',
       roles: ['secretary'],
     },
-    {
-      label: 'Matrícula',
-      icon: 'pi pi-calendar',
-      route: '/secretary/matricula',
-      roles: ['secretary'],
-    },
-    {
-      label: 'Certificados',
-      icon: 'pi pi-verified',
-      route: '/secretary/certificados',
-      roles: ['secretary'],
-    }
   ]);
 
   filteredMenu = computed(() => {
