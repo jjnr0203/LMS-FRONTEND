@@ -1,11 +1,14 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { TreasuryService, MatriculaRow } from '../../../core/services/treasury.service';
+import { UserService } from '../../../core/services/user.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
+import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -21,12 +24,14 @@ import { FormsModule } from '@angular/forms';
     ButtonModule,
     ToastModule,
     CardModule,
+    DialogModule,
     ConfirmDialogModule,
     InputTextModule,
     SelectModule,
     IconFieldModule,
     InputIconModule,
     FormsModule,
+    CommonModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './tuition-list.component.html',
@@ -34,8 +39,12 @@ import { FormsModule } from '@angular/forms';
 })
 export class TuitionListComponent implements OnInit {
   private treasuryService = inject(TreasuryService);
+  private userService = inject(UserService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+
+  profileModalVisible = false;
+  selectedStudent: any = null;
 
   tuitions = signal<MatriculaRow[]>([]);
   loading = signal(true);
@@ -103,12 +112,32 @@ export class TuitionListComponent implements OnInit {
     return `${row.firstName} ${row.lastName}`;
   }
 
-  statusLabel(enrolled: boolean): string {
-    return enrolled ? 'Matriculado' : 'Sin Matricular';
+  statusLabel(enrolled: boolean, status: string): string {
+    if (!enrolled) return 'Sin Matricular';
+    switch (status) {
+      case 'pago_total':
+      case 'convenio':
+        return 'Matriculado';
+      case 'no_paga':
+      case 'pendiente':
+        return 'Pendiente';
+      default:
+        return 'Matriculado';
+    }
   }
 
-  statusSeverity(enrolled: boolean): 'success' | 'warn' {
-    return enrolled ? 'success' : 'warn';
+  statusSeverity(enrolled: boolean, status: string): 'success' | 'warn' | 'info' | 'secondary' {
+    if (!enrolled) return 'secondary';
+    switch (status) {
+      case 'pago_total':
+      case 'convenio':
+        return 'success';
+      case 'no_paga':
+      case 'pendiente':
+        return 'warn';
+      default:
+        return 'info';
+    }
   }
 
   confirmEnroll(row: MatriculaRow) {
@@ -138,5 +167,30 @@ export class TuitionListComponent implements OnInit {
         });
       },
     });
+  }
+
+  openProfileModal(student: any) {
+    this.selectedStudent = { ...student };
+    this.profileModalVisible = true;
+    this.userService.getUser(student.studentId, 'student').subscribe({
+      next: (fullStudent) => {
+        if (this.selectedStudent && this.selectedStudent.studentId === fullStudent.id) {
+          this.selectedStudent = { ...this.selectedStudent, ...fullStudent };
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  calculateAge(birthDate: string | Date | undefined): number | null {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birthDateObj = new Date(birthDate);
+    let age = today.getFullYear() - birthDateObj.getFullYear();
+    const m = today.getMonth() - birthDateObj.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
+      age--;
+    }
+    return age;
   }
 }

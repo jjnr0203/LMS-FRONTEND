@@ -80,12 +80,13 @@
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-user>
-            <tr>
+            <tr (click)="openProfileModal(user)" class="cursor-pointer">
               <td class="font-medium text-900">{{ user.id }}</td>
               <td>{{ user.firstName }} {{ user.lastName }}</td>
               <td>{{ user.email }}</td>
               <td>
                 <p-tag
+                  class="soft-tag"
                   [value]="translateRole(user.roleName)"
                   [severity]="getRoleSeverity(user.roleName)"
                 />

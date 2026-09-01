@@ -99,55 +99,13 @@
     padding-top: 0 !important;
   }
 
-  .profile-modal {
-    .profile-avatar {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .profile-avatar-placeholder {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: #ecfdf5;
-      color: #10b981;
-      font-size: 1.75rem;
-    }
-
-    .profile-name {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #064e3b;
-    }
-
-    .custom-badge {
-      font-size: 0.75rem;
-      padding: 0.15rem 0.6rem;
-      border-radius: 999px;
-      background: #064e3b;
-      color: #ffffff;
-    }
-
-    .profile-field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.15rem;
-      padding: 0.5rem 0.75rem;
-    }
-
-    .profile-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      color: #10b981;
-    }
-
-    .profile-value {
-      font-size: 0.95rem;
-      color: #1e293b;
-      font-weight: 500;
-    }
+  .custom-badge {
+    padding: 0.35rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #064e3b;
+    color: #ffffff;
+    display: inline-block;
   }
 }

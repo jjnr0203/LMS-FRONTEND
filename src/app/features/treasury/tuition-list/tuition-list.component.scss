@@ -58,3 +58,22 @@
   max-width: 1400px;
   margin: 0 auto;
 }
+
+.custom-badge {
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #064e3b;
+  color: #ffffff;
+  display: inline-block;
+}
+
+::ng-deep .profile-modal .p-dialog-header {
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
+::ng-deep .profile-modal .p-dialog-content {
+  padding-top: 0 !important;
+}

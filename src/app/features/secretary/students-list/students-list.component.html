@@ -60,13 +60,17 @@
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-student>
-          <tr>
+          <tr (click)="openProfileModal(student)" class="cursor-pointer">
             <td class="font-medium text-900">{{ student.id }}</td>
             <td>{{ student.firstName }} {{ student.lastName }}</td>
             <td>{{ student.email }}</td>
             <td>{{ student.careerName ?? 'Sin carrera asignada' }}</td>
             <td>
-              <p-tag [value]="getStatusLabel(student.enrolled, student.tuitionStatus)" [severity]="getStatusSeverity(student.enrolled, student.tuitionStatus)" />
+              <p-tag
+                class="soft-tag"
+                [value]="getStatusLabel(student.enrolled, student.tuitionStatus)"
+                [severity]="getStatusSeverity(student.enrolled, student.tuitionStatus)"
+              />
             </td>
             <td class="text-center">
               <div class="flex align-items-center justify-content-center gap-2">
@@ -76,7 +80,7 @@
                   [text]="true"
                   styleClass="action-menu-btn"
                   size="small"
-                  (onClick)="showMenu($event, menu, student)"
+                  (onClick)="$event.stopPropagation(); showMenu($event, menu, student)"
                 />
               </div>
             </td>
@@ -157,11 +161,10 @@
           {{ selectedStudent.firstName }} {{ selectedStudent.lastName }}
         </h2>
         <div class="flex align-items-center gap-2 mt-2">
-          @if (selectedStudent.status) {
-            <p-tag value="Matriculado" severity="success" />
-          } @else {
-            <p-tag value="Sin Matricular" severity="warn" />
-          }
+          <p-tag
+            [value]="getStatusLabel(selectedStudent.enrolled, selectedStudent.tuitionStatus)"
+            [severity]="getStatusSeverity(selectedStudent.enrolled, selectedStudent.tuitionStatus)"
+          />
           <span class="custom-badge">{{ selectedStudent.isActive ? 'Activo' : 'Inactivo' }}</span>
         </div>
       </div>

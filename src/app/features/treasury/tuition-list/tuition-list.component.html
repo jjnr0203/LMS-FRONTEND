@@ -54,11 +54,15 @@
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-t>
-          <tr>
+          <tr (click)="openProfileModal(t)" class="cursor-pointer">
             <td>{{ t.studentId }}</td>
             <td>{{ fullName(t) }}</td>
             <td>
-              <p-tag [value]="statusLabel(t.enrolled)" [severity]="statusSeverity(t.enrolled)" />
+              <p-tag
+                class="soft-tag"
+                [value]="statusLabel(t.enrolled, t.status)"
+                [severity]="statusSeverity(t.enrolled, t.status)"
+              />
             </td>
             <td class="text-center">
               @if (!t.enrolled) {
@@ -68,7 +72,7 @@
                   size="small"
                   [rounded]="true"
                   [loading]="loading()"
-                  (onClick)="confirmEnroll(t)"
+                  (onClick)="$event.stopPropagation(); confirmEnroll(t)"
                 />
               } @else {
                 <span class="text-500 text-sm">Ya matriculado</span>
@@ -85,3 +89,81 @@
     </div>
   </div>
 </div>
+
+<!-- Profile Modal -->
+<p-dialog
+  header=""
+  [(visible)]="profileModalVisible"
+  [modal]="true"
+  [style]="{ width: '600px', 'max-width': '95vw' }"
+  [closable]="true"
+  styleClass="profile-modal"
+>
+  @if (selectedStudent) {
+    <div class="flex align-items-center gap-4 mb-4">
+      @if (selectedStudent.avatarUrl) {
+        <img
+          [src]="selectedStudent.avatarUrl"
+          alt="Avatar"
+          class="w-6rem h-6rem border-circle shadow-2 object-cover"
+        />
+      } @else {
+        <div
+          class="w-6rem h-6rem border-circle shadow-2 flex justify-content-center align-items-center bg-gray-50 border-1 border-gray-200"
+        >
+          <i class="pi pi-user text-4xl" style="color: #064e3b"></i>
+        </div>
+      }
+      <div>
+        <h2 class="m-0 text-xl font-bold text-900">
+          {{ selectedStudent.firstName }} {{ selectedStudent.lastName }}
+        </h2>
+        <div class="flex align-items-center gap-2 mt-2">
+          <p-tag
+            [value]="statusLabel(selectedStudent.enrolled, selectedStudent.status)"
+            [severity]="statusSeverity(selectedStudent.enrolled, selectedStudent.status)"
+          />
+          <span class="custom-badge">{{ selectedStudent.isActive ? 'Activo' : 'Inactivo' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid m-0">
+      <div class="col-5 font-semibold text-700">Cédula:</div>
+      <div class="col-7">{{ selectedStudent.id ?? selectedStudent.studentId }}</div>
+
+      <div class="col-5 font-semibold text-700">Correo Electrónico:</div>
+      <div class="col-7">{{ selectedStudent.email || 'No registrado' }}</div>
+
+      <div class="col-5 font-semibold text-700">Teléfono:</div>
+      <div class="col-7">{{ selectedStudent.phone || 'No registrado' }}</div>
+
+      <div class="col-5 font-semibold text-700">Fecha de Nacimiento:</div>
+      <div class="col-7">
+        @if (selectedStudent.birthDate) {
+          {{ selectedStudent.birthDate | date: 'longDate' }} ({{
+            calculateAge(selectedStudent.birthDate)
+          }}
+          años)
+        } @else {
+          No registrado
+        }
+      </div>
+
+      <div class="col-5 font-semibold text-700">Dirección:</div>
+      <div class="col-7">{{ selectedStudent.address || 'No registrado' }}</div>
+
+      <div class="col-5 font-semibold text-700">Carrera:</div>
+      <div class="col-7">{{ selectedStudent.careerName || 'No registrado' }}</div>
+
+      <div class="col-5 font-semibold text-700">Ingreso a la Institución:</div>
+      <div class="col-7">
+        @if (selectedStudent.createdAt) {
+          {{ selectedStudent.createdAt | date: 'longDate' }}
+        } @else {
+          No registrado
+        }
+      </div>
+    </div>
+  }
+</p-dialog>

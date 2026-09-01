@@ -50,24 +50,28 @@
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-student>
-          <tr>
+          <tr (click)="openProfileModal(student)" class="cursor-pointer">
             <td class="font-medium text-900">{{ student.studentId }}</td>
             <td>{{ fullName(student) }}</td>
             <td class="pago-col text-center">
               <p-tag
+                class="soft-tag"
                 [value]="getPagoLabel(student.enrolled, student.status, student.paidInstallments)"
                 [severity]="getPagoSeverity(student.enrolled, student.status, student.paidInstallments)"
               />
             </td>
             <td class="cuotas-col text-center">
-              @if (!student.enrolled || student.paidInstallments === 0) {
+              @if (!student.enrolled) {
                 -
-              } @else {
+              } @else if (student.status === 'convenio' || student.paidInstallments > 0) {
                 {{ student.paidInstallments }}/4
+              } @else {
+                -
               }
             </td>
             <td class="estado-col text-center">
               <p-tag
+                class="soft-tag"
                 [value]="getStatusLabel(student.enrolled, student.status)"
                 [severity]="getStatusSeverity(student.enrolled, student.status)"
               />
@@ -117,21 +121,24 @@
       @if (selectedStudent.avatarUrl) {
         <img
           [src]="selectedStudent.avatarUrl"
-          alt="avatar"
-          class="profile-avatar"
-          onerror="this.style.display='none'"
+          alt="Avatar"
+          class="w-6rem h-6rem border-circle shadow-2 object-cover"
         />
       } @else {
-        <div class="profile-avatar-placeholder flex align-items-center justify-content-center">
-          <i class="pi pi-user"></i>
+        <div
+          class="w-6rem h-6rem border-circle shadow-2 flex justify-content-center align-items-center bg-gray-50 border-1 border-gray-200"
+        >
+          <i class="pi pi-user text-4xl" style="color: #064e3b"></i>
         </div>
       }
       <div>
-        <h2 class="profile-name m-0">{{ selectedStudent.firstName }} {{ selectedStudent.lastName }}</h2>
+        <h2 class="m-0 text-xl font-bold text-900">
+          {{ selectedStudent.firstName }} {{ selectedStudent.lastName }}
+        </h2>
         <div class="flex align-items-center gap-2 mt-2">
           <p-tag
-            [value]="selectedStudent.enrolled ? 'Matriculado' : 'Sin Matricular'"
-            [severity]="selectedStudent.enrolled ? 'success' : 'warn'"
+            [value]="getStatusLabel(selectedStudent.enrolled, selectedStudent.status)"
+            [severity]="getStatusSeverity(selectedStudent.enrolled, selectedStudent.status)"
           />
           <span class="custom-badge">{{ selectedStudent.isActive ? 'Activo' : 'Inactivo' }}</span>
         </div>
@@ -139,40 +146,40 @@
     </div>
 
     <div class="grid m-0">
-      <div class="col-12 md:col-6 profile-field">
-        <span class="profile-label">Cédula</span>
-        <span class="profile-value">{{ selectedStudent.id ?? selectedStudent.studentId }}</span>
+      <div class="col-5 font-semibold text-700">Cédula:</div>
+      <div class="col-7">{{ selectedStudent.id ?? selectedStudent.studentId }}</div>
+
+      <div class="col-5 font-semibold text-700">Correo Electrónico:</div>
+      <div class="col-7">{{ selectedStudent.email || 'No registrado' }}</div>
+
+      <div class="col-5 font-semibold text-700">Teléfono:</div>
+      <div class="col-7">{{ selectedStudent.phone || 'No registrado' }}</div>
+
+      <div class="col-5 font-semibold text-700">Fecha de Nacimiento:</div>
+      <div class="col-7">
+        @if (selectedStudent.birthDate) {
+          {{ selectedStudent.birthDate | date: 'longDate' }} ({{
+            calculateAge(selectedStudent.birthDate)
+          }}
+          años)
+        } @else {
+          No registrado
+        }
       </div>
-      <div class="col-12 md:col-6 profile-field">
-        <span class="profile-label">Correo</span>
-        <span class="profile-value">{{ selectedStudent.email || '—' }}</span>
-      </div>
-      <div class="col-12 md:col-6 profile-field">
-        <span class="profile-label">Teléfono</span>
-        <span class="profile-value">{{ selectedStudent.phone || '—' }}</span>
-      </div>
-      <div class="col-12 md:col-6 profile-field">
-        <span class="profile-label">Fecha de nacimiento</span>
-        <span class="profile-value">
-          {{ selectedStudent.birthDate ? (selectedStudent.birthDate | date: 'dd/MM/yyyy') : '—' }}
-          @if (calculateAge(selectedStudent.birthDate) !== null) {
-            <span class="text-500">({{ calculateAge(selectedStudent.birthDate) }} años)</span>
-          }
-        </span>
-      </div>
-      <div class="col-12 md:col-6 profile-field">
-        <span class="profile-label">Dirección</span>
-        <span class="profile-value">{{ selectedStudent.address || '—' }}</span>
-      </div>
-      <div class="col-12 md:col-6 profile-field">
-        <span class="profile-label">Carrera</span>
-        <span class="profile-value">{{ selectedStudent.careerName || '—' }}</span>
-      </div>
-      <div class="col-12 md:col-6 profile-field">
-        <span class="profile-label">Fecha de ingreso</span>
-        <span class="profile-value">
-          {{ selectedStudent.createdAt ? (selectedStudent.createdAt | date: 'dd/MM/yyyy') : '—' }}
-        </span>
+
+      <div class="col-5 font-semibold text-700">Dirección:</div>
+      <div class="col-7">{{ selectedStudent.address || 'No registrado' }}</div>
+
+      <div class="col-5 font-semibold text-700">Carrera:</div>
+      <div class="col-7">{{ selectedStudent.careerName || 'No registrado' }}</div>
+
+      <div class="col-5 font-semibold text-700">Ingreso a la Institución:</div>
+      <div class="col-7">
+        @if (selectedStudent.createdAt) {
+          {{ selectedStudent.createdAt | date: 'longDate' }}
+        } @else {
+          No registrado
+        }
       </div>
     </div>
   }

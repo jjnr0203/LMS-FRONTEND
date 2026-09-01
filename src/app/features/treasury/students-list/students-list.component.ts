@@ -102,18 +102,41 @@ export class TreasuryStudentsListComponent implements OnInit {
     return `${row.firstName} ${row.lastName}`;
   }
 
-  getStatusSeverity(enrolled: boolean, status: string): 'success' | 'warn' | 'danger' | 'info' | 'secondary' {
-    return enrolled ? 'success' : 'secondary';
+  getStatusSeverity(
+    enrolled: boolean,
+    status: string,
+  ): 'success' | 'warn' | 'danger' | 'info' | 'secondary' {
+    if (!enrolled) return 'secondary';
+    switch (status) {
+      case 'pago_total':
+      case 'convenio':
+        return 'success';
+      case 'no_paga':
+      case 'pendiente':
+        return 'warn';
+      default:
+        return 'info';
+    }
   }
 
   getStatusLabel(enrolled: boolean, status: string): string {
-    return enrolled ? 'Matriculado' : 'Sin Matricular';
+    if (!enrolled) return 'Sin Matricular';
+    switch (status) {
+      case 'pago_total':
+      case 'convenio':
+        return 'Matriculado';
+      case 'no_paga':
+      case 'pendiente':
+        return 'Pendiente';
+      default:
+        return 'Matriculado';
+    }
   }
 
   getPagoLabel(enrolled: boolean, status: string, paidInstallments: number): string {
     if (!enrolled) return 'Sin Registro';
     if (status === 'pago_total' || paidInstallments >= 4) return 'Pagado';
-    if (paidInstallments > 0) return 'En Proceso';
+    if (status === 'convenio' || paidInstallments > 0) return 'En Proceso';
     return 'Sin Registro';
   }
 
@@ -153,19 +176,11 @@ export class TreasuryStudentsListComponent implements OnInit {
         command: () => this.openCertificateModal(row),
       });
     } else if (row.status === 'convenio') {
-      if (row.paidInstallments > 0) {
-        items.push({
-          label: 'Registrar Abono',
-          icon: 'pi pi-plus',
-          command: () => this.confirmRegisterAbono(row),
-        });
-      } else {
-        items.push({
-          label: 'Registrar Pago',
-          icon: 'pi pi-credit-card',
-          command: () => this.openPaymentModal(row),
-        });
-      }
+      items.push({
+        label: 'Registrar Abono',
+        icon: 'pi pi-plus',
+        command: () => this.confirmRegisterAbono(row),
+      });
       items.push({
         label: 'Generar Certificado',
         icon: 'pi pi-file-pdf',
@@ -173,9 +188,9 @@ export class TreasuryStudentsListComponent implements OnInit {
       });
     } else {
       items.push({
-        label: 'Matricular',
-        icon: 'pi pi-graduation-cap',
-        command: () => this.confirmMatricular(row),
+        label: 'Registrar Pago',
+        icon: 'pi pi-credit-card',
+        command: () => this.openPaymentModal(row),
       });
     }
 
