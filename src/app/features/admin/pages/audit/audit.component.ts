@@ -12,6 +12,7 @@ import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FormsModule } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { environment } from '../../../../environments/environment';
 
 interface AuditLog {
   id: string;
@@ -86,7 +87,7 @@ export class AuditComponent implements OnInit {
     }
 
     this.http
-      .get<{ items: AuditLog[]; total: number }>(`/api/admin/audit-logs`, { params })
+      .get<{ items: AuditLog[]; total: number }>(`${environment.apiUrl}/admin/audit-logs`, { params })
       .subscribe({
         next: (res) => {
           this.logs = res.items ?? [];
@@ -148,7 +149,7 @@ export class AuditComponent implements OnInit {
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.http.delete(`/api/admin/audit-logs/${log.id}`).subscribe({
+        this.http.delete(`${environment.apiUrl}/admin/audit-logs/${log.id}`).subscribe({
           next: () => {
             this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Registro eliminado' });
             this.fetchLogs(this.currentPage, this.pageSize);
@@ -168,7 +169,7 @@ export class AuditComponent implements OnInit {
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.http.delete(`/api/admin/audit-logs/clear/old`).subscribe({
+        this.http.delete(`${environment.apiUrl}/admin/audit-logs/clear/old`).subscribe({
           next: (res: any) => {
             this.messageService.add({ severity: 'success', summary: 'Éxito', detail: `Se han eliminado ${res.affected ?? ''} registros antiguos` });
             this.fetchLogs(1, this.pageSize);
