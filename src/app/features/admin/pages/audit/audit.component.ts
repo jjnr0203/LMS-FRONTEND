@@ -12,7 +12,7 @@ import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FormsModule } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 
 interface AuditLog {
   id: string;
