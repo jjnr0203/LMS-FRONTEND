@@ -173,7 +173,12 @@ export class AcademicTerms implements OnInit {
         label: 'Eliminar',
         icon: 'pi pi-trash',
         styleClass: 'action-delete',
-        command: () => this.deleteTerm(this.selectedTermForMenu.id)
+        disabled: term.isActive,
+        command: () => {
+          if (!term.isActive) {
+            this.deleteTerm(this.selectedTermForMenu.id);
+          }
+        }
       }
     ];
     menu.toggle(event);

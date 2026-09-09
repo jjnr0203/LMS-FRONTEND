@@ -255,7 +255,7 @@ export class Careers implements OnInit {
     this.careerForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.maxLength(40), Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/)]],
       code: ['', [Validators.required, Validators.maxLength(8)]],
-      durationSemesters: [1, [Validators.required, Validators.min(1), Validators.max(9)]],
+      durationSemesters: [1, [Validators.required, Validators.min(1), Validators.max(99)]],
       modalityIds: [[], Validators.required],
       jornadaIds: [[], Validators.required],
       coordinatorId: [null],
@@ -606,6 +606,7 @@ export class Careers implements OnInit {
     this.editSubjectId = null;
     this.subjectSemesters = Array.from({ length: this.selectedCareer.durationSemesters }, (_, i) => i + 1);
     this.subjectForm.reset({ credits: 1, hours: 0, semester: 1 });
+    this.subjectForm.get('successorIds')?.enable();
     this.submittedSubject.set(false);
     this.displaySubjectDialog = true;
   }
@@ -617,6 +618,7 @@ export class Careers implements OnInit {
       this.subjectSemesters = Array.from({ length: this.selectedCareer.durationSemesters }, (_, i) => i + 1);
     }
     this.subjectForm.patchValue(s);
+    this.subjectForm.get('successorIds')?.disable();
     this.submittedSubject.set(false);
     this.displaySubjectDialog = true;
   }
@@ -628,7 +630,7 @@ export class Careers implements OnInit {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Por favor, corrija los errores en el formulario' });
       return;
     }
-    const raw = this.subjectForm.value;
+    const raw = this.subjectForm.getRawValue();
     const data: any = {
       code: raw.code,
       name: raw.name,

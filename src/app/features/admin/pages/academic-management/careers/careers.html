@@ -317,23 +317,23 @@
       </div></div>
       <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
         <label class="font-semibold text-sm text-slate-700">Duración (Semestres) <span class="text-red-500">*</span></label>
-        <p-inputNumber formControlName="durationSemesters" [min]="1" [max]="9" [useGrouping]="false" styleClass="w-full" class="w-full"></p-inputNumber>
+        <input pInputText formControlName="durationSemesters" maxlength="2" (input)="filterNumbers($event, careerForm, 'durationSemesters')" class="w-full" />
       </div></div>
       <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
         <label class="font-semibold text-sm text-slate-700">Facultad <span class="text-red-500">*</span></label>
-        <p-select formControlName="facultyId" [options]="faculties" optionLabel="name" optionValue="id" placeholder="Seleccione una facultad" [showClear]="true" [filter]="true" styleClass="w-full"></p-select>
+        <p-select formControlName="facultyId" [options]="faculties" optionLabel="name" optionValue="id" placeholder="Seleccione una facultad" [showClear]="true" [filter]="true" styleClass="w-full" appendTo="body"></p-select>
       </div></div>
       <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
         <label class="font-semibold text-sm text-slate-700">Modalidades <span class="text-red-500">*</span></label>
-        <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
+        <p-multiSelect formControlName="modalityIds" [options]="modalities" optionLabel="name" optionValue="id" placeholder="Seleccione modalidades" [showClear]="true" display="chip" styleClass="w-full" appendTo="body"></p-multiSelect>
       </div></div>
       <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
         <label class="font-semibold text-sm text-slate-700">Jornadas <span class="text-red-500">*</span></label>
-        <p-multiSelect formControlName="jornadaIds" [options]="jornadas" optionLabel="name" optionValue="id" placeholder="Seleccione jornadas" [showClear]="true" display="chip" styleClass="w-full"></p-multiSelect>
+        <p-multiSelect formControlName="jornadaIds" [options]="jornadas" optionLabel="name" optionValue="id" placeholder="Seleccione jornadas" [showClear]="true" display="chip" styleClass="w-full" appendTo="body"></p-multiSelect>
       </div></div>
       <div class="col-12 md:col-6"><div class="flex flex-column gap-2 mb-3">
         <label class="font-semibold text-sm text-slate-700">Coordinador</label>
-        <p-select formControlName="coordinatorId" [options]="coordinators" optionLabel="firstName" optionValue="id" placeholder="Seleccione un coordinador" [filter]="true" filterBy="firstName,lastName" [showClear]="true" styleClass="w-full">
+        <p-select formControlName="coordinatorId" [options]="coordinators" optionLabel="firstName" optionValue="id" placeholder="Seleccione un coordinador" [filter]="true" filterBy="firstName,lastName" [showClear]="true" styleClass="w-full" appendTo="body">
           <ng-template let-coord pTemplate="item">{{coord.firstName}} {{coord.lastName}}</ng-template>
           <ng-template let-coord pTemplate="selectedItem">{{coord ? coord.firstName + ' ' + coord.lastName : 'Seleccione un coordinador'}}</ng-template>
         </p-select>
